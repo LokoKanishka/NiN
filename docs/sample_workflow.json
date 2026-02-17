@@ -46,7 +46,7 @@
         },
         {
             "parameters": {
-                "model": "gpt-oss-120b",
+                "model": "qwen2.5:32b",
                 "prompt": "Analyze the following text and extract quotes about teleology:\n\n{{ $json.text }}"
             },
             "name": "Analyze with LUCY",
