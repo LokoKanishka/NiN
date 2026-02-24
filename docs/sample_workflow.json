@@ -13,7 +13,7 @@
         },
         {
             "parameters": {
-                "fileSelector": "/home/lucy-ubuntu/Escritorio/Tesis/*.pdf"
+                "fileSelector": "/data/*.pdf"
             },
             "name": "Read PDFs",
             "type": "n8n-nodes-base.readBinaryFiles",
@@ -65,7 +65,7 @@
         },
         {
             "parameters": {
-                "fileName": "/home/lucy-ubuntu/Escritorio/Tesis/analysis_output.md",
+                "fileName": "/data/analysis_output.md",
                 "dataPropertyName": "text"
             },
             "name": "Save to Markdown",
