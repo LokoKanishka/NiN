@@ -78,7 +78,9 @@
 
 ### Lecciones clave
 
-- **Red Docker Bridge**: El sandbox SI puede hablar con los containers usando sus IPs internas tipo `172.29.0.x`.
+- **Red Docker Bridge**: El sandbox SI puede hablar con los containers usando sus IPs internas tipo `172.29.0.x`. Esto bypassa todos los problemas de `localhost` y `pkill`.
 - **API `GET /workflows/:id` es ineficiente**: Por diseño interno de n8n, pedir un workflow individual demora porque serializa demasiada data. `GET /workflows` es rápido.
 - **`stripHeavy`**: Al parsear una respuesta de n8n individual, SIEMPRE hacer pop/delete de `activeVersion`, `shared`, `pinData` antes de que los LLMs intenten leerlo para ahorrar decenas de miles de tokens de contexto.
 - **Triggers**: Si un sub-workflow se necesita ejecutar por API, NO usar "When Executed by Another Workflow". Usar "Webhook" en su lugar.
+- **Stack Expandido**: El uso de **n8n Atom 3.0** y **n8n as code** en el IDE permite una simbiosis perfecta: el humano diseña visualmente y la IA opera el backend/JSON.
+
