@@ -1,5 +1,5 @@
 {
-  "name": "Env\u00edo Autom\u00e1tico de CV a Colegios",
+  "name": "Envío Automático de CV a Colegios",
   "nodes": [
     {
       "parameters": {
@@ -7,13 +7,13 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "00 16 * * *"
+              "expression": "40 16 * * *"
             }
           ]
         }
       },
       "id": "schedule-trigger-1",
-      "name": "Reloj (16:00)",
+      "name": "Reloj (16:40)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
       "position": [
@@ -53,7 +53,7 @@
         "conditions": {
           "string": [
             {
-              "value1": "={{ $json['N\u00ba de Comuna'] }}",
+              "value1": "={{ $json['Nº de Comuna'] }}",
               "value2": "Comuna 12"
             }
           ]
@@ -85,14 +85,14 @@
     {
       "parameters": {
         "fromEmail": "tu_correo@gmail.com",
-        "toEmail": "={{ $json['Correo Electr\u00f3nico'].replace(/\\s*\\/\\s*/g, ', ') }}",
-        "subject": "Postulaci\u00f3n docente - Diego Leonardo Succi",
+        "toEmail": "={{ $json['Correo Electrónico'].replace(/\\s*\\/\\s*/g, ', ') }}",
+        "subject": "Postulación docente - Diego Leonardo Succi",
         "attachments": "adjunto_cv",
         "options": {
           "appendAttachements": true
         },
-        "html": "=A las autoridades de la instituci\u00f3n {{ $json['Nombre de la Instituci\u00f3n'] }}:<br><br>Me dirijo a ustedes para poner a disposici\u00f3n mi curr\u00edculum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la instituci\u00f3n.<br><br>Poseo t\u00edtulo habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>Atte: Profesor Diego Leonardo Succi.",
-        "text": "=A las autoridades de la instituci\u00f3n {{ $json['Nombre de la Instituci\u00f3n'] }}:\n\nMe dirijo a ustedes para poner a disposici\u00f3n mi curr\u00edculum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la instituci\u00f3n.\n\nPoseo t\u00edtulo habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.\n\nAtte: Profesor Diego Leonardo Succi.",
+        "html": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.<br><br>Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>Atte: Profesor Diego Leonardo Succi.",
+        "text": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:\n\nMe dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.\n\nPoseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.\n\nAtte: Profesor Diego Leonardo Succi.",
         "emailFormat": "html"
       },
       "id": "smtp-send-1",
