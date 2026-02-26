@@ -7,13 +7,13 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "40 16 * * *"
+              "expression": "16 17 * * *"
             }
           ]
         }
       },
       "id": "schedule-trigger-1",
-      "name": "Reloj (16:40)",
+      "name": "Reloj (17:16)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
       "position": [
@@ -85,14 +85,14 @@
     {
       "parameters": {
         "fromEmail": "tu_correo@gmail.com",
-        "toEmail": "={{ $json['Correo Electrónico'].replace(/\\s*\\/\\s*/g, ', ') }}",
+        "toEmail": "={{ $('Filtro (Solo Comuna 12)').item.json['Correo Electrónico'].replace(/\\s*\\/\\s*/g, ', ') }}",
         "subject": "Postulación docente - Diego Leonardo Succi",
-        "attachments": "adjunto_cv",
         "options": {
-          "appendAttachements": true
+          "appendAttachements": false,
+          "attachments": "adjunto_cv"
         },
-        "html": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.<br><br>Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>Atte: Profesor Diego Leonardo Succi.",
-        "text": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:\n\nMe dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.\n\nPoseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.\n\nAtte: Profesor Diego Leonardo Succi.",
+        "html": "=A las autoridades de la institución {{ $('Filtro (Solo Comuna 12)').item.json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.<br><br>Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>Atte: Profesor Diego Leonardo Succi.",
+        "text": "=A las autoridades de la institución {{ $('Filtro (Solo Comuna 12)').item.json['Nombre de la Institución'] }}:\n\nMe dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.\n\nPoseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.\n\nAtte: Profesor Diego Leonardo Succi.",
         "emailFormat": "html"
       },
       "id": "smtp-send-1",
@@ -112,17 +112,6 @@
     }
   ],
   "connections": {
-    "Reloj (15:50)": {
-      "main": [
-        [
-          {
-            "node": "Leer Archivo Excel",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Leer Archivo Excel": {
       "main": [
         [
@@ -161,6 +150,17 @@
         [
           {
             "node": "Enviar Correo SMTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reloj (17:16)": {
+      "main": [
+        [
+          {
+            "node": "Leer Archivo Excel",
             "type": "main",
             "index": 0
           }
