@@ -1,0 +1,165 @@
+{
+  "name": "Envío Automático de CV a Colegios",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger-1",
+      "name": "Reloj (8:00 AM L a V)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/gmail_cv/data/colegios.xlsx"
+      },
+      "id": "read-excel-1",
+      "name": "Leer Archivo Excel",
+      "type": "n8n-nodes-base.readBinaryFiles",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "extract-csv-1",
+      "name": "Convertir a Datos",
+      "type": "n8n-nodes-base.spreadsheetFileRead",
+      "typeVersion": 1,
+      "position": [
+        400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json['Nº de Comuna'] }}",
+              "value2": "Comuna 12"
+            }
+          ]
+        }
+      },
+      "id": "filter-comuna",
+      "name": "Filtro (Solo Comuna 12)",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [
+        600,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/gmail_cv/data/Mi_Curriculum.pdf",
+        "dataPropertyName": "adjunto_cv"
+      },
+      "id": "read-cv-1",
+      "name": "Cargar CV Local",
+      "type": "n8n-nodes-base.readBinaryFiles",
+      "typeVersion": 1,
+      "position": [
+        800,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "action": "send",
+        "sendTo": "={{ $json['Correo Electrónico'].replace(/\\s*\\/\\s*/g, ', ') }}",
+        "subject": "Postulación docente - Facundo",
+        "message": "=Estimados directivos de la institución {{ $json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes con el motivo de presentar mi currículum vitae para consideración en futuras búsquedas de personal docente.<br><br>Adjunto al presente correo encontrarán mi CV actualizado.<br><br>Quedo a su entera disposición.<br><br>Saludos cordiales.",
+        "appendAttatchments": true,
+        "attachments": "adjunto_cv",
+        "options": {}
+      },
+      "id": "gmail-send-1",
+      "name": "Enviar Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1000,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Reloj (8:00 AM L a V)": {
+      "main": [
+        [
+          {
+            "node": "Leer Archivo Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Archivo Excel": {
+      "main": [
+        [
+          {
+            "node": "Convertir a Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convertir a Datos": {
+      "main": [
+        [
+          {
+            "node": "Filtro (Solo Comuna 12)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro (Solo Comuna 12)": {
+      "main": [
+        [
+          {
+            "node": "Cargar CV Local",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar CV Local": {
+      "main": [
+        [
+          {
+            "node": "Enviar Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
