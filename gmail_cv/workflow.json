@@ -83,19 +83,17 @@
     },
     {
       "parameters": {
-        "resource": "message",
-        "action": "send",
-        "sendTo": "={{ $json['Correo Electrónico'].replace(/\\s*\\/\\s*/g, ', ') }}",
+        "fromEmail": "tu_correo@gmail.com",
+        "toEmail": "={{ $json['Correo Electrónico'].replace(/\\s*\\/\\s*/g, ', ') }}",
         "subject": "Postulación docente - Facundo",
-        "message": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.<br><br>Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>Atte: Profesor Diego Leonardo Succi.",
-        "appendAttatchments": true,
+        "html": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.<br><br>Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>Atte: Profesor Diego Leonardo Succi.",
         "attachments": "adjunto_cv",
         "options": {}
       },
-      "id": "gmail-send-1",
-      "name": "Enviar Gmail",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "id": "smtp-send-1",
+      "name": "Enviar Correo SMTP",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
       "position": [
         1000,
         300
@@ -151,7 +149,7 @@
       "main": [
         [
           {
-            "node": "Enviar Gmail",
+            "node": "Enviar Correo SMTP",
             "type": "main",
             "index": 0
           }
