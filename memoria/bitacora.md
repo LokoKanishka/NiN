@@ -84,3 +84,15 @@
 - **Triggers**: Si un sub-workflow se necesita ejecutar por API, NO usar "When Executed by Another Workflow". Usar "Webhook" en su lugar.
 - **Stack Expandido**: El uso de **n8n Atom 3.0** y **n8n as code** en el IDE permite una simbiosis perfecta: el humano diseña visualmente y la IA opera el backend/JSON.
 
+---
+
+## 2026-02-25 (cont.) — Automatización Gmail CV (Handover Notes)
+
+**Objetivo**: Automatizar el envío de correos con adjuntos CV desde un archivo Excel a los colegios, filtrando por comuna y usando n8n.
+
+### Estado Actual (Handover pre-reinicio)
+- Se armó el directorio `/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/` conteniendo `workflow.json`, `README.md` y la carpeta `data/` con el PDF y el Excel.
+- Las rutas del n8n se ajustaron a rutas absolutas del host en lugar del `.n8n-files` del contenedor para solucionar errores de lectura de volúmenes.
+- **Cambio de arquitectura**: Reemplazamos el nodo nativo de Gmail (OAuth2) por el nodo genérico `emailSend` (SMTP) usando contraseñas de aplicaciones de Google para simplificar la configuración del lado del usuario.
+- El usuario reportó ralentizaciones severas de la IA. Mediante un diagnóstico descubrí que había procesos colgados de `curl` y `docker exec` saturando el host debido al modelo asíncrono. Fueron aniquilados vía `pkill`.
+- **Qué hacer en el próximo arranque**: Leer esta bitácora. Verificar con el usuario si el Mail CV salió bien o si hubo drama con las contraseñas de App. Si todo está OK, arrancar con la Forja (Pilar 2) o lo que el usuario decida. Todo el código de la sesión de hoy ya está respaldado en Git.
