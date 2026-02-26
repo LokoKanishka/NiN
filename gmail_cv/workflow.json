@@ -40,7 +40,7 @@
       },
       "id": "extract-csv-1",
       "name": "Convertir a Datos",
-      "type": "n8n-nodes-base.spreadsheetFileRead",
+      "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
         400,

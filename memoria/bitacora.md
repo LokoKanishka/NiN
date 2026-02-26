@@ -96,3 +96,26 @@
 - **Cambio de arquitectura**: Reemplazamos el nodo nativo de Gmail (OAuth2) por el nodo genérico `emailSend` (SMTP) usando contraseñas de aplicaciones de Google para simplificar la configuración del lado del usuario.
 - El usuario reportó ralentizaciones severas de la IA. Mediante un diagnóstico descubrí que había procesos colgados de `curl` y `docker exec` saturando el host debido al modelo asíncrono. Fueron aniquilados vía `pkill`.
 - **Qué hacer en el próximo arranque**: Leer esta bitácora. Verificar con el usuario si el Mail CV salió bien o si hubo drama con las contraseñas de App. Si todo está OK, arrancar con la Forja (Pilar 2) o lo que el usuario decida. Todo el código de la sesión de hoy ya está respaldado en Git.
+
+---
+
+## 2026-02-26 — Fix del Workflow Gmail CV y n8n_cli
+
+**Objetivo**: Corregir error de importación y activación del workflow del CV debido a nodos obsoletos y pulir el script de control de n8n.
+
+### Acciones
+
+| # | Acción | Resultado | Lección |
+|---|--------|-----------|---------|
+| 1 | Analizar error "Unrecognized node type" en la UI | ✅ Éxito | El workflow usaba `n8n-nodes-base.spreadsheetFileRead` (obsoleto). |
+| 2 | Reemplazar nodo en `workflow.json` | ✅ Éxito | Se actualizó a `n8n-nodes-base.extractFromFile`. |
+| 3 | Actualizar workflow vía `n8n_cli.py` | ✅ HTTP 200 | El CLI actualizó existosamente la definición en la base de n8n. |
+| 4 | Testear activación (`activate`) desde API | ❌ Falló ("active is read-only") | La propiedad `active` no se puede cambiar vía `PUT /workflows/:id`. Requiere `POST /workflows/:id/activate`. |
+| 5 | Corregir `n8n_cli.py` | ✅ Éxito | Se actualizaron los comandos `activate` y `deactivate` para usar los endpoints oficiales POST y reportar credenciales faltantes. |
+| 6 | Intentar activar nuevamente | ❌ Faltan credenciales | El workflow requiere que el usuario asigne manualmente la credencial SMTP desde la UI. Se le indicó cómo hacerlo. |
+
+### Estado Actual (Handover)
+- El workflow está listo y corregido en la base de datos de n8n.
+- Solo requiere que el usuario asigne la Credencial SMTP en la UI de n8n y presione "Publish".
+- El CLI de n8n (`n8n_cli.py`) tiene los verbos activate/deactivate parcheados a la API actual de n8n.
+- Todo guardado en el repo. Listos para empezar "La Forja" en la próxima sesión si el usuario lo decide.

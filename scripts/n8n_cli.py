@@ -197,20 +197,22 @@ def cmd_activate(base: str, key: str, args: list):
     if not args:
         die("Usage: activate <workflow_id>")
     wf_id = args[0]
-    status, data = api_request(base, key, "PUT", f"/workflows/{wf_id}",
-                                {"active": True})
-    print(json.dumps({"ok": status == 200, "status": status,
-                       "id": wf_id, "active": True}, indent=2))
+    status, data = api_request(base, key, "POST", f"/workflows/{wf_id}/activate")
+    if status == 200:
+        print(json.dumps({"ok": True, "status": status, "id": wf_id, "active": True}, indent=2))
+    else:
+        print(json.dumps({"ok": False, "status": status, "error": data}, indent=2))
 
 
 def cmd_deactivate(base: str, key: str, args: list):
     if not args:
         die("Usage: deactivate <workflow_id>")
     wf_id = args[0]
-    status, data = api_request(base, key, "PUT", f"/workflows/{wf_id}",
-                                {"active": False})
-    print(json.dumps({"ok": status == 200, "status": status,
-                       "id": wf_id, "active": False}, indent=2))
+    status, data = api_request(base, key, "POST", f"/workflows/{wf_id}/deactivate")
+    if status == 200:
+        print(json.dumps({"ok": True, "status": status, "id": wf_id, "active": False}, indent=2))
+    else:
+        print(json.dumps({"ok": False, "status": status, "error": data}, indent=2))
 
 
 def cmd_execute(base: str, key: str, args: list):
