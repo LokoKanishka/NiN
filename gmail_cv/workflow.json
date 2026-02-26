@@ -87,7 +87,7 @@
         "action": "send",
         "sendTo": "={{ $json['Correo Electrónico'].replace(/\\s*\\/\\s*/g, ', ') }}",
         "subject": "Postulación docente - Facundo",
-        "message": "=Estimados directivos de la institución {{ $json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes con el motivo de presentar mi currículum vitae para consideración en futuras búsquedas de personal docente.<br><br>Adjunto al presente correo encontrarán mi CV actualizado.<br><br>Quedo a su entera disposición.<br><br>Saludos cordiales.",
+        "message": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.<br><br>Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>Atte: Profesor Diego Leonardo Succi.",
         "appendAttatchments": true,
         "attachments": "adjunto_cv",
         "options": {}
