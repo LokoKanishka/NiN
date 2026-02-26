@@ -7,7 +7,7 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "0 8 * * 1-5"
+              "expression": "30 14 * * 1-5"
             }
           ]
         }
@@ -36,6 +36,7 @@
     },
     {
       "parameters": {
+        "operation": "xlsx",
         "options": {}
       },
       "id": "extract-csv-1",
@@ -85,10 +86,14 @@
       "parameters": {
         "fromEmail": "tu_correo@gmail.com",
         "toEmail": "={{ $json['Correo Electrónico'].replace(/\\s*\\/\\s*/g, ', ') }}",
-        "subject": "Postulación docente - Facundo",
-        "html": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.<br><br>Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>Atte: Profesor Diego Leonardo Succi.",
+        "subject": "Postulación docente - Diego Leonardo Succi",
         "attachments": "adjunto_cv",
-        "options": {}
+        "options": {
+          "appendAttachements": true
+        },
+        "html": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:<br><br>Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.<br><br>Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>Atte: Profesor Diego Leonardo Succi.",
+        "text": "=A las autoridades de la institución {{ $json['Nombre de la Institución'] }}:\n\nMe dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución.\n\nPoseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.\n\nAtte: Profesor Diego Leonardo Succi.",
+        "emailFormat": "html"
       },
       "id": "smtp-send-1",
       "name": "Enviar Correo SMTP",
