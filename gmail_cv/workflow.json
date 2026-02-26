@@ -7,13 +7,13 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "45 15 * * *"
+              "expression": "50 15 * * *"
             }
           ]
         }
       },
       "id": "schedule-trigger-1",
-      "name": "Reloj (15:45)",
+      "name": "Reloj (15:50)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
       "position": [
@@ -106,7 +106,7 @@
     }
   ],
   "connections": {
-    "Reloj (15:45)": {
+    "Reloj (15:50)": {
       "main": [
         [
           {
