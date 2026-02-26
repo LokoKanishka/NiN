@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "/home/node/.n8n-files/gmail_cv/data/colegios.xlsx"
+        "fileSelector": "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/colegios.xlsx"
       },
       "id": "read-excel-1",
       "name": "Leer Archivo Excel",
@@ -69,7 +69,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "/home/node/.n8n-files/gmail_cv/data/Mi_Curriculum.pdf",
+        "fileSelector": "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/Mi_Curriculum.pdf",
         "dataPropertyName": "adjunto_cv"
       },
       "id": "read-cv-1",
