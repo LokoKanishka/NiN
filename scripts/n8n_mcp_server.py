@@ -10,6 +10,7 @@ import subprocess
 import urllib.request
 import urllib.error
 import ssl
+import sqlite3
 from typing import Dict, Any, List, Optional
 from mcp.server.fastmcp import FastMCP
 
@@ -17,6 +18,7 @@ from mcp.server.fastmcp import FastMCP
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(SCRIPT_DIR)
 ENV_FILE = os.path.join(REPO_DIR, ".env")
+DB_PATH = os.path.join(REPO_DIR, "agente_memoria.db")
 CONTAINER = "n8n-lucy"
 TIMEOUT = 5
 
@@ -189,6 +191,51 @@ def invoke_secret_agent(consulta: str) -> str:
                 return raw
     except Exception as e:
         return f"Error conectando al Agente de n8n: {e}"
+
+@mcp.tool()
+def recordar_contexto(project_name: str, session_goal: str, open_files: str = "", active_workflows: str = "") -> str:
+    """Guarda el estado actual de la sesión en la base de datos persistente."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO session_context (project_name, session_goal, open_files, active_workflows)
+            VALUES (?, ?, ?, ?)
+        ''', (project_name, session_goal, open_files, active_workflows))
+        conn.commit()
+        conn.close()
+        return "Contexto de sesión guardado correctamente en SQLite."
+    except Exception as e:
+        return f"Error guardando contexto: {e}"
+
+@mcp.tool()
+def recuperar_contexto() -> str:
+    """Recupera el último contexto guardado para reanudar el trabajo."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM session_context ORDER BY id DESC LIMIT 1')
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return f"Último contexto encontrado:\\n- Proyecto: {row['project_name']}\\n- Meta: {row['session_goal']}\\n- Archivos: {row['open_files']}\\n- Workflows: {row['active_workflows']}\\n- Fecha: {row['timestamp']}"
+        return "No hay contexto previo guardado."
+    except Exception as e:
+        return f"Error recuperando contexto: {e}"
+
+@mcp.tool()
+def guardar_mensaje(role: str, content: str) -> str:
+    """Guarda un mensaje importante en el historial persistente."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO conversation_history (role, content) VALUES (?, ?)', (role, content))
+        conn.commit()
+        conn.close()
+        return "Mensaje guardado en el historial."
+    except Exception as e:
+        return f"Error guardando mensaje: {e}"
 
 def register_dynamic_tools():
     """Busca flujos activos que empiecen con 'Tool:' y los registra como herramientas MCP."""
