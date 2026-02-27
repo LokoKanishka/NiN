@@ -119,3 +119,45 @@
 - Solo requiere que el usuario asigne la Credencial SMTP en la UI de n8n y presione "Publish".
 - El CLI de n8n (`n8n_cli.py`) tiene los verbos activate/deactivate parcheados a la API actual de n8n.
 - Todo guardado en el repo. Listos para empezar "La Forja" en la próxima sesión si el usuario lo decide.
+
+---
+
+## 2026-02-26 (cont.) — Ajustes Workflow Gmail CV
+
+**Objetivo**: Modificar el horario de ejecución y el remitente del workflow a pedido del usuario.
+
+### Acciones
+
+| # | Acción | Resultado | Lección |
+|---|--------|-----------|---------|
+| 1 | Actualizar hora ejecución a 18:05 | ✅ Éxito | El cambio en el cron expression (`5 18 * * *`) se hizo directo en `workflow.json`. |
+| 2 | Cambiar correo remitente a `chatjepetex4@gmail.com` | ✅ Éxito | Modificado en en el nodo emailSend. |
+
+### Estado Actual
+- Cambios realizados en `/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/workflow.json`.
+- Lista la configuración para que dispare hacia las escuelas de la Comuna 1.
+
+---
+
+## 2026-02-26 (cont.) — Incidente de Latencia y Servidor MCP
+
+**Objetivo**: Analizar la demora inaceptable (4.5 minutos) para cambiar la hora de un flujo y programar una solución definitiva a la conectividad con n8n.
+
+### Acciones y Análisis del Incidente
+
+| # | Acción / Suceso | Resultado | Lección |
+|---|--------|-----------|---------|
+| 1 | Ejecutar script `n8n_cli.py` para cambiar hora | ❌ Falló, se colgó | El daemon de Docker del host estaba congelado, bloqueando cualquier pipe I/O. |
+| 2 | Reiniciar Docker manualmente (sudo) | ✅ Éxito (Manual) | Cuando Docker se freeza, los LLM no pueden autogestionarlo sin pedir `sudo` al humano. |
+| 3 | Re-ejecutar `n8n_cli.py` | ❌ Falló, Timeout | Al reiniciar Docker, **la IP de la red bridge de n8n cambió**. El script usaba la IP cacheada anterior. |
+| 4 | Conexión directa HTTP bypassando el script | ✅ 4.5 minutos | Operar abriendo terminales bash en cada paso para correr un proxy de python es lento y frágil. |
+| 5 | **Solución Definitiva**: Crear `n8n_mcp_server.py` | ✅ MCP Programado | Se programó un Servidor MCP para que la conexión a n8n sea nativa al LLM sin abrir terminales. |
+
+### Lecciones clave y Pilares
+
+- **Pilar: "Lo que podemos mejorar, lo programamos"**: Operar aplicaciones vía scripts de consola llamados desde bash es anti-patrón para agentes de alta velocidad. Cualquier herramienta core (como n8n) DEBE integrarse vía **MCP (Model Context Protocol)**.
+- **Resiliencia IP**: La caché de IP del bridge de docker es peligrosa si Docker se reinicia. El MCP Server se encargará de resolver la IP dinámicamente o usar persistencia profunda.
+
+### Estado Actual de la Mejora
+- Se desarrolló `/home/lucy-ubuntu/Escritorio/NIN/scripts/n8n_mcp_server.py`.
+- Requiere que el usuario lo registre una única vez en su cliente IDE para que Antigravity gane control neuronal directo sobre n8n.
