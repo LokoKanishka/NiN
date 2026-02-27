@@ -46,16 +46,42 @@ def get_container_ip() -> str:
         result = subprocess.run(
             ["docker", "inspect", CONTAINER, "--format",
              "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}"],
-            capture_output=True, text=True, timeout=5
+            capture_output=True, text=True, timeout=2
         )
         ip = result.stdout.strip()
-        if not ip:
-            raise RuntimeError(f"Container {CONTAINER} no tiene IP")
-        with open(cache_file, "w") as f:
-            f.write(ip)
-        return ip
-    except Exception as e:
-        raise RuntimeError(f"Error obteniendo IP: {e}")
+        if ip:
+            with open(cache_file, "w") as f:
+                f.write(ip)
+            return ip
+    except Exception:
+        pass # Docker está colgado o falló, usar fallback agresivo
+
+    # Fallback: Escaneo de fuerza bruta en las subredes de Docker bypassando el daemon
+    try:
+        import concurrent.futures
+        def check_ip(test_ip: str) -> str:
+            try:
+                urllib.request.urlopen(f"http://{test_ip}:5678/healthz", timeout=0.4)
+                return test_ip
+            except Exception:
+                return ""
+
+        ips_to_test = ["127.0.0.1"]
+        for subnet in range(17, 32):
+            for host in range(1, 6):
+                ips_to_test.append(f"172.{subnet}.0.{host}")
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
+            for future in concurrent.futures.as_completed([executor.submit(check_ip, i) for i in ips_to_test]):
+                res = future.result()
+                if res:
+                    with open(cache_file, "w") as f:
+                        f.write(res)
+                    return res
+    except Exception:
+        pass
+
+    raise RuntimeError(f"Error crítico: Docker daemon no responde y el escáner de subred falló en encontrar n8n.")
 
 def api_request(method: str, path: str, body: Optional[Dict] = None) -> Dict:
     api_key = load_api_key()
