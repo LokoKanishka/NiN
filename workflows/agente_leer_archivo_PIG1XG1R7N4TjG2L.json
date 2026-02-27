@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-27T05:09:12.644Z",
+  "updatedAt": "2026-02-27T05:23:51.350Z",
   "createdAt": "2026-02-27T05:09:12.644Z",
   "id": "PIG1XG1R7N4TjG2L",
   "name": "Agente: Leer Archivo",
@@ -26,7 +26,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "={{ $json.body.ruta }}",
+        "fileSelector": "={{ .body.ruta }}",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
@@ -40,7 +40,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const b = $input.first().binary; const k = Object.keys(b)[0]; const text = Buffer.from(b[k].data, 'base64').toString('utf-8'); return [{ json: { contenido: text } }];"
+        "jsCode": "const b = .first().binary; if (!b) return {contenido: \"No se pudo leer el archivo\"}; const k = Object.keys(b)[0]; return { contenido: Buffer.from(b[k].data, \"base64\").toString(\"utf-8\") };"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -82,8 +82,8 @@
     "availableInMCP": false
   },
   "meta": null,
-  "versionId": "7aecdff0-f93c-4e84-8566-9acbb8735920",
-  "activeVersionId": "7aecdff0-f93c-4e84-8566-9acbb8735920",
-  "versionCounter": 3,
+  "versionId": "f8e3d728-c590-444e-98ac-0173293a87a3",
+  "activeVersionId": "f8e3d728-c590-444e-98ac-0173293a87a3",
+  "versionCounter": 6,
   "triggerCount": 1
 }
