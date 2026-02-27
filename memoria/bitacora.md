@@ -224,8 +224,95 @@ Se ha implementado el sistema de memoria contextual avanzada.
 
 ### 📥 Resumen para Próxima Sesión (Handover)
 - **Infraestructura**: Autodescubrimiento y NiN Notebook activos.
-- **Docker**: Estado saludable.
+- **Docker**: Estado saludable. Sin contenedores fallidos.
 - **Pendiente**:
   1. **Configurar Credenciales GDrive**: En n8n para activar el flujo de sync.
   2. **Monitor Inmunológico**: Automatizar reinicio de servicios fallidos vía n8n.
   3. **Pilar 3**: Expandir capacidades de investigación web con SearXNG.
+
+---
+
+## 2026-02-27 (cont.) — Saneamiento y Diagnóstico Docker
+
+**Objetivo**: Eliminar contenedores en crash loop y estabilizar la visión del sistema.
+
+### Acciones
+| # | Acción | Resultado | Lección |
+|---|--------|-----------|---------|
+| 1 | Diagnóstico de `lucy_eyes_searxng` | ⚠️ Error de juicio | Contenedor pertenecía al proyecto **cunningham-Espejo**, NO a NIN. |
+| 2 | Eliminación de contenedor | ❌ ERROR | Se ejecutó `docker rm -f lucy_eyes_searxng` creyendo que era redundante. Era del otro proyecto. |
+| 3 | Corrección | ✅ | Se proporcionó prompt a Codex (IA del Espejo) para recrear el contenedor. |
+
+### Lección Crítica: Límites de Proyecto
+> **REGLA DE ORO**: En este sistema conviven múltiples proyectos con sus propios stacks Docker.
+> - **NIN** → Contenedores: `n8n-lucy`, `qdrant-lucy`, `searxng-lucy`
+> - **cunningham-Espejo** → Contenedores: `lucy_brain_*`, `lucy_eyes_*`, `lucy_hands_*`, `lucy_ui_*`, `lucy_memory_*`, `lucy_docker_*`, `lucy_voice_*`, `lucy_open_*`
+>
+> **NUNCA tocar, diagnosticar, ni eliminar contenedores que no sean del stack NIN sin confirmación explícita del usuario.**
+
+### Estado Actual
+- Stack NIN limpio y operativo.
+- Se delegó la reparación del stack Espejo a su propia IA (Codex).
+
+---
+
+## 2026-02-27 (cont.) — Evolución n8n: Herramientas Dinámicas
+
+**Objetivo**: Mejorar la integración con n8n estandarizando los flujos como herramientas autodescubribles.
+
+### Acciones
+| # | Acción | Resultado | Lección |
+|---|--------|-----------|---------|
+| 1 | Renombrar flujos `Agente:*` a `Tool:*` | ✅ Éxito | El prefijo `Tool:` permite autodescubrimiento por el MCP Server. |
+| 2 | Migrar nodos `Execute Command` a `Code` (Node.js) | ✅ Éxito | `n8n-nodes-base.executeCommand` no estaba reconocido; `Code` con `child_process` funciona. |
+| 3 | Activar Tool: Grep Repo, System Health, Repo Scanner | ✅ Éxito | Los 3 flujos activados y operativos. |
+| 4 | Refactorizar `n8n_mcp_server.py` | ✅ Éxito | Se eliminaron 4 herramientas hardcodeadas. Ahora todo es dinámico. |
+| 5 | Crear `Tool: Doctor System` (Monitor Inmunológico) | ✅ Éxito | Primer componente de auto-diagnóstico Docker. |
+
+### Lecciones clave
+- **API n8n**: `active` es read-only en PUT. Usar `POST /workflows/:id/activate`.
+- **Nodos**: `executeCommand` fue deprecado/removido en algunas versiones. `Code` + `child_process` es la alternativa universal.
+
+---
+
+## 2026-02-27 (cont.) — Separación de Stacks NIN vs Espejo
+
+**Objetivo**: Resolver conflicto de puerto 5678 entre los dos proyectos y garantizar aislamiento total.
+
+### Acciones
+| # | Acción | Resultado | Lección |
+|---|--------|-----------|---------|
+| 1 | Cambiar puerto NIN de 5678 a 5688 | ✅ Éxito | Ambos n8n conviven sin conflicto. |
+| 2 | Eliminar `127.0.0.1` del scanner de IPs en MCP | ✅ Éxito | Evita que NIN conecte accidentalmente al n8n del Espejo. |
+| 3 | Limpiar caché `.n8n_ip` | ✅ Éxito | Fuerza recalcular la IP correcta del bridge Docker. |
+
+### Mapa de puertos definitivo
+| Servicio | NIN | Espejo |
+|---|---|---|
+| n8n | `127.0.0.1:5688` | `127.0.0.1:5678` |
+| SearXNG | `127.0.0.1:8080` | `127.0.0.1:8081` |
+| Qdrant | `127.0.0.1:6335` | `127.0.0.1:6333` |
+
+---
+
+## 2026-02-27 (cont.) — Hardening de Red + Noticias IA
+
+**Objetivo**: Endurecer la exposición de red de NIN y crear el primer flujo de investigación web.
+
+### Acciones
+| # | Acción | Resultado | Lección |
+|---|--------|-----------|---------|
+| 1 | Bindear todos los puertos NIN a `127.0.0.1` | ✅ Éxito | Antes estaban en `0.0.0.0` (expuestos a la red local). |
+| 2 | Crear `Tool: Noticias IA` | ✅ Éxito | Flujo: Webhook → HTTP Request a SearXNG → Formateo. Busca noticias del día en castellano. |
+| 3 | Auditoría cruzada con Codex (Espejo) | ✅ Éxito | Confirmaron separación de puertos y aislamiento correcto. |
+
+---
+
+### 📥 Resumen para Próxima Sesión (Handover)
+- **Infraestructura**: Todos los flujos `Tool:` activos y autodescubribles. Puertos hardened.
+- **Docker**: NIN y Espejo separados. Sin conflictos de puertos.
+- **Nuevo**: `Tool: Noticias IA` operativo (SearXNG + n8n).
+- **Pendiente**:
+  1. **Credenciales GDrive**: Configurar en n8n para activar sincronización de memoria.
+  2. **Monitor Inmunológico**: Expandir `Tool: Doctor System` con auto-restart.
+  3. **Pilar 3**: Profundizar capacidades de investigación web.

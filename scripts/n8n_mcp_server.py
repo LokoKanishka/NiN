@@ -20,6 +20,12 @@ ENV_FILE = os.path.join(REPO_DIR, ".env")
 CONTAINER = "n8n-lucy"
 TIMEOUT = 5
 
+# === LÍMITES DE PROYECTO ===
+# NIN solo opera sobre estos contenedores. NUNCA tocar contenedores de otros proyectos
+# (cunningham-Espejo: lucy_brain_*, lucy_eyes_*, lucy_hands_*, lucy_ui_*, etc.)
+NIN_CONTAINERS = {"n8n-lucy", "qdrant-lucy", "searxng-lucy"}
+
+
 # Desactivar verificación SSL para entornos locales (Requerimiento Usuario)
 ssl_context = ssl._create_unverified_context()
 
@@ -70,7 +76,9 @@ def get_container_ip() -> str:
             except Exception:
                 return ""
 
-        ips_to_test = ["127.0.0.1"]
+        # NOTA: NO incluir 127.0.0.1 — Espejo's n8n usa host networking en :5678
+        # y lo detectaríamos erróneamente. NIN usa bridge, solo buscar en subnets Docker.
+        ips_to_test = []
         for subnet in range(17, 32):
             for host in range(1, 6):
                 ips_to_test.append(f"172.{subnet}.0.{host}")
@@ -157,58 +165,6 @@ def execute_n8n_workflow(workflow_id: str, trigger_data: Optional[str] = None) -
         payload["triggerData"] = json.loads(trigger_data)
     result = api_request("POST", f"/workflows/{workflow_id}/execute", payload)
     return json.dumps(result, indent=2, ensure_ascii=False)
-
-@mcp.tool()
-def leer_archivo_n8n(ruta: str) -> str:
-    """Lee un archivo del host usando el nodo nativo de n8n."""
-    ip = get_container_ip()
-    url = f"http://{ip}:5678/webhook/agente-leer"
-    payload = json.dumps({"ruta": ruta}).encode('utf-8')
-    req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
-    try:
-        with urllib.request.urlopen(req, timeout=10, context=ssl_context) as resp:
-            raw = resp.read().decode("utf-8")
-            try:
-                data = json.loads(raw)
-                # Alineación de campos JSON (Priorizar 'output' según instrucciones)
-                if isinstance(data, list) and len(data) > 0: data = data[0]
-                return data.get("output", data.get("contenido", raw))
-            except:
-                return raw
-    except Exception as e:
-        return f"Error leyendo vía n8n: {e}"
-
-@mcp.tool()
-def escanear_directorio_nin(ruta: str = "/home/lucy-ubuntu/Escritorio/NIN", profundidad: int = 2) -> str:
-    """Escanea el directorio NIN a alta velocidad."""
-    try:
-        cmd = ["find", ruta, "-maxdepth", str(profundidad), "-not", "-path", "*/.git/*", "-printf", "%y %p\n"]
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
-        return res.stdout if res.stdout else "Directorio vacío."
-    except Exception as e:
-        return f"Error escaneando: {e}"
-
-@mcp.tool()
-def grep_nin(patron: str) -> str:
-    """Busca un patrón en archivos del repositorio NIN usando grep directamente."""
-    try:
-        cmd = ["grep", "-rn", patron, REPO_DIR, "--include=*.py", "--include=*.md", "--include=*.json", "--exclude-dir=.git"]
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-        return res.stdout[:5000] if res.stdout else "No se encontraron resultados."
-    except Exception as e:
-        return f"Error en grep: {e}"
-
-@mcp.tool()
-def estado_sistema_nin() -> str:
-    """Obtiene el estado de salud del servidor (CPU, RAM, Docker) en milisegundos."""
-    try:
-        ram = subprocess.getoutput("free -h | head -2")
-        cpu = subprocess.getoutput("top -bn1 | grep 'Cpu(s)'")
-        disco = subprocess.getoutput("df -h / | tail -1")
-        docker = subprocess.getoutput("docker ps --format '{{.Names}} {{.Status}}' 2>/dev/null")
-        return f"--- RAM ---\n{ram}\n\n--- CPU ---\n{cpu}\n\n--- DISCO ---\n{disco}\n\n--- DOCKER ---\n{docker}"
-    except Exception as e:
-        return f"Error obteniendo estado: {e}"
 
 @mcp.tool()
 def invoke_secret_agent(consulta: str) -> str:
