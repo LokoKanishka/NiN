@@ -308,11 +308,52 @@ Se ha implementado el sistema de memoria contextual avanzada.
 
 ---
 
+## 2026-02-27 (cont.) — Expansión Masiva: 10 Herramientas Avanzadas + Operating Rules
+
+**Objetivo**: Expandir las capacidades del agente con 10 nuevas herramientas en n8n y formalizar las reglas operativas permanentes.
+
+### Acciones
+| # | Acción | Resultado | Lección |
+|---|--------|-----------|---------|
+| 1 | Limpiar workflows obsoletos (Agente:*, pruebas, vacíos) | ✅ Éxito | 6 flujos eliminados. |
+| 2 | Crear 10 herramientas avanzadas en n8n | ✅ Éxito | Fase 1 (Core), Fase 2 (Avanzadas), Fase 3 (Externas). |
+| 3 | Crear Bot Telegram `@nin_sirena_bot` | ✅ Éxito | Bot creado via BotFather, Token obtenido, Chat ID extraído. |
+| 4 | Configurar credencial Telegram en n8n | ⚠️ Parcial | Error por typo en Token (mayúscula/minúscula). Corregido via API. Webhook aún requiere validación final. |
+| 5 | Crear `.agents/workflows/operating_rules.md` | ✅ Éxito | Reglas permanentes: n8n-first, memory cycle, no simulaciones. |
+| 6 | Crear 4 herramientas de memoria (Memory Search/Upsert/Apply/Feedback) | ✅ Éxito | Operan contra `agente_memoria.db` via SQLite. |
+
+### Nuevas Herramientas Creadas
+| Herramienta | Tipo | Estado |
+|---|---|---|
+| `Tool: Escribir en Búnker` | RAG Ingestion | ✅ Activo |
+| `Tool: Analizar Repositorios Github` | Investigación | ✅ Activo |
+| `Tool: Control Docker Avanzado` | Operaciones | ✅ Activo |
+| `Tool: Ejecutor Python Aislado` | Ejecución | ✅ Activo |
+| `Tool: Administrador de APIs` | HTTP/cURL | ✅ Activo |
+| `Tool: Scraping Profundo` | Web | ✅ Activo |
+| `Tool: Vigía de Redes Sociales` | Monitoreo | ✅ Activo |
+| `Tool: Sirena de Telegram` | Notificaciones | ⚠️ Requiere validación |
+| `Tool: Lector de Bandeja (Email)` | Email | ⏳ Requiere credencial IMAP |
+| `Tool: Agendador de Eventos` | Calendar | ⏳ Requiere OAuth Google |
+| `Tool: Memory Search` | Memoria | ✅ Activo |
+| `Tool: Memory Upsert` | Memoria | ✅ Activo |
+| `Tool: Memory Apply` | Memoria | ✅ Activo |
+| `Tool: Memory Feedback` | Memoria | ✅ Activo |
+
+### Lecciones clave
+- **Credenciales via API**: Se pueden crear credentials con `POST /api/v1/credentials`, pero hay que tener cuidado extremo con mayúsculas/minúsculas al copiar tokens de screenshots.
+- **Conflicto de editor**: Si el usuario tiene n8n abierto en el browser mientras se actualiza un workflow via API, n8n bloquea el guardado UI con "someone else just updated this workflow".
+- **Test vs Production webhooks**: n8n usa rutas diferentes (`/webhook-test/` vs `/webhook/`). El modo test solo escucha después de hacer clic en "Execute Workflow".
+
+---
+
 ### 📥 Resumen para Próxima Sesión (Handover)
-- **Infraestructura**: Todos los flujos `Tool:` activos y autodescubribles. Puertos hardened.
+- **Infraestructura**: 25+ flujos `Tool:` activos y autodescubribles. Puertos hardened.
 - **Docker**: NIN y Espejo separados. Sin conflictos de puertos.
-- **Nuevo**: `Tool: Noticias IA` operativo (SearXNG + n8n).
+- **Memoria**: Sistema completo de memoria persistente (SQLite + 4 Tools de ciclo).
+- **Operating Rules**: Formalizadas en `.agents/workflows/operating_rules.md`.
+- **Telegram Bot**: `@nin_sirena_bot` creado. Token corregido. Requiere validación final del webhook.
 - **Pendiente**:
-  1. **Credenciales GDrive**: Configurar en n8n para activar sincronización de memoria.
-  2. **Monitor Inmunológico**: Expandir `Tool: Doctor System` con auto-restart.
-  3. **Pilar 3**: Profundizar capacidades de investigación web.
+  1. **Validar Sirena Telegram**: Probar el webhook de producción con el token corregido.
+  2. **Credenciales externas**: IMAP (Email), OAuth Google (Calendar).
+  3. **Credenciales GDrive**: Configurar en n8n para activar sincronización de memoria.
