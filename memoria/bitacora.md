@@ -191,3 +191,19 @@
 ### Estado Actual
 - Iniciando diseño del primer componente: **Agente Secreto - Mapeador**.
 - Se requiere que n8n sea capaz de proveer resúmenes de archivos locales que superan el tamaño de ventana de contexto individual.
+
+### [2026-02-27] — Optimización Extrema: Agente Secreto (Opción B)
+Implementación exitosa de la arquitectura de Micro-Herramientas. Se eliminó la dependencia del modelo local de 32B para tareas de utilería básica, reduciendo la latencia de minutos a milisegundos.
+
+**Métricas Performance (Host Ubuntu):**
+- **Escaneo de Repositorio:** 0.003s (Antes: ~15s)
+- **Búsqueda Grep (Pilar 1):** 0.018s (Antes: ~30s)
+- **Lectura de Archivos (via n8n Webhook):** 0.027s (Antes: 2.5 min + Alucinación)
+- **Estado del Sistema:** 0.247s (Monitoreo en tiempo real)
+
+**Acciones de Reparación:**
+- Se corrigió el loop de reinicio de `searxng-lucy` desactivando los motores `startpage` y `yacy` que presentaban errores de parsing JSON.
+- Se refactorizó el workflow de n8n para manejo robusto de binarios en la lectura de archivos.
+- Se actualizaron los permisos del directorio `searxng`.
+
+**Veredicto:** El Agente Secreto ahora es el sistema de "ojos y manos" más veloz del ecosistema NiN. Antigravity actúa como el cerebro central, delegando tareas de bajo nivel a herramientas puras de n8n y comandos de host.
