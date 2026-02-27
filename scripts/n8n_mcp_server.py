@@ -9,6 +9,7 @@ import os
 import subprocess
 import urllib.request
 import urllib.error
+import ssl
 from typing import Dict, Any, List, Optional
 from mcp.server.fastmcp import FastMCP
 
@@ -18,6 +19,9 @@ REPO_DIR = os.path.dirname(SCRIPT_DIR)
 ENV_FILE = os.path.join(REPO_DIR, ".env")
 CONTAINER = "n8n-lucy"
 TIMEOUT = 5
+
+# Desactivar verificación SSL para entornos locales (Requerimiento Usuario)
+ssl_context = ssl._create_unverified_context()
 
 mcp = FastMCP("n8n Controlador")
 
@@ -98,7 +102,8 @@ def api_request(method: str, path: str, body: Optional[Dict] = None) -> Dict:
 
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+        # Usamos el contexto SSL deshabilitado para evitar errores en local
+        with urllib.request.urlopen(req, timeout=TIMEOUT, context=ssl_context) as resp:
             raw = resp.read().decode("utf-8")
             return json.loads(raw) if raw else {"status": "success"}
     except urllib.error.HTTPError as e:
@@ -161,9 +166,15 @@ def leer_archivo_n8n(ruta: str) -> str:
     payload = json.dumps({"ruta": ruta}).encode('utf-8')
     req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read())
-            return data.get("contenido", "Archivo vacío o no encontrado.")
+        with urllib.request.urlopen(req, timeout=10, context=ssl_context) as resp:
+            raw = resp.read().decode("utf-8")
+            try:
+                data = json.loads(raw)
+                # Alineación de campos JSON (Priorizar 'output' según instrucciones)
+                if isinstance(data, list) and len(data) > 0: data = data[0]
+                return data.get("output", data.get("contenido", raw))
+            except:
+                return raw
     except Exception as e:
         return f"Error leyendo vía n8n: {e}"
 
@@ -211,9 +222,15 @@ def invoke_secret_agent(consulta: str) -> str:
     req = urllib.request.Request(webhook_url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
     
     try:
-        with urllib.request.urlopen(req, timeout=300) as response:
-            result = response.read().decode('utf-8')
-            return result
+        # Espera la respuesta completa (Respond to Webhook)
+        with urllib.request.urlopen(req, timeout=300, context=ssl_context) as response:
+            raw = response.read().decode('utf-8')
+            try:
+                data = json.loads(raw)
+                if isinstance(data, list) and len(data) > 0: data = data[0]
+                return str(data.get("output", raw))
+            except:
+                return raw
     except Exception as e:
         return f"Error conectando al Agente de n8n: {e}"
 
@@ -243,8 +260,15 @@ def register_dynamic_tools():
                             payload = json.dumps(kwargs).encode('utf-8')
                             req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
                             try:
-                                with urllib.request.urlopen(req, timeout=30) as resp:
-                                    return resp.read().decode('utf-8')
+                                # Espera extendida para herramientas dinámicas
+                                with urllib.request.urlopen(req, timeout=60, context=ssl_context) as resp:
+                                    raw = resp.read().decode('utf-8')
+                                    try:
+                                        data = json.loads(raw)
+                                        if isinstance(data, list) and len(data) > 0: data = data[0]
+                                        return str(data.get("output", raw))
+                                    except:
+                                        return raw
                             except Exception as e:
                                 return f"Error en {display_name}: {e}"
                         
