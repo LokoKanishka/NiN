@@ -161,3 +161,18 @@
 ### Estado Actual de la Mejora
 - Se desarrolló `/home/lucy-ubuntu/Escritorio/NIN/scripts/n8n_mcp_server.py`.
 - Requiere que el usuario lo registre una única vez en su cliente IDE para que Antigravity gane control neuronal directo sobre n8n.
+
+---
+
+## 2026-02-26 (cont.) — Resiliencia Nivel 2: Evasión de Bloqueos
+
+**Objetivo**: Siguiendo el pilar de automatizar la resiliencia en base a cuellos de botella detectados ("lo que se puede mejorar, se programa"), garantizar que el MCP Server nunca se asfixie si el daemon de Docker se cuelga.
+
+### Acciones
+| Acciones y Decisiones | Resultado | Lección / Justificación |
+|---|-----------|---------|
+| Implementar timeout estricto de 2s en las llamadas de Docker `inspect` en el Server. | ✅ Éxito | Si el daemon Docker sufre un freeze masivo de I/O, el bot no puede quedarse colgado ilimitadamente. |
+| Agregar Subnet Scanner Paralelo (`concurrent.futures`) como `fallback` agresivo. | ✅ Éxito | Ante la falla de los comandos oficiales, la única ruta viable es la fuerza bruta en las direcciones IP locales tipo `172.x.0.x`. |
+
+### Lecciones clave
+- **La Herramienta debe Evadir al Fallo**: En sistemas inestables, los scripts no solo deben cumplir un objetivo, sino contar con una ruta B (como un escaneo paralelo ciego de subredes) que se active automáticamente al detectar parálisis en las dependencias primarias del SO.
