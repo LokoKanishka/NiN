@@ -154,10 +154,56 @@ def execute_n8n_workflow(workflow_id: str, trigger_data: Optional[str] = None) -
     return json.dumps(result, indent=2, ensure_ascii=False)
 
 @mcp.tool()
+def leer_archivo_n8n(ruta: str) -> str:
+    """Lee un archivo del host usando el nodo nativo de n8n."""
+    ip = get_container_ip()
+    url = f"http://{ip}:5678/webhook/agente-leer"
+    payload = json.dumps({"ruta": ruta}).encode('utf-8')
+    req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read())
+            return data.get("contenido", "Archivo vacío o no encontrado.")
+    except Exception as e:
+        return f"Error leyendo vía n8n: {e}"
+
+@mcp.tool()
+def escanear_directorio_nin(ruta: str = "/home/lucy-ubuntu/Escritorio/NIN", profundidad: int = 2) -> str:
+    """Escanea el directorio NIN a alta velocidad."""
+    try:
+        cmd = ["find", ruta, "-maxdepth", str(profundidad), "-not", "-path", "*/.git/*", "-printf", "%y %p\n"]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        return res.stdout if res.stdout else "Directorio vacío."
+    except Exception as e:
+        return f"Error escaneando: {e}"
+
+@mcp.tool()
+def grep_nin(patron: str) -> str:
+    """Busca un patrón en archivos del repositorio NIN usando grep directamente."""
+    try:
+        cmd = ["grep", "-rn", patron, REPO_DIR, "--include=*.py", "--include=*.md", "--include=*.json", "--exclude-dir=.git"]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        return res.stdout[:5000] if res.stdout else "No se encontraron resultados."
+    except Exception as e:
+        return f"Error en grep: {e}"
+
+@mcp.tool()
+def estado_sistema_nin() -> str:
+    """Obtiene el estado de salud del servidor (CPU, RAM, Docker) en milisegundos."""
+    try:
+        ram = subprocess.getoutput("free -h | head -2")
+        cpu = subprocess.getoutput("top -bn1 | grep 'Cpu(s)'")
+        disco = subprocess.getoutput("df -h / | tail -1")
+        docker = subprocess.getoutput("docker ps --format '{{.Names}} {{.Status}}' 2>/dev/null")
+        return f"--- RAM ---\n{ram}\n\n--- CPU ---\n{cpu}\n\n--- DISCO ---\n{disco}\n\n--- DOCKER ---\n{docker}"
+    except Exception as e:
+        return f"Error obteniendo estado: {e}"
+
+@mcp.tool()
 def invoke_secret_agent(consulta: str) -> str:
     """
-    Invoca al 'Agente Secreto - Mapeador' de n8n para realizar tareas complejas de lectura
-    de archivos grandes, resúmenes de contexto o mapeo del repositorio NIN.
+    Invoca al 'Agente Secreto - Mapeador' de n8n para tareas de REZONAMIENTO que requieren
+    el modelo de 32B (Advertencia: Latencia alta de 1-3 minutos).
     """
     ip = get_container_ip()
     webhook_url = f"http://{ip}:5678/webhook/agente-secreto"
@@ -165,12 +211,9 @@ def invoke_secret_agent(consulta: str) -> str:
     req = urllib.request.Request(webhook_url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
     
     try:
-        # Tarda unos minutos por el tamaño del modelo de 32B
         with urllib.request.urlopen(req, timeout=300) as response:
             result = response.read().decode('utf-8')
             return result
-    except urllib.error.HTTPError as e:
-        return f"Error HTTP del Agente de n8n: {e.code} {e.reason} - {e.read().decode('utf-8')}"
     except Exception as e:
         return f"Error conectando al Agente de n8n: {e}"
 
