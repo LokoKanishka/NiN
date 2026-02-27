@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-27T06:08:28.985Z",
+  "updatedAt": "2026-02-27T06:09:36.818Z",
   "createdAt": "2026-02-27T06:08:28.985Z",
   "id": "YcDDnv32fwxV3eSk",
   "name": "Tool: Notebook",
@@ -17,7 +17,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        -200,
+        -208,
         0
       ],
       "id": "wh-notebook",
@@ -31,7 +31,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        50,
+        16,
         0
       ],
       "id": "cmd-notebook",
@@ -44,7 +44,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        300,
+        240,
         0
       ],
       "id": "format-notebook",
@@ -81,8 +81,8 @@
     "availableInMCP": false
   },
   "meta": null,
-  "versionId": "9567b557-c01a-4f49-99d6-3972e3833bbe",
+  "versionId": "3a0ce7cb-7346-4f61-abf7-11d2b24b22f3",
   "activeVersionId": null,
-  "versionCounter": 1,
+  "versionCounter": 2,
   "triggerCount": 0
 }
