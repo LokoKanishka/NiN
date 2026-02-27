@@ -176,3 +176,18 @@
 
 ### Lecciones clave
 - **La Herramienta debe Evadir al Fallo**: En sistemas inestables, los scripts no solo deben cumplir un objetivo, sino contar con una ruta B (como un escaneo paralelo ciego de subredes) que se active automáticamente al detectar parálisis en las dependencias primarias del SO.
+
+---
+
+## 2026-02-27 — Visión: n8n como Multiplicador de Fuerza (Agente Secreto)
+
+**Objetivo**: Evolucionar n8n de ser una herramienta operada por la IA a ser un **Agente Secreto** que asista proactivamente a Antigravity en tareas pesadas o de contexto masivo.
+
+### Los 3 Pilares del Agente Secreto
+1. **Mapeador de Contexto**: Delegar en n8n el escaneo profundo de archivos y estructuras para entregar resúmenes de alta densidad a la IA.
+2. **Monitor Inmunológico**: n8n vigila la salud del sistema (Docker, RAM, Red) y actúa antes de que la IA pierda conexión.
+3. **Investigador SearXNG**: n8n realiza investigaciones web profundas y entrega "conocimiento puro" filtrado a la IA.
+
+### Estado Actual
+- Iniciando diseño del primer componente: **Agente Secreto - Mapeador**.
+- Se requiere que n8n sea capaz de proveer resúmenes de archivos locales que superan el tamaño de ventana de contexto individual.
