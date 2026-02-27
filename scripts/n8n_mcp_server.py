@@ -150,8 +150,29 @@ def execute_n8n_workflow(workflow_id: str, trigger_data: Optional[str] = None) -
     payload = {"workflowId": workflow_id}
     if trigger_data:
         payload["triggerData"] = json.loads(trigger_data)
-    result = api_request("POST", "/executions", payload)
+    result = api_request("POST", f"/workflows/{workflow_id}/execute", payload)
     return json.dumps(result, indent=2, ensure_ascii=False)
+
+@mcp.tool()
+def invoke_secret_agent(consulta: str) -> str:
+    """
+    Invoca al 'Agente Secreto - Mapeador' de n8n para realizar tareas complejas de lectura
+    de archivos grandes, resúmenes de contexto o mapeo del repositorio NIN.
+    """
+    ip = get_container_ip()
+    webhook_url = f"http://{ip}:5678/webhook/agente-secreto"
+    payload = json.dumps({"consulta": consulta}).encode('utf-8')
+    req = urllib.request.Request(webhook_url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
+    
+    try:
+        # Tarda unos minutos por el tamaño del modelo de 32B
+        with urllib.request.urlopen(req, timeout=300) as response:
+            result = response.read().decode('utf-8')
+            return result
+    except urllib.error.HTTPError as e:
+        return f"Error HTTP del Agente de n8n: {e.code} {e.reason} - {e.read().decode('utf-8')}"
+    except Exception as e:
+        return f"Error conectando al Agente de n8n: {e}"
 
 if __name__ == "__main__":
     mcp.run(transport='stdio')
