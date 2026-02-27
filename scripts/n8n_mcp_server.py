@@ -217,5 +217,48 @@ def invoke_secret_agent(consulta: str) -> str:
     except Exception as e:
         return f"Error conectando al Agente de n8n: {e}"
 
+def register_dynamic_tools():
+    """Busca flujos activos que empiecen con 'Tool:' y los registra como herramientas MCP."""
+    try:
+        data = api_request("GET", "/workflows?active=true")
+        wfs = data.get("data", [])
+        for wf in wfs:
+            name = wf.get("name", "")
+            if name.startswith("Tool:"):
+                # Buscar el path del webhook
+                webhook_path = None
+                for node in wf.get("nodes", []):
+                    if node.get("type") == "n8n-nodes-base.webhook":
+                        webhook_path = node.get("parameters", {}).get("path")
+                        break
+                
+                if webhook_path:
+                    tool_name = name.replace("Tool:", "").strip().lower().replace(" ", "_")
+                    
+                    # Definir la función de la herramienta
+                    def create_tool_handler(path, display_name):
+                        def dynamic_tool_handler(**kwargs) -> str:
+                            ip = get_container_ip()
+                            url = f"http://{ip}:5678/webhook/{path}"
+                            payload = json.dumps(kwargs).encode('utf-8')
+                            req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
+                            try:
+                                with urllib.request.urlopen(req, timeout=30) as resp:
+                                    return resp.read().decode('utf-8')
+                            except Exception as e:
+                                return f"Error en {display_name}: {e}"
+                        
+                        dynamic_tool_handler.__name__ = tool_name
+                        dynamic_tool_handler.__doc__ = f"Ejecuta el flujo de n8n: {name}"
+                        return dynamic_tool_handler
+
+                    handler = create_tool_handler(webhook_path, name)
+                    mcp.tool()(handler)
+                    # print(f"Herramienta dinámica registrada: {tool_name} -> {webhook_path}")
+    except Exception as e:
+        # print(f"Error en autodescubrimiento: {e}")
+        pass
+
 if __name__ == "__main__":
+    register_dynamic_tools()
     mcp.run(transport='stdio')

@@ -192,30 +192,26 @@
 - Iniciando diseño del primer componente: **Agente Secreto - Mapeador**.
 - Se requiere que n8n sea capaz de proveer resúmenes de archivos locales que superan el tamaño de ventana de contexto individual.
 
-### [2026-02-27] — Optimización Extrema: Agente Secreto (Opción B)
-Implementación exitosa de la arquitectura de Micro-Herramientas. Se eliminó la dependencia del modelo local de 32B para tareas de utilería básica, reduciendo la latencia de minutos a milisegundos.
+### [2026-02-27] — Optimización Extrema y Conciencia Dinámica
+Se ha completado la transformación del Agente Secreto en dos fases críticas.
 
-**Métricas Performance (Host Ubuntu):**
-- **Escaneo de Repositorio:** 0.003s (Antes: ~15s)
-- **Búsqueda Grep (Pilar 1):** 0.018s (Antes: ~30s)
-- **Lectura de Archivos (via n8n Webhook):** 0.027s (Antes: 2.5 min + Alucinación)
-- **Estado del Sistema:** 0.247s (Monitoreo en tiempo real)
+**Fase 1: Velocidad Extrema (Opción B)**
+Se eliminó la dependencia del modelo de 32B para tareas de utilería.
+- **Escaneo Repo**: 0.003s
+- **Grep**: 0.018s
+- **Lectura Archivos**: 0.027s
+- **Estado Sistema**: 0.247s (vía `estado_sistema_nin`).
 
-**Acciones de Reparación:**
-- Se corrigió el loop de reinicio de `searxng-lucy` desactivando los motores `startpage` y `yacy` que presentaban errores de parsing JSON.
-- Se refactorizó el workflow de n8n para manejo robusto de binarios en la lectura de archivos.
-- Se actualizaron los permisos del directorio `searxng`.
-
-**Veredicto:** El Agente Secreto ahora es el sistema de "ojos y manos" más veloz del ecosistema NiN. Antigravity actúa como el cerebro central, delegando tareas de bajo nivel a herramientas puras de n8n y comandos de host.
+**Fase 2: Autodescubrimiento (Evolución)**
+- **Dynamic Tool Discovery**: El MCP Server ahora registra automáticamente cualquier flujo de n8n que empiece con `Tool:`.
+- **Limpieza de Sistema**: Se eliminó el contenedor `lucy_eyes_searxng` que estaba en conflicto. `searxng-lucy` es ahora el buscador central.
+- **Pilar 1 & 2 Consagrados**: El sistema es ahora capaz de autogestionar su contexto y herramientas.
 
 ---
 
 ### 📥 Resumen para Próxima Sesión (Handover)
-- **Pilar 1 (Mapeador)**: **COMPLETADO (Opción B)**. Se habilitaron 4 micro-herramientas de n8n integradas en el MCP Server (`leer_archivo_n8n`, `escanear_directorio_nin`, `grep_nin`, `estado_sistema_nin`).
-- **Estado Técnico**:
-  - `n8n_mcp_server.py`: Actualizado con los nuevos tools. Conexión por webhook directa.
-  - `searxng-lucy`: **REPARADO**. Motores problemáticos desactivados en `settings.yml`.
-  - `n8n`: Los flujos están activos y sincronizados localmente en `/workflows/`.
+- **Infraestructura**: Autodescubrimiento de herramientas activo en `n8n_mcp_server.py`.
+- **Docker**: Estado saludable y sin redundancias.
 - **Pendiente**:
-  1. Iniciar **Pilar 2 (Monitor Inmunológico)**: Monitoreo proactivo de errores y auto-reparación.
-  2. Iniciar **Pilar 3 (Investigador)**: Conexión de n8n con SearXNG funcional.
+  1. **Monitor Inmunológico**: Automatizar reinicio de servicios fallidos vía n8n.
+  2. **Pilar 3**: Expandir capacidades de investigación web con herramientas dinámicas.
