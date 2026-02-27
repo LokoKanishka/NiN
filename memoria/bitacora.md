@@ -210,8 +210,9 @@ Se eliminó la dependencia del modelo de 32B para tareas de utilería.
 ---
 
 ### 📥 Resumen para Próxima Sesión (Handover)
-- **Infraestructura**: Autodescubrimiento de herramientas activo en `n8n_mcp_server.py`.
-- **Docker**: Estado saludable y sin redundancias.
+- **Infraestructura**: Autodescubrimiento y NiN Notebook activos.
+- **Docker**: Estado saludable.
 - **Pendiente**:
-  1. **Monitor Inmunológico**: Automatizar reinicio de servicios fallidos vía n8n.
-  2. **Pilar 3**: Expandir capacidades de investigación web con herramientas dinámicas.
+  1. **Configurar Credenciales GDrive**: En n8n para activar el flujo de sync.
+  2. **Monitor Inmunológico**: Automatizar reinicio de servicios fallidos vía n8n.
+  3. **Pilar 3**: Expandir capacidades de investigación web con SearXNG.
