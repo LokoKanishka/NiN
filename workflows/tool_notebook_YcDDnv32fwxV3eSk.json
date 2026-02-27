@@ -1,0 +1,88 @@
+{
+  "updatedAt": "2026-02-27T06:08:28.985Z",
+  "createdAt": "2026-02-27T06:08:28.985Z",
+  "id": "YcDDnv32fwxV3eSk",
+  "name": "Tool: Notebook",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente-notebook",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        0
+      ],
+      "id": "wh-notebook",
+      "name": "Webhook",
+      "webhookId": "notebook-001"
+    },
+    {
+      "parameters": {
+        "command": "# Buscar por patron o listar ultimos cambios\nif [ -n \"{{ $json.body.query }}\" ]; then\n  grep -rnE \"{{ $json.body.query }}\" /home/lucy-ubuntu/Escritorio/NIN/memoria /home/lucy-ubuntu/Escritorio/NIN/docs 2>/dev/null | head -50\nelse\n  ls -lt /home/lucy-ubuntu/Escritorio/NIN/memoria /home/lucy-ubuntu/Escritorio/NIN/docs | head -20\nfi"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        50,
+        0
+      ],
+      "id": "cmd-notebook",
+      "name": "Query Memory"
+    },
+    {
+      "parameters": {
+        "jsCode": "return { output: \"--- PROYECTO NIN: MEMORIA CONTEXTUAL ---\\n\" + $input.first().json.stdout };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        0
+      ],
+      "id": "format-notebook",
+      "name": "Format output"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Query Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Memory": {
+      "main": [
+        [
+          {
+            "node": "Format output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "meta": null,
+  "versionId": "9567b557-c01a-4f49-99d6-3972e3833bbe",
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "triggerCount": 0
+}
