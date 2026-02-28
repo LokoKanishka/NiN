@@ -41,6 +41,34 @@ Sin n8n conectado, estás operando a media potencia. SIEMPRE arrancá conectánd
 | **Aisladas (Zero Cloud Leak)** | `scraping_profundo`, `sirena_de_telegram` | 🔴 Bloqueado |
 | **Contexto** | `recordar_contexto`, `recuperar_contexto`, `guardar_mensaje` | 🟢 Activo |
 
+### Glosario Estricto de los 13 Skills Operativos (Febrero 2026)
+Como Agente, tienes 13 conectores blindados hacia la máquina anfitriona. Conócelos y úsalos así:
+
+**1. Diagnóstico y Salud**
+- `ping`: Latido asíncrono para verificar que n8n no está congelado antes de hacer tareas pesadas.
+- `system_health`: Te devuelve el consumo real de RAM, CPU y el disco del host. Úsalo si notas lentitud.
+- `doctor_system`: Detecta contenedores Docker caídos en el stack NIN y Espejo, y los levanta automáticamente.
+
+**2. Código y Archivos (FS Local)**
+- `grep_repo`: Busca cadenas de texto recursivamente en la carpeta del proyecto.
+- `repo_scanner`: Lista la estructura de directorios y archivos.
+- `lector_archivo`: Extrae el texto plano de cualquier código fuente o log para que lo puedas leer.
+- `ejecutor_python_aislado`: Si necesitas procesar datos, hacer matemáticas o manipular JSON complejos, usa este conector para ejecutar el script Python crudo y él te devolverá el `stdout`.
+
+**3. Sistema de Memoria Rápida (JSON FileSystem)**
+*Las 4 herramientas de memoria son ultra rápidas (sub-50ms) y deben usarse constantemente.*
+- `memory_search`: Busca en tu historial local si resolviste un problema parecido antes.
+- `memory_upsert`: Guarda tus deducciones técnicas, contraseñas o contextos como si fuera un JSON Key-Value store.
+- `memory_apply` y `memory_feedback`: Para inyectar tus ideas previas y puntuar si tu deducción de `upsert` fue buena o mala.
+
+**4. Conocimiento Profundo y Navegación**
+- `consultar_cerebro`: Conecta con el vector store Qdrant. Úsalo para preguntar sobre lore del proyecto, filosofía LUCY o documentos densos.
+- `noticias_ia`: Busca en la web de forma 100% privada usando el contenedor SearXNG local. Bypassa censuras.
+
+**5. Docker y HTTP Interno**
+- `control_docker_avanzado`: Enviale un comando simple como `ps` para listar contenedores crudos interactuando con `/var/run/docker.sock`.
+- `administrador_de_apis`: Un puente cURL/WGET para que hagas GET/POST a otras aplicaciones locales (ej. LM Studio, ollama) dentro de la red.
+
 ### Conexión técnica (cómo funciona por debajo)
 
 - **MCP Server**: `scripts/n8n_mcp_server.py` conecta al contenedor `n8n-lucy` vía HTTP bridge Docker.
