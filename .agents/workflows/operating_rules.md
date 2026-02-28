@@ -31,15 +31,15 @@ Sin n8n conectado, estás operando a media potencia. SIEMPRE arrancá conectánd
 
 ### Herramientas disponibles (autodescubiertas vía MCP)
 
-| Categoría | Herramientas |
-|---|---|
-| **Diagnóstico** | `ping`, `system_health`, `doctor_system` |
-| **Código/Archivos** | `grep_repo`, `repo_scanner`, `lector_archivo`, `ejecutor_python_aislado` |
-| **Memoria** | `memory_search`, `memory_upsert`, `memory_apply`, `memory_feedback`, `consultar_cerebro` |
-| **Docker** | `control_docker_avanzado`, `doctor_system` |
-| **Web/APIs** | `scraping_profundo`, `noticias_ia`, `administrador_de_apis`, `analizar_repositorios_github` |
-| **Comunicación** | `sirena_de_telegram` |
-| **Contexto** | `recordar_contexto`, `recuperar_contexto`, `guardar_mensaje` |
+| Categoría | Herramientas | Estado |
+|---|---|---|
+| **Diagnóstico** | `ping`, `system_health`, `doctor_system` | 🟢 Activo |
+| **Código/Archivos** | `grep_repo`, `repo_scanner`, `lector_archivo`, `ejecutor_python_aislado` | 🟢 Activo |
+| **Memoria** | `memory_search`, `memory_upsert`, `memory_apply`, `memory_feedback`, `consultar_cerebro` | 🟢 Activo |
+| **Docker** | `control_docker_avanzado` | 🟢 Activo |
+| **Web/APIs** | `noticias_ia`, `administrador_de_apis` | 🟢 Activo |
+| **Aisladas (Zero Cloud Leak)** | `scraping_profundo`, `sirena_de_telegram` | 🔴 Bloqueado |
+| **Contexto** | `recordar_contexto`, `recuperar_contexto`, `guardar_mensaje` | 🟢 Activo |
 
 ### Conexión técnica (cómo funciona por debajo)
 
