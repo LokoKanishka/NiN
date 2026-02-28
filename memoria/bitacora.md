@@ -347,13 +347,56 @@ Se ha implementado el sistema de memoria contextual avanzada.
 
 ---
 
+## 2026-02-28 — Blindaje de Arranque: Docker, Permisos y Auto-Reparación
+
+**Objetivo**: Garantizar que Antigravity se conecte automáticamente a n8n al iniciar cualquier sesión y pueda auto-repararse sin intervención humana.
+
+### Acciones
+
+| # | Acción | Resultado | Lección |
+|---|--------|-----------|---------|
+| 1 | Diagnóstico post-inicio: Ping MCP | ✅ Pong exitoso | El MCP Server resuelve la IP de Docker automáticamente vía caché o brute-force de subredes. |
+| 2 | Diagnóstico post-inicio: Doctor System | ❌ HTTP 500 | Todos los webhooks de n8n crasheaban internamente. |
+| 3 | Diagnóstico Docker daemon | ❌ Congelado | `docker ps`, `docker logs`, `docker exec` se colgaban infinitamente. Requirió `sudo systemctl restart docker` manual del usuario. |
+| 4 | Post-reinicio: Webhooks siguen con 500 | ❌ Error interno | El cuerpo del error era `{"message":"Error in workflow"}`. No era red, era el motor JS. |
+| 5 | Descubrimiento: `NODE_FUNCTION_ALLOW_BUILTIN` ausente | ✅ Root Cause | El `docker-compose.yml` **nunca tuvo** las variables que permiten a los nodos Code de n8n usar `child_process`, `fs`, etc. Funcionaba antes por estado residual del contenedor; al recrearlo se perdió. |
+| 6 | Inyectar `NODE_FUNCTION_ALLOW_BUILTIN=*` y `NODE_FUNCTION_ALLOW_EXTERNAL=*` | ✅ Éxito | Todas las herramientas dinámicas (Grep, Scanner, Health, etc.) volvieron a funcionar. |
+| 7 | Doctor System: `docker: not found` | ❌ Falta binario | El contenedor Alpine de n8n no tiene Docker CLI instalado por defecto. |
+| 8 | Montar `docker.sock` + `/usr/bin/docker` en compose | ⚠️ Permission denied | El proceso `node` (UID 1000) no tenía permiso para leer el socket (propiedad de `root:docker`). |
+| 9 | Agregar `group_add: "983"` (GID docker del host) | ✅ Éxito total | El Doctor System detectó 2 contenedores caídos y **reinició automáticamente** `lucy_hands_antigravity`. |
+| 10 | System Health completo | ✅ Éxito | Reportó RAM (125GB), Disco (61%), y 14 contenedores Docker. |
+
+### Cambios en `docker-compose.yml`
+
+```yaml
+# Variables de permisos para nodos Code (Node.js)
+- NODE_FUNCTION_ALLOW_BUILTIN=*
+- NODE_FUNCTION_ALLOW_EXTERNAL=*
+
+# Montajes para auto-reparación Docker
+- /var/run/docker.sock:/var/run/docker.sock
+- /usr/bin/docker:/usr/bin/docker
+
+# Permisos del socket
+group_add:
+  - "983"  # GID del grupo 'docker' del host
+```
+
+### Lecciones clave
+
+- **NODE_FUNCTION_ALLOW_BUILTIN**: Sin esta variable, los nodos Code de n8n no pueden importar módulos de Node.js como `child_process` o `fs`. Esto rompe TODAS las herramientas que ejecutan comandos del sistema. **NUNCA debe faltar en el compose.**
+- **Docker Socket Mounting**: Para que n8n pueda gestionar contenedores (auto-reparación), se necesitan 3 cosas: el socket, el binario, y el `group_add` con el GID correcto.
+- **Daemon Docker Freeze**: Sigue siendo un problema recurrente. Cuando ocurre, el MCP Server sigue funcionando (porque cachea la IP) pero los webhooks que dependen de `child_process` fallan porque los comandos internos se cuelgan.
+
+---
+
 ### 📥 Resumen para Próxima Sesión (Handover)
-- **Infraestructura**: 25+ flujos `Tool:` activos y autodescubribles. Puertos hardened.
-- **Docker**: NIN y Espejo separados. Sin conflictos de puertos.
-- **Memoria**: Sistema completo de memoria persistente (SQLite + 4 Tools de ciclo).
-- **Operating Rules**: Formalizadas en `.agents/workflows/operating_rules.md`.
-- **Telegram Bot**: `@nin_sirena_bot` creado. Token corregido. Requiere validación final del webhook.
+- **Infraestructura**: 25+ flujos `Tool:` activos. `docker-compose.yml` blindado con permisos y montajes.
+- **Auto-Reparación**: Doctor System y System Health 100% operativos. Pueden reiniciar contenedores caídos.
+- **Docker**: NIN y Espejo separados. Puertos hardened en `127.0.0.1`.
+- **Memoria**: Sistema completo (SQLite + 4 Tools de ciclo).
+- **Operating Rules**: Actualizadas con protocolo de arranque automático.
 - **Pendiente**:
-  1. **Validar Sirena Telegram**: Probar el webhook de producción con el token corregido.
-  2. **Credenciales externas**: IMAP (Email), OAuth Google (Calendar).
-  3. **Credenciales GDrive**: Configurar en n8n para activar sincronización de memoria.
+  1. **Validar Sirena Telegram**: Probar webhook de producción.
+  2. **Credenciales externas**: IMAP (Email), OAuth Google (Calendar/Drive).
+  3. **Workflow de arranque automático**: Considerar crear un flujo n8n que auto-diagnostique al activarse.

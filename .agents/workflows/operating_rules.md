@@ -6,6 +6,50 @@ description: Reglas operativas permanentes de Antigravity + NIN
 
 Sos un agente técnico conectado a n8n (servidor local). Tu objetivo es resolver tareas operativas y técnicas con ejecución real, no simulada.
 
+## 🚀 Protocolo de Arranque (OBLIGATORIO al inicio de cada sesión)
+
+**n8n es tu exoesqueleto: tus manos, tus ojos, y parte de tu cerebro (memoria).
+Sin n8n conectado, estás operando a media potencia. SIEMPRE arrancá conectándote.**
+
+### Paso 1: Leer contexto
+1. Leer `memoria/bitacora.md` (última entrada + handover).
+2. Leer este archivo (`operating_rules.md`).
+
+### Paso 2: Conectar el exoesqueleto (n8n)
+1. Ejecutar `mcp_n8n-control_ping` → Debe responder "Pong".
+2. Si falla: la IP cacheada en `.n8n_ip` puede estar obsoleta. Borrarla y reintentar.
+3. Si sigue fallando: Docker puede estar congelado. Pedir al usuario `sudo systemctl restart docker`.
+
+### Paso 3: Verificar capacidades
+1. Ejecutar `mcp_n8n-control_list_n8n_workflows` → Confirmar que los flujos `Tool:*` están activos.
+2. Ejecutar `mcp_n8n-control_system_health` → Verificar RAM, Disco, estado de contenedores.
+3. Si algún contenedor NIN está caído: ejecutar `mcp_n8n-control_doctor_system` para auto-reparar.
+
+### Paso 4: Recuperar memoria
+1. Ejecutar `mcp_n8n-control_recuperar_contexto` → Cargar último estado de sesión guardado.
+2. Ejecutar `mcp_n8n-control_memory_search` con el tema de la sesión actual.
+
+### Herramientas disponibles (autodescubiertas vía MCP)
+
+| Categoría | Herramientas |
+|---|---|
+| **Diagnóstico** | `ping`, `system_health`, `doctor_system` |
+| **Código/Archivos** | `grep_repo`, `repo_scanner`, `lector_archivo`, `ejecutor_python_aislado` |
+| **Memoria** | `memory_search`, `memory_upsert`, `memory_apply`, `memory_feedback`, `consultar_cerebro` |
+| **Docker** | `control_docker_avanzado`, `doctor_system` |
+| **Web/APIs** | `scraping_profundo`, `noticias_ia`, `administrador_de_apis`, `analizar_repositorios_github` |
+| **Comunicación** | `sirena_de_telegram` |
+| **Contexto** | `recordar_contexto`, `recuperar_contexto`, `guardar_mensaje` |
+
+### Conexión técnica (cómo funciona por debajo)
+
+- **MCP Server**: `scripts/n8n_mcp_server.py` conecta al contenedor `n8n-lucy` vía HTTP bridge Docker.
+- **IP dinámica**: Se cachea en `.n8n_ip`. Si Docker se reinicia, la IP cambia y hay que limpiar el caché.
+- **Autodescubrimiento**: Cualquier flujo de n8n con nombre `Tool: X` se registra automáticamente como herramienta MCP.
+- **Permisos críticos en `docker-compose.yml`**:
+  - `NODE_FUNCTION_ALLOW_BUILTIN=*` → Sin esto, los nodos Code de n8n NO funcionan.
+  - `docker.sock` + `group_add: "983"` → Sin esto, no puedo auto-reparar contenedores.
+
 ## Reglas Obligatorias
 
 1. Antes de resolver cualquier problema, buscá memoria previa con `memory_search`.
@@ -31,6 +75,20 @@ Sos un agente técnico conectado a n8n (servidor local). Tu objetivo es resolver
 4. Después de resolver, ejecutar `memory_upsert`.
 5. Actualizar efectividad con `memory_feedback`.
 6. Toda mejora debe quedar persistida en la memoria de n8n.
+
+## Límites de Proyecto (NUNCA violar)
+
+- **NIN** → Contenedores: `n8n-lucy`, `qdrant-lucy`, `searxng-lucy`
+- **cunningham-Espejo** → Contenedores: `lucy_brain_*`, `lucy_eyes_*`, `lucy_hands_*`, `lucy_ui_*`, etc.
+- **NUNCA tocar, diagnosticar, ni eliminar contenedores que no sean del stack NIN sin confirmación explícita del usuario.**
+
+## Mapa de Puertos
+
+| Servicio | NIN | Espejo |
+|---|---|---|
+| n8n | `127.0.0.1:5688` | `127.0.0.1:5678` |
+| SearXNG | `127.0.0.1:8080` | `127.0.0.1:8081` |
+| Qdrant | `127.0.0.1:6335` | `127.0.0.1:6333` |
 
 ## Required Response Fields
 
