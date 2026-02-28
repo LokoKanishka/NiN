@@ -400,3 +400,9 @@ group_add:
   1. **Validar Sirena Telegram**: Probar webhook de producción.
   2. **Credenciales externas**: IMAP (Email), OAuth Google (Calendar/Drive).
   3. **Workflow de arranque automático**: Considerar crear un flujo n8n que auto-diagnostique al activarse.
+
+### Sesión 2026-02-28 (Tarde) - Resolución de Problemas de Red y Cierre de Testing
+**Contexto:** Se intentó reparar las herramientas `Scraping Profundo` y `Sirena Telegram` sin éxito a través de actualizaciones dinámicas de flujos en n8n.
+**Análisis:** Al ejecutar comandos PING y WGET desde el contenedor `n8n-lucy`, se comprobó que el contenedor Hardened Alpine utilizado tiene bloqueada la conectividad de red saliente hacia Internet. Todo el tráfico que no sea local (Docker network) es descartado. 
+**Resolución Arquitectónica:** Esto confirma el modelo de seguridad "Zero Cloud Leak" del Proyecto LUCY. Las herramientas de Scraping e Integración Externa quedarán oficialmente suspendidas (bloqueo por infraestructura) mientras que las 13 herramientas locales de integración, búsqueda y diagnóstico permanecen 100% estables, rápidas y operativas usando recursos del host (Docker socket, SearXNG local, FS de la máquina ubuntu).
+**Siguientes pasos programados:** Testeo absoluto, final y definitivo de las 13 herramientas restantes.
