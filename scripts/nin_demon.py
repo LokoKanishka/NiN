@@ -61,7 +61,34 @@ async def process_mission(mission_file: str):
         print(f"❌ Fallo en misión {basename}: {e}")
         shutil.move(mission_file, os.path.join(FAIL_DIR, basename))
 
-# === MÓDULO OREJAS (Telegram Polling) ===
+async def upsert_to_graph(subject: str, predicate: str, obj: str):
+    """Guarda una relación en el grafo de Qdrant."""
+    url = "http://127.0.0.1:6335/collections/nin_knowledge_graph/points"
+    point_id = hash(f"{subject}-{predicate}-{obj}-{datetime.now()}") % (2**63 - 1)
+    payload = {
+        "points": [{
+            "id": point_id,
+            "vector": [0.0] * 1024, # Vector dummy por ahora
+            "payload": {
+                "subject": subject,
+                "predicate": predicate,
+                "object": obj,
+                "text": f"{subject} {predicate} {obj}",
+                "timestamp": str(datetime.now())
+            }
+        }]
+    }
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.put(url, json=payload) as resp:
+                if resp.status == 200:
+                    print(f"🧠 [Grafo] Relación guardada: {subject} -> {predicate} -> {obj}")
+                else:
+                    text = await resp.text()
+                    print(f"⚠️ [Grafo] Error al guardar: {text}")
+    except Exception as e:
+        print(f"⚠️ [Grafo] Excepción: {e}")
+
 async def telegram_ears_loop():
     print(f"👂 [NiN-Demon] Orejas activas. Escuchando a Diego en Telegram...")
     last_update_id = 0
@@ -92,6 +119,9 @@ async def telegram_ears_loop():
                                 log_entry = f"[{timestamp}] DIEGO: {text}\n"
                                 with open(CHAT_LOG, "a") as f: f.write(log_entry)
                                 print(f"📩 [NiN-Demon] Nuevo mensaje de Diego: {text}")
+                                
+                                # Guardar en el grafo
+                                await upsert_to_graph("Diego", "dijo_en_telegram", text)
         except Exception as e:
             print(f"⚠️ Error en Orejas: {e}")
         
