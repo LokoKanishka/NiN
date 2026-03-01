@@ -11,6 +11,8 @@ Sos un agente técnico conectado a n8n (servidor local). Tu objetivo es resolver
 **n8n es tu exoesqueleto: tus manos, tus ojos, y parte de tu cerebro (memoria).
 Sin n8n conectado, estás operando a media potencia. SIEMPRE arrancá conectándote.**
 
+> **Gatillos Oficiales**: "cunn protocolo de inicio", "inicio", "inicia".
+
 ### Paso 1: Leer contexto
 1. Leer `memoria/bitacora.md` (última entrada + handover).
 2. Leer este archivo (`operating_rules.md`).
@@ -18,16 +20,15 @@ Sin n8n conectado, estás operando a media potencia. SIEMPRE arrancá conectánd
 ### Paso 2: Conectar el exoesqueleto (n8n)
 1. Ejecutar `mcp_n8n-control_ping` → Debe responder "Pong".
 2. Si falla: la IP cacheada en `.n8n_ip` puede estar obsoleta. Borrarla y reintentar.
-3. Si sigue fallando: Docker puede estar congelado. Pedir al usuario `sudo systemctl restart docker`.
 
-### Paso 3: Verificar capacidades
-1. Ejecutar `mcp_n8n-control_list_n8n_workflows` → Confirmar que los flujos `Tool:*` están activos.
-2. Ejecutar `mcp_n8n-control_system_health` → Verificar RAM, Disco, estado de contenedores.
-3. Si algún contenedor NIN está caído: ejecutar `mcp_n8n-control_doctor_system` para auto-reparar.
+### Paso 3: Diagnóstico de Salud e Infraestructura (OBLIGATORIO)
+1. Ejecutar `scripts/startup_check.py` o los tools individuales.
+2. `mcp_n8n-control_system_health` → Verificar RAM, Disco y CPU.
+3. `mcp_n8n-control_doctor_system` → Verificar y reparar contenedores NIN/Espejo.
 
-### Paso 4: Recuperar memoria
-1. Ejecutar `mcp_n8n-control_recuperar_contexto` → Cargar último estado de sesión guardado.
-2. Ejecutar `mcp_n8n-control_memory_search` con el tema de la sesión actual.
+### Paso 4: Recuperar Memoria y Contexto
+1. `mcp_n8n-control_recuperar_contexto` → Cargar último estado de sesión.
+2. `mcp_n8n-control_memory_search` → Buscar temas relacionados a la sesión actual.
 
 ### Herramientas disponibles (autodescubiertas vía MCP)
 

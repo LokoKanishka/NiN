@@ -486,3 +486,16 @@ group_add:
 4. **Victoria:** La segunda pasada de auditoría finalizó con **100% de éxito**. 26 de 26 herramientas respondieron a los payloads destructivos con `200 OK` (procesamiento seguro) o Timeout natural por Inferencia pesada LLM, erradicando los temibles errores HTTP 500.
 
 **Estado Actual:** Todo el arsenal Base y la Expansión (Colmena, Groq, Tavily, Hugging Face, Resend) están asegurados, activos y sellados a prueba de fallos. El usuario cuenta ahora con el clúster NiN en su estado de máxima eficacia y resistencia estructural.
+### Sesión 01/03/2026 (Tarde) - Estandarización y Limpieza de Modelos 🧹
+**Objetivo:** Eliminar rastros de modelos descartados (120B y 3B Llama) y unificar el asistente bajo Qwen 14B.
+**Logros Logrados:**
+1. **Limpieza de Archivos:** Se eliminaron los scripts `download_model.py`, `nin_specialist_inference.py` y los directorios `entrenamiento/` y `models/`.
+2. **Refactorización NiN-Demon:** Se renombraron las funciones de inferencia a `ask_qwen` y se eliminaron todas las referencias al nombre "Hermes" (versión descatada).
+3. **Saneamiento de Identidad:** Se actualizó `identidad.md` para reflejar que el único asistente local es Qwen 14B.
+4. **Resiliencia:** El sistema de misiones y "orejas" de Telegram ahora usa exclusivamente el motor de razonamiento Qwen 14B de forma prolija.
+
+**Estado Actual:** Sistema limpio. Un único ayudante catalogado: **Alt (Qwen 14B)**.
+
+### Sesión 01/03/2026 (Tarde - cont.) - Bautismo de "Alt" 🏷️
+**Logro:** Se renombró oficialmente al asistente 14B como **Alt**. Se actualizaron scripts y documentos de identidad.
+

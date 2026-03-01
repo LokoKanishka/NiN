@@ -1,0 +1,9 @@
+{
+    "status": "Ready",
+    "connection": "Blindada (172.24.0.4)",
+    "health": {
+        "raw": null
+    },
+    "doctor": "Check complete",
+    "context": "No context found"
+}
