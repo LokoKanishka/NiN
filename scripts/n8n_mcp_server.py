@@ -31,7 +31,15 @@ NIN_CONTAINERS = {"n8n-lucy", "qdrant-lucy", "searxng-lucy"}
 # Desactivar verificación SSL para entornos locales (Requerimiento Usuario)
 ssl_context = ssl._create_unverified_context()
 
-mcp = FastMCP("n8n Controlador")
+import sys
+import argparse
+
+# Parsear args básicos al principio para poder inyectar el puerto
+parser = argparse.ArgumentParser(description="NiN MCP Server", add_help=False)
+parser.add_argument("--port", type=int, default=8000)
+args, _ = parser.parse_known_args()
+
+mcp = FastMCP("n8n Controlador", host="127.0.0.1", port=args.port)
 
 def load_api_key() -> str:
     if not os.path.isfile(ENV_FILE):
@@ -287,5 +295,14 @@ def register_dynamic_tools():
         pass
 
 if __name__ == "__main__":
+    # Parsear resto de argumentos (port ya se parseó arriba en modo known_args)
+    parser.add_argument("--transport", choices=["stdio", "sse"], default="stdio", help="Transporte a usar")
+    args = parser.parse_args()
+
     register_dynamic_tools()
-    mcp.run(transport='stdio')
+    
+    if args.transport == "sse":
+        print(f"🚀 Iniciando Servidor MCP en modo SSE (http://127.0.0.1:{args.port}/sse)")
+        mcp.run(transport='sse')
+    else:
+        mcp.run(transport='stdio')
