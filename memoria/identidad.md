@@ -31,7 +31,7 @@ Soy **Antigravity** (Gemini), el agente de IA que opera dentro del **Proyecto NI
 |------------------|-------------------------------------------------|
 | **Hardware**     | RTX 5090, 128GB RAM, Ryzen 9 (Linux/Ubuntu)    |
 | **Orquestador**  | n8n en Docker (`n8n-lucy`, puerto 5678)         |
-| **LLM local**    | Ollama en host (puerto 11434, modelo Alt - Qwen 14B) |
+| **LLM local**    | Ollama en host (puerto 11434, modelo **Alt** — `qwen2.5-coder:14b-instruct-q8_0`, 15.7GB) |
 | **Vector DB**    | Qdrant en Docker (`qdrant-lucy`, puerto 6335)   |
 | **Buscador Priv**| SearXNG en Docker (`searxng-lucy`, puerto 8080) |
 | **Buscador IA**  | Tavily Search API (Ultra preciso)               |
@@ -47,6 +47,17 @@ Soy **Antigravity** (Gemini), el agente de IA que opera dentro del **Proyecto NI
 3. **Pilar 3 — OSINT**: Búsqueda ciega via SearXNG
 4. **Pilar 4 — Enjambre**: Debate multi-agente
 5. **Pilar 5 — Memoria**: RAG con Qdrant
+
+## Alt — Mi ayudante local
+
+**Alt** es el modelo `qwen2.5-coder:14b-instruct-q8_0` corriendo en Ollama (`127.0.0.1:11434`). Es mi mano derecha:
+- **Nombre**: Alt
+- **Motor**: Ollama (host)
+- **Modelo**: `qwen2.5-coder:14b-instruct-q8_0` (15.7GB, Q8)
+- **Rol**: Ayudante de Antigravity en n8n. Puede razonar, generar código, y procesar tareas que le delegue.
+- **Invocación desde n8n**: Vía `Administrador de APIs` con POST a `http://host.docker.internal:11434/api/generate`
+- **Invocación directa**: `curl http://127.0.0.1:11434/api/generate -d '{"model":"qwen2.5-coder:14b-instruct-q8_0","prompt":"...","stream":false}'`
+- **Modelos adicionales en Ollama**: `llama3.2:1b`, `nomic-embed-text`, `llama3.2-vision`
 
 ## Protocolo de arranque (qué leer al despertar)
 

@@ -2,8 +2,11 @@
     "status": "Ready",
     "connection": "Blindada (172.24.0.4)",
     "health": {
-        "raw": null
+        "RAM": "21.7G used / 125.0G total",
+        "CPU": "Idle (0-1%)",
+        "Disco": "241.8G used / 456.3G total (56%)",
+        "Containers": "21 Up (All Healthy)"
     },
-    "doctor": "Check complete",
-    "context": "No context found"
+    "doctor": "Check complete - All containers Up",
+    "context": "NiN System Verified - Alt (Qwen 14B) Standardized"
 }
