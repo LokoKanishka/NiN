@@ -2,11 +2,11 @@
     "status": "Ready",
     "connection": "Blindada (172.24.0.4)",
     "health": {
-        "RAM": "21.7G used / 125.0G total",
-        "CPU": "Idle (0-1%)",
-        "Disco": "241.8G used / 456.3G total (56%)",
-        "Containers": "21 Up (All Healthy)"
+        "raw": "--- RAM ---\n              total        used        free      shared  buff/cache   available\nMem:         125.0G       22.3G       76.8G      188.8M       25.9G      101.3G\n\n--- CPU ---\n  127    19 node     S     1648   0%  30   0% /bin/sh -c top -bn1 | grep -E 'Cpu'\n  129   127 node     S     1632   0%  10   0% grep -E Cpu\n\n--- DISCO ---\noverlay                 456.3G    241.8G    191.3G  56% /\n\n--- DOCKER ---\nsearxng-lucy Up 2 hours\nqdrant-lucy Up 2 hours\nn8n-lucy Up 2 hours\nlucy_fusion_ui_panel Up 2 hours (healthy)\nlucy_fusion_antigravity Up 2 hours (healthy)\nlucy_fusion_n8n Up 2 hours (healthy)\nlucy_fusion_searxng Up 2 hours\nlucy_fusion_socket_proxy Up 2 hours\nlucy_fusion_redis Up 2 hours\nlucy_fusion_qdrant Up 2 hours\nlucy_brain_runners Up 2 hours (healthy)\nlucy_brain_n8n Up 2 hours (healthy)\nlucy_eyes_searxng Up 2 hours\nlucy_hands_antigravity Up 2 hours (healthy)\nlucy_ui_panel Up 2 hours (healthy)\nlucy_memory_qdrant Up 2 hours\nlucy_memory_redis Up 2 hours\nlucy_docker_socket_proxy Up 2 hours\nlucy_voice_alltalk Up 2 hours\nlucy_open_webui Up 2 hours (healthy)\nlucy_ui_dockge Up 2 hours (healthy)\nantigravity_container Up 2 hours\n"
     },
-    "doctor": "Check complete - All containers Up",
-    "context": "NiN System Verified - Alt (Qwen 14B) Standardized"
+    "doctor": "\u2705 Todo en orden. Todos los contenedores est\u00e1n Up.",
+    "alt": {
+        "status": "Online",
+        "model": "qwen2.5-coder:14b-instruct-q8_0"
+    }
 }
