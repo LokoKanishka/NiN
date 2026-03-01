@@ -469,3 +469,10 @@ group_add:
 - **Herramienta:** Hugging Face Inference API / Router.
 - **Implementación:** Script optimizado `/home/lucy-ubuntu/Escritorio/NIN/scripts/hf_inference.py` (Bypass n8n). La clave está segura en el `.env`.
 - **Resultado:** Test de análisis superado con éxito `(score: 0.9998 POSITIVO)`.
+
+
+### Sesión 01/03/2026 - Integración de Resend (Email) 📧
+**Logro:** Añadida capacidad de envío de correos electrónicos transaccionales.
+- **Herramienta:** Resend API.
+- **Implementación:** Script optimizado `/home/lucy-ubuntu/Escritorio/NIN/scripts/resend_mailer.py` (Bypass n8n antiguo).
+- **Test:** Envío a correo registrado `chatjepetex2025@gmail.com` con éxito.
