@@ -64,10 +64,16 @@ Como Agente, tienes 13 conectores blindados hacia la máquina anfitriona. Conóc
 **4. Conocimiento Profundo y Navegación**
 - `consultar_cerebro`: Conecta con el vector store Qdrant. Úsalo para preguntar sobre lore del proyecto, filosofía LUCY o documentos densos.
 - `noticias_ia`: Busca en la web de forma 100% privada usando el contenedor SearXNG local. Bypassa censuras.
-- `research_colmena`: (NUEVO - Pendiente Credenciales) Recolecta fuentes de YouTube y Web para delegar análisis pesado a la nube.
-- `consultar_colmena`: (NUEVO - Pendiente Credenciales) Interfaz tipo NotebookLM para preguntarle a Gemini 1.5 Pro sobre la carpeta de investigación en Drive.
+- `research_colmena`: Recolecta fuentes de YouTube y Web para delegar análisis pesado a la nube de Google Drive.
+- `consultar_colmena`: Interfaz interactiva para preguntarle a Gemini 1.5 Pro sobre la carpeta de investigación masiva en Drive.
+- `tavily_search`: Búsqueda web avanzada e inteligente, optimizada para contexto de agentes IA.
 
-**5. Docker y HTTP Interno**
+**5. Velocidad, Multimodalidad y Utilidades (Bypass Nativo)**
+- `groq_fast_processor`: Inferencia ultra-rápida (milisegundos) con Llama 3.3 70B para tomas de decisión y clasificación veloz.
+- `hf_inference`: Herramienta universal para visión artificial, transcripción de audio (Whisper) y modelos Zero-Shot vía Hugging Face.
+- `resend_mailer`: Secretario de correos transaccional para envíos a terceros directamente desde el flujo lógico del agente.
+
+**6. Docker y HTTP Interno**
 - `control_docker_avanzado`: Enviale un comando simple como `ps` para listar contenedores crudos interactuando con `/var/run/docker.sock`.
 - `administrador_de_apis`: Un puente cURL/WGET para que hagas GET/POST a otras aplicaciones locales (ej. LM Studio, ollama) dentro de la red.
 

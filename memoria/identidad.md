@@ -33,7 +33,12 @@ Soy **Antigravity** (Gemini), el agente de IA que opera dentro del **Proyecto NI
 | **Orquestador**  | n8n en Docker (`n8n-lucy`, puerto 5678)         |
 | **LLM local**    | Ollama en host (puerto 11434, modelo QwQ-32B)   |
 | **Vector DB**    | Qdrant en Docker (`qdrant-lucy`, puerto 6335)   |
-| **Buscador**     | SearXNG en Docker (`searxng-lucy`, puerto 8080) |
+| **Buscador Priv**| SearXNG en Docker (`searxng-lucy`, puerto 8080) |
+| **Buscador IA**  | Tavily Search API (Ultra preciso)               |
+| **Cerebro Veloz**| Groq API (Llama 3.3 70B - Milisegundos)         |
+| **Cerebro Macro**| Gemini 1.5 Pro + Drive (Sistema Colmena)        |
+| **Multimodal**   | Hugging Face (Whisper, Visión, Llava)           |
+| **Correos**      | Resend API (Transaccional)                      |
 | **Repo**         | `/home/lucy-ubuntu/Escritorio/NIN`              |
 
 ## Los 5 Pilares
