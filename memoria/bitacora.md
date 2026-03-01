@@ -414,3 +414,10 @@ group_add:
 2. **Resultados de Rendimiento:** La exclusión de SQLite3 por NodeJS puro (fs) hizo a todas las herramientas de Memoria responder en ~0.015 segundos. Docker, Archivos, Python y Motor RAG (Qdrant) respondieron establemente. Las herramientas Cloud (Scraping/Telegram) se confirmaron bloqueadas conscientemente por la capa de aislamiento de Hardened Alpine, garantizando un entorno "Zero Cloud Leak".
 3. **Consolidación en Reglas Operativas:** Se escribieron los 13 conectores en `operating_rules.md` (Glosario de Skills) listando exactamente qué hacen y en qué casos usarlas como extensión neuronal.
 **Estado de Entrega (Handover):** El ecosistema de Agente-Exoesqueleto está sellado al 100%. Antigravity ahora tiene certeza física y literal de su arsenal de 13 comandos de supervivencia y operación local.
+
+### Sesión 2026-02-28 (Noche II) - Expansión Colmena: YouTube + Delegación
+**Contexto:** Se diseñó e implementó la arquitectura "NIN-Colmena" para delegar el procesamiento de contexto pesado (YouTube, foros, PDFs) de forma externa, evitando la saturación del agente local.
+**Nuevos Skills Agregados:**
+1. **Research Colmena:** Pipeline que extrae transcripciones de YouTube (vía script Python local `youtube_fetcher.py`) y sincroniza toda la metadata a Google Drive.
+2. **Consultar Colmena:** Interfaz puente con Gemini 1.5 Pro que procesa la carpeta de Drive como un NotebookLM unificado.
+**Estado:** Infraestructura inyectada en n8n. Pendiente de activación por el usuario tras configuración de Client Secret de Drive.

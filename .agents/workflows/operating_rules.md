@@ -64,6 +64,8 @@ Como Agente, tienes 13 conectores blindados hacia la máquina anfitriona. Conóc
 **4. Conocimiento Profundo y Navegación**
 - `consultar_cerebro`: Conecta con el vector store Qdrant. Úsalo para preguntar sobre lore del proyecto, filosofía LUCY o documentos densos.
 - `noticias_ia`: Busca en la web de forma 100% privada usando el contenedor SearXNG local. Bypassa censuras.
+- `research_colmena`: (NUEVO - Pendiente Credenciales) Recolecta fuentes de YouTube y Web para delegar análisis pesado a la nube.
+- `consultar_colmena`: (NUEVO - Pendiente Credenciales) Interfaz tipo NotebookLM para preguntarle a Gemini 1.5 Pro sobre la carpeta de investigación en Drive.
 
 **5. Docker y HTTP Interno**
 - `control_docker_avanzado`: Enviale un comando simple como `ps` para listar contenedores crudos interactuando con `/var/run/docker.sock`.
