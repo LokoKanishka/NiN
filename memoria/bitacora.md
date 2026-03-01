@@ -421,3 +421,16 @@ group_add:
 1. **Research Colmena:** Pipeline que extrae transcripciones de YouTube (vía script Python local `youtube_fetcher.py`) y sincroniza toda la metadata a Google Drive.
 2. **Consultar Colmena:** Interfaz puente con Gemini 1.5 Pro que procesa la carpeta de Drive como un NotebookLM unificado.
 **Estado:** Infraestructura inyectada en n8n. Pendiente de activación por el usuario tras configuración de Client Secret de Drive.
+
+### Sesión 28/02/2026 - Integración Sistema Colmena 🐝
+**Objetivo:** Activar delegación de investigación pesada a Google Drive + Gemini 1.5 Pro.
+
+**Hitos Logrados:**
+- **Credenciales:** Configuración exitosa de Google Drive OAuth2 tras superar error 403 (autorización de usuario de prueba en GCP).
+- **Retrocompatibilidad n8n:** Se detectó versión antigua de n8n. Se implementó un bypass para Gemini (HTTP Request directa) y se reescribieron los workflows con sintaxis Legacy (`items[0].json`) para evitar errores 500.
+- **Herramientas Colmena:**
+    - `Tool: Research Colmena`: Extrae transcripciones (JS Fallback) y sube reportes a Drive.
+    - `Tool: Consultar Colmena`: Analiza contextos delegados usando Gemini 1.5 Pro API.
+- **Red:** Confirmación de acceso a n8n vía IP de Bridge Docker (`172.24.0.4`) para aislamiento de proyectos.
+
+**Estado:** Operativo. Puente de investigación en la nube activo.

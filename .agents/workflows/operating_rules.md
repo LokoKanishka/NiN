@@ -73,8 +73,8 @@ Como Agente, tienes 13 conectores blindados hacia la máquina anfitriona. Conóc
 
 ### Conexión técnica (cómo funciona por debajo)
 
-- **MCP Server**: `scripts/n8n_mcp_server.py` conecta al contenedor `n8n-lucy` vía HTTP bridge Docker.
-- **IP dinámica**: Se cachea en `.n8n_ip`. Si Docker se reinicia, la IP cambia y hay que limpiar el caché.
+- **MCP Server**: `scripts/n8n_mcp_server.py` conecta al contenedor `n8n-lucy` vía **HTTP bridge Docker (172.24.0.4:5678)**.
+- **IP dinámica**: Se cachea en `/home/lucy-ubuntu/Escritorio/NIN/.n8n_ip`. Es la ruta maestra para evitar colisiones con Espejo.
 - **Autodescubrimiento**: Cualquier flujo de n8n con nombre `Tool: X` se registra automáticamente como herramienta MCP.
 - **Permisos críticos en `docker-compose.yml`**:
   - `NODE_FUNCTION_ALLOW_BUILTIN=*` → Sin esto, los nodos Code de n8n NO funcionan.
@@ -116,7 +116,7 @@ Como Agente, tienes 13 conectores blindados hacia la máquina anfitriona. Conóc
 
 | Servicio | NIN | Espejo |
 |---|---|---|
-| n8n | `127.0.0.1:5688` | `127.0.0.1:5678` |
+| n8n | `172.24.0.4:5678` (Bridge) | `127.0.0.1:5678` (Host) |
 | SearXNG | `127.0.0.1:8080` | `127.0.0.1:8081` |
 | Qdrant | `127.0.0.1:6335` | `127.0.0.1:6333` |
 
