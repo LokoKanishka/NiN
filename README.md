@@ -23,7 +23,7 @@ From the **project root** (`~/Escritorio/NIN`):
 ```bash
 docker-compose up -d
 ```
-Access the interface at `http://localhost:5678/home/workflows`.
+Access the interface at `http://localhost:5688/home/workflows`.
 
 > **Tip:** Use the **NIN** desktop shortcut to open the workflows panel directly with one click.
 
@@ -44,7 +44,7 @@ docker-compose down && docker-compose up -d --force-recreate
 ```
 Verify connectivity:
 ```bash
-curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5678
+curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5688
 # Expected: 200
 ```
 

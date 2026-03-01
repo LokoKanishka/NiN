@@ -17,3 +17,7 @@ download_model.py
 __pycache__/
 *.pyc
 .env
+# NiN Demon
+demon/
+*.pid
+*.log
