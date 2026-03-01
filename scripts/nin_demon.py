@@ -18,9 +18,32 @@ FAIL_DIR = f"{BASE_DIR}/misiones/fallidas"
 CHAT_DIR = f"{BASE_DIR}/voz"
 CHAT_LOG = f"{CHAT_DIR}/diego_mensajes.log"
 
+# Motor de Razonamiento Soberano 🏎️
+OLLAMA_MODEL = "qwen2.5-coder:14b-instruct-q8_0"
+OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
+
 # Credenciales Telegram (Detectadas)
 TG_TOKEN = "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA"
 DIEGO_ID = 5154360597
+
+async def ask_hermes(prompt: str) -> str:
+    """Consulta al modelo Hermes-2-Pro local para razonamiento avanzado."""
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": prompt,
+        "stream": False
+    }
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(OLLAMA_URL, json=payload) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    return data.get("response", "")
+                else:
+                    return f"Error Hermes: {resp.status}"
+    except Exception as e:
+        return f"Error Hermes: {e}"
+
 
 async def execute_tool_safe(session: ClientSession, tool_name: str, arguments: Dict[str, Any]):
     try:

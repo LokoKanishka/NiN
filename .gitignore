@@ -21,3 +21,5 @@ __pycache__/
 demon/
 *.pid
 *.log
+entrenamiento/.venv_train/
+entrenamiento/.venv_train_fix/
