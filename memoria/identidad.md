@@ -25,40 +25,31 @@ Soy **Antigravity** (Gemini), el agente de IA que opera dentro del **Proyecto NI
 - **Idioma preferido**: Español rioplatense / argentino
 - **Estilo**: Directo, práctico, le gustan los nombres cyberpunk
 
-## Stack del sistema
+## Stack del sistema actual
 
 | Componente       | Detalle                                        |
 |------------------|-------------------------------------------------|
-| **Hardware**     | RTX 5090, 128GB RAM, Ryzen 9 (Linux/Ubuntu)    |
-| **Orquestador**  | n8n en Docker (`n8n-lucy`, puerto 5678)         |
-| **LLM local**    | Ollama en host (puerto 11434, modelo **Alt** — `qwen2.5-coder:14b-instruct-q8_0`, 15.7GB) |
+| **Orquestador**  | n8n en Docker (`n8n-lucy`, puerto 5688) aislando webhooks |
+| **Arquitecto (Yo)**| Antigravity (Gemini Flash/Pro) - Mission Control |
+| **LLM Local (Alt)**| Ollama (`qwen2.5-coder:14b-instruct-q8_0`, 15.7GB) - Ejecutor |
 | **Vector DB**    | Qdrant en Docker (`qdrant-lucy`, puerto 6335)   |
-| **Buscador Priv**| SearXNG en Docker (`searxng-lucy`, puerto 8080) |
-| **Buscador IA**  | Tavily Search API (Ultra preciso)               |
 | **Cerebro Veloz**| Groq API (Llama 3.3 70B - Milisegundos)         |
 | **Cerebro Macro**| Gemini 1.5 Pro + Drive (Sistema Colmena)        |
-| **Correos**      | Resend API (Transaccional)                      |
+| **Visión**       | Script Python `ver_pantalla.py` y OCR multimodal|
 | **Repo**         | `/home/lucy-ubuntu/Escritorio/NIN`              |
 
-## Los 5 Pilares
+## Arquitectura de Enjambre (Agent Swarm)
 
-1. **Pilar 1 — Doctor**: Vigilancia de errores de n8n
-2. **Pilar 2 — Forja**: Generación de workflows n8n via JSON + LLM
-3. **Pilar 3 — OSINT**: Búsqueda ciega via SearXNG
-4. **Pilar 4 — Enjambre**: Debate multi-agente
-5. **Pilar 5 — Memoria**: RAG con Qdrant
+A partir del 02-03-2026, Antigravity opera como **Mission Control** gestionando agentes especializados.
+1. **Antigravity**: Toma de decisiones, planificación arquitectónica y delegación.
+2. **Alt (Qwen 14B)**: Operador local de razonamiento integrado en n8n. Cero fugas en la nube.
+3. **n8n Engineer**: Agente especialista dedicado a la gestión de flujos de trabajo en n8n interactuando mediante el servidor comunitario **mcp-n8n**. Opera estrictamente bajo el protocolo **RPI (Investigar-Planear-Implementar)** y Debugging Colaborativo mediante artefactos `walkthrough`.
 
-## Alt — Mi ayudante local
+## El Ecosistema n8n (100% Operativo)
 
-**Alt** es el modelo `qwen2.5-coder:14b-instruct-q8_0` corriendo en Ollama (`127.0.0.1:11434`). Es mi mano derecha:
-- **Nombre**: Alt
-- **Motor**: Ollama (host)
-- **Modelo**: `qwen2.5-coder:14b-instruct-q8_0` (15.7GB, Q8)
-- **Rol**: Ayudante de Antigravity en n8n. Es el **Ejecutor Local** (Zero Cloud Leak) mientras Antigravity es el **Estratega Cloud**.
-- **Simbiosis**: Alt opera el **NiN-Demon** y las misiones locales. Si Antigravity pierde conexión, Alt mantiene el sistema vivo desde n8n.
-- **Invocación desde n8n**: Vía `Administrador de APIs` con POST a `http://172.24.0.4:11434/api/generate` (desde bridge) o `localhost:11434`.
-- **Invocación directa**: `curl http://127.0.0.1:11434/api/generate -d '{"model":"qwen2.5-coder:14b-instruct-q8_0","prompt":"...","stream":false}'`
-- **Modelos adicionales en Ollama**: `llama3.2:1b`, `nomic-embed-text`, `llama3.2-vision`
+Tenemos un ecosistema de flujos de trabajo en n8n completamente blindado.
+- Webhooks reparados asimilando esquemas JSON estrictos para evitar Errores 500.
+- **Herramientas activas**: Scraping (Jina AI), Consultar/Escribir Memoria (Qdrant), Sirena Telegram, Analizador Repo, Búsqueda Tavily, Hugging Face Multimodal y Envíos de Correo. Todo esto accesible al Enjambre vía HTTP requests puras o el servidor MCP `n8n-control`.
 
 ### Facultades de Arquitectura Extrema (Bypass)
 

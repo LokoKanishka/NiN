@@ -63,13 +63,26 @@ Errors contacting `telemetry.n8n.io` or `posthog.com` are **expected and harmles
 
 ---
 
-## 🧠 Software Components
+## 🧠 Software Components & Agent Swarm
 
-### 1. The Architect (`gpt-oss-120b`)
-Generates logical plans and **valid n8n workflow JSON** from natural language instructions. See `prompts/architect_prompt.md`.
+El Proyecto LUCY opera como un enjambre de agentes (Agent Swarm).
 
-### 2. The Executor (n8n)
-Orchestrates file reading (PDFs, CSVs), API calls, and Markdown report generation. Operates autonomously from the Architect's JSON output.
+### 1. The Architect (Antigravity / Mission Control)
+Responsable de la toma de decisiones, asimilación del usuario y orquestación del servidor/agentes.
+
+### 2. The Engineer (n8n Engineer)
+Un agente especializado para el control total del ecosistema n8n mediante el servidor `mcp-n8n`.
+Regido estrictamente por el protocolo de **Research-Plan-Implement (RPI)**. 
+
+### 3. The Local Executor (Alt - Qwen 14B)
+Modelo local Open Source blindado. Opera con 0 dependencias Cloud y actúa como el "Músculo" del cluster NiN.
+
+### 4. The Cloud Brains
+- **Groq LPU (Llama 3.3 70B)**: Para velocidad y código de cero-latencia.
+- **Sistema Colmena**: Delegación a plataformas Drive para ingesta masiva (RAG asíncrono).
+
+### 5. The Nervous System (n8n)
+Orchestrates file reading, external API endpoints, and webhooks. Reparado a prueba de fallos 500.
 
 ---
 

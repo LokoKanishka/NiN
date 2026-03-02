@@ -1,5 +1,14 @@
 # 📒 Bitácora de Operaciones NiN
 
+## [2026-03-02] - Protocolo de Hibernación y Agent Swarm (Handover)
+- **Cambio Arquitectónico**: Pasamos a un Enjambre de Agentes (Agent Swarm).
+- **MI ROL**: Soy **Antigravity** (Mission Control / Estratega). No edito webhooks de n8n directamente, deliego esa tarea.
+- **NUEVO AGENTE**: Se ha definido el perfil de `n8n Engineer` (Agent Manager). Su trabajo exclusivo es usar `mcp-n8n` para gestionar flujos bajo el protocolo **RPI (Investigar-Planear-Implementar)**.
+- **ACCIÓN PENDIENTE (AL DESPERTAR)**: 
+  1. Verificar si el usuario ha pegado la `N8N_USER_API_KEY` en `mcp_config.json`.
+  2. Proveer una directriz o misión de testeo al nuevo Agente Ingeniero para validar la delegación de herramientas MCP.
+- **Estado Actual**: Todo el sistema n8n 100% reparado. Groq 70B, Tavily, Resend, Drive y Local Skills operativos y a prueba de Errores 500. `ver_pantalla.py` validado.
+
 ## [2026-03-02] - Gran Auditoría y Expansión de Sentidos
 - **IA**: Pivot estratégico de Gemini a **Groq LPU (Llama 3.3 70B)** para inferencia ultra-rápida.
 - **n8n**: Reparación total de Sirena de Telegram, Scraping Profundo (via Jina AI) y Agente Secreto (vía Alt).
