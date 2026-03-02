@@ -549,3 +549,8 @@ group_add:
 Este script se conecta directamente por REST API al clúster de LPU (Language Processing Units) de Groq, invocando la colosal mente open source de Meta `llama-3.3-70b-versatile`.
 *   **Velocidad absurda:** 0.07 segundos a 0.49 segundos para respuestas completas, incluyendo el procesamiento de scripts enteros (300+ líneas).
 *   **Orquestación Nativa:** El demonio Groq soporta la bandera `--file` para ingerir documentos enteros y también soporta **Pipelines Stdin de Linux** (`cat archivo | python3 groq_titan.py "prompt"`), convirtiéndose en la herramienta definitiva para auditorías masivas de código y texto en el ecosistema NiN.
+
+## 2026-03-02 - Integración de n8n Engineer y Nuevas Herramientas
+- **Antigravity (Mission Control)** configurado para controlar n8n a través del `mcp-n8n` local.
+- Se implementó exitosamente el flujo `Tool: YouTube Search` utilizando la instancia local de SearXNG, devolviendo resultados instantáneos estructurados.
+- Se avanzó en el diseño y despliegue del flujo `Tool: Reproductor de Video` usando `nsenter` para escapar del contenedor Docker y ejecutar el navegador en el host principal. Queda pendiente debuggear el hang asíncrono en n8n al lanzar `xdg-open` para la próxima sesión.

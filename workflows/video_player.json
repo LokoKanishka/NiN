@@ -1,0 +1,52 @@
+{
+    "name": "Tool: Reproductor de Video",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "video-player",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                -200,
+                0
+            ],
+            "id": "wh-video",
+            "name": "Webhook",
+            "webhookId": "video-player"
+        },
+        {
+            "parameters": {
+                "jsCode": "const cp = require('child_process');\nconst url = ($json.body && $json.body.url) || '';\nif (!url) return [{ json: { output: '❌ Falta el parámetro url' } }];\n\ntry {\n  // Escape docker container to host GUI using nsenter via mounted docker socket\n  const cmd = `docker run --rm --pid=host --privileged alpine nsenter -t 1 -m -u -n -i su - lucy-ubuntu -c \"export DISPLAY=:0; nohup xdg-open '${url}' > /dev/null 2>&1 &\"`;\n  cp.exec(cmd, (error, stdout, stderr) => {\n    if (error) {\n      console.error(`exec error: ${error}`);\n      // In an async context, the response is already sent, so logging is the primary way to handle this.\n    }\n  });\n  return [{ json: { output: '▶️ Abriendo video en el host: ' + url } }];\n} catch(e) {\n  return [{ json: { output: '❌ Error al abrir video: ' + e.message } }];\n}"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                100,
+                0
+            ],
+            "id": "play-video",
+            "name": "Reproducir"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Reproducir",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner"
+    }
+}

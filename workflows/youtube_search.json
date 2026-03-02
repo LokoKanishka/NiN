@@ -1,0 +1,79 @@
+{
+    "name": "Tool: YouTube Search",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "youtube-search",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                -400,
+                0
+            ],
+            "id": "wh-yt-search",
+            "name": "Webhook",
+            "webhookId": "youtube-search"
+        },
+        {
+            "parameters": {
+                "url": "=http://searxng-lucy:8080/search?q={{ encodeURIComponent($json.body.query || 'n8n automation') }}&format=json&engines=youtube",
+                "options": {
+                    "timeout": 15000
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -100,
+                0
+            ],
+            "id": "searxng-yt",
+            "name": "SearXNG YouTube"
+        },
+        {
+            "parameters": {
+                "jsCode": "const results = ($input.first().json.results || []).slice(0, 10);\nconst formatted = results.map((r, i) =>\n  (i+1) + '. ' + r.title + '\\n   URL: ' + r.url\n).join('\\n\\n');\nreturn [{ json: { output: 'Resultados de YouTube:\\n\\n' + (formatted || 'No se encontraron videos.') } }];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                0
+            ],
+            "id": "format-yt",
+            "name": "Formatear"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "SearXNG YouTube",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SearXNG YouTube": {
+            "main": [
+                [
+                    {
+                        "node": "Formatear",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner"
+    }
+}
