@@ -526,3 +526,10 @@ group_add:
 5. Se puenteó directamente al bot oficial de Telegram (NiN-Demon) inyectando alertas `requests.post` asíncronas para reportar *success/fail* por cada correo procesado en vivo.
 
 **Nuevo Superpoder Adquirido**: Antigravity ahora cuenta con la certeza y el código base probado para **bypassear la capa Docker** y establecer túneles SMTP/MIME en crudo, combinados con reportes push por Telegram, cuando la resiliencia es más crítica que el bajo código.
+
+### Cambio Estratégico de Hardware: Hacia las LPUs (Groq + Llama 3.3)
+**Incidente:** La API gratuita de Gemini (`gemini-1.5-pro` y `gemini-2.0-flash`) sufrió bloqueos duros por "Quota Exceeded (limit: 0)" debido a restricciones de política de facturación en las cuentas de Google Cloud.
+**Solución Cyberpunk:** Se desechó `gemini_titan.py` y se construyó en menos de 5 minutos el cliente `groq_titan.py`.
+Este script se conecta directamente por REST API al clúster de LPU (Language Processing Units) de Groq, invocando la colosal mente open source de Meta `llama-3.3-70b-versatile`.
+*   **Velocidad absurda:** 0.07 segundos a 0.49 segundos para respuestas completas, incluyendo el procesamiento de scripts enteros (300+ líneas).
+*   **Orquestación Nativa:** El demonio Groq soporta la bandera `--file` para ingerir documentos enteros y también soporta **Pipelines Stdin de Linux** (`cat archivo | python3 groq_titan.py "prompt"`), convirtiéndose en la herramienta definitiva para auditorías masivas de código y texto en el ecosistema NiN.

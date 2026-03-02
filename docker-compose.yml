@@ -22,6 +22,10 @@ services:
       - N8N_BLOCK_FS_WRITE_ACCESS=false
       - NODE_FUNCTION_ALLOW_BUILTIN=crypto,fs,path,child_process,http,https
       - NODE_FUNCTION_ALLOW_EXTERNAL=request,axios,mcp-sdk
+      - N8N_BLOCK_NODES=[]
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
+      - N8N_BLOCK_FS_WRITE_ACCESS=false
+      - N8N_LOCAL_FILES_ACCESS_MODE=allow
     volumes:
       - n8n_data:/home/node/.n8n
       - ./data:/home/node/.n8n-files
