@@ -514,14 +514,15 @@ group_add:
 
 ### Sesión 01/03/2026 (Noche Tarde) - Superando los Cuellos de Botella de n8n 📧🛡️
 
-**Objetivo**: Automatizar el envío diferido (con delays anti-spam) de currículums en PDF.
+### Bypass SMTP de Emergencia (A prueba de n8n) 📧🚨
 
-**Hitos y Lecciones**:
-1. **Fallback de Arquitectura**: El plan original dictaba usar un nodo Webhook de n8n. Sin embargo, en un entorno de producción, la concurrencia y persistencia asincrónica generó un cuello de botella, colgando el ruteador de Express interno de n8n frente a cargas de trabajo externas cronometradas (devolviendo HTTP 404).
-2. **SMTP Nativo en Python**: Ante el fallo del intermediario gráfico, Antigravity pivoteó hacia una solución nativa. Se rediseñó el script `send_cvs.py` para usar `smtplib` y `email.mime` de Python, independizando el éxito de la misión de la salud de Docker.
-3. **App Passwords de Google**: Se confirmó que la seguridad 2FA de Google bloquea el acceso de scripts Python con la contraseña estándar (Error 535 BadCredentials). La solución imperativa siempre será generar e inyectar una "App Password" de 16 caracteres.
-4. **Validación Automática**: El método nativo por Python demostró ser hiper-resistente a timeouts. El script soporta detención y reprogramación de ejecución (`TARGET_TIME`) gracias a la biblioteca `datetime` y `nohup`.
+**Contexto**: Durante una misión crítica de envío de CVs por la madrugada, los webhooks de n8n comenzaron a fallar en producción devolviendo errores `HTTP 404` y timeouts. La latencia introducida por el ruteo interno de Docker hacía inviable depender del framework gráfico.
 
-**Nuevo Superpoder Adquirido**: Antigravity ahora cuenta con la certeza y el conocimiento empírico para bypassear a n8n y establecer túneles SMTP limpios y directos en Python puro cuando la robustez de red prime sobre el flujo de diseño gráfico.
+**Acción**: Antigravity ejecutó una Directiva de Bypass Arquitectónico Central. 
+1. Se abandonó el flujo n8n problemático por completo.
+2. Se desarrolló un demonio en Python Puro (`send_cvs.py`) utilizando la librería estándar `smtplib`.
+3. Se integraron componentes MIME multipart para adjuntar dinámicamente archivos PDF nativos.
+4. Se incorporó una lógica robusta de delays *anti-spam* y cruce de cronómetros por la medianoche.
+5. Se puenteó directamente al bot oficial de Telegram (NiN-Demon) inyectando alertas `requests.post` asíncronas para reportar *success/fail* por cada correo procesado en vivo.
 
-
+**Nuevo Superpoder Adquirido**: Antigravity ahora cuenta con la certeza y el código base probado para **bypassear la capa Docker** y establecer túneles SMTP/MIME en crudo, combinados con reportes push por Telegram, cuando la resiliencia es más crítica que el bajo código.
