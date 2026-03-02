@@ -54,8 +54,9 @@ Soy **Antigravity** (Gemini), el agente de IA que opera dentro del **Proyecto NI
 - **Nombre**: Alt
 - **Motor**: Ollama (host)
 - **Modelo**: `qwen2.5-coder:14b-instruct-q8_0` (15.7GB, Q8)
-- **Rol**: Ayudante de Antigravity en n8n. Puede razonar, generar código, y procesar tareas que le delegue.
-- **Invocación desde n8n**: Vía `Administrador de APIs` con POST a `http://host.docker.internal:11434/api/generate`
+- **Rol**: Ayudante de Antigravity en n8n. Es el **Ejecutor Local** (Zero Cloud Leak) mientras Antigravity es el **Estratega Cloud**.
+- **Simbiosis**: Alt opera el **NiN-Demon** y las misiones locales. Si Antigravity pierde conexión, Alt mantiene el sistema vivo desde n8n.
+- **Invocación desde n8n**: Vía `Administrador de APIs` con POST a `http://172.24.0.4:11434/api/generate` (desde bridge) o `localhost:11434`.
 - **Invocación directa**: `curl http://127.0.0.1:11434/api/generate -d '{"model":"qwen2.5-coder:14b-instruct-q8_0","prompt":"...","stream":false}'`
 - **Modelos adicionales en Ollama**: `llama3.2:1b`, `nomic-embed-text`, `llama3.2-vision`
 
