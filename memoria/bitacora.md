@@ -512,3 +512,15 @@ group_add:
 
 **Estado**: El conocimiento de esta relación y su rendimiento es ahora parte del protocolo de inicio obligatorio.
 
+### Sesión 01/03/2026 (Noche Tarde) - Superando los Cuellos de Botella de n8n 📧🛡️
+
+**Objetivo**: Automatizar el envío diferido (con delays anti-spam) de currículums en PDF.
+
+**Hitos y Lecciones**:
+1. **Fallback de Arquitectura**: El plan original dictaba usar un nodo Webhook de n8n. Sin embargo, en un entorno de producción, la concurrencia y persistencia asincrónica generó un cuello de botella, colgando el ruteador de Express interno de n8n frente a cargas de trabajo externas cronometradas (devolviendo HTTP 404).
+2. **SMTP Nativo en Python**: Ante el fallo del intermediario gráfico, Antigravity pivoteó hacia una solución nativa. Se rediseñó el script `send_cvs.py` para usar `smtplib` y `email.mime` de Python, independizando el éxito de la misión de la salud de Docker.
+3. **App Passwords de Google**: Se confirmó que la seguridad 2FA de Google bloquea el acceso de scripts Python con la contraseña estándar (Error 535 BadCredentials). La solución imperativa siempre será generar e inyectar una "App Password" de 16 caracteres.
+4. **Validación Automática**: El método nativo por Python demostró ser hiper-resistente a timeouts. El script soporta detención y reprogramación de ejecución (`TARGET_TIME`) gracias a la biblioteca `datetime` y `nohup`.
+
+**Nuevo Superpoder Adquirido**: Antigravity ahora cuenta con la certeza y el conocimiento empírico para bypassear a n8n y establecer túneles SMTP limpios y directos en Python puro cuando la robustez de red prime sobre el flujo de diseño gráfico.
+
