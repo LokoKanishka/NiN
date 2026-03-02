@@ -1,4 +1,11 @@
-# 📒 Bitácora de Sesiones — Antigravity
+# 📒 Bitácora de Operaciones NiN
+
+## [2026-03-02] - Gran Auditoría y Expansión de Sentidos
+- **IA**: Pivot estratégico de Gemini a **Groq LPU (Llama 3.3 70B)** para inferencia ultra-rápida.
+- **n8n**: Reparación total de Sirena de Telegram, Scraping Profundo (via Jina AI) y Agente Secreto (vía Alt).
+- **Visión**: Implementación de `ver_pantalla.py` y validación de reconocimiento de iconos en escritorio.
+- **Infra**: Configuración de workflows de Google Drive y Gmail listos para conectar.
+- **Estado**: Sistema al 100% de operatividad y capacidad de respuesta.
 
 > Log cronológico de sesiones. Cada entrada documenta acciones, éxitos, fallos, y lecciones aprendidas.
 
