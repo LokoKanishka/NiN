@@ -260,15 +260,35 @@ def register_dynamic_tools():
                         webhook_path = node.get("parameters", {}).get("path")
                         break
                 
-                if webhook_path:
-                    tool_name = name.replace("Tool:", "").strip().lower().replace(" ", "_")
+                    if webhook_path:
+                        # Normalizar nombre: minúsculas, sin espacios, y quitar tildes
+                        clean_name = name.replace("Tool:", "").strip().lower()
+                        import unicodedata
+                        clean_name = "".join(
+                            c for c in unicodedata.normalize('NFD', clean_name)
+                            if unicodedata.category(c) != 'Mn'
+                        )
+                        tool_name = clean_name.replace(" ", "_").replace("-", "_")
                     
                     # Definir la función de la herramienta
                     def create_tool_handler(path, display_name):
                         def dynamic_tool_handler(**kwargs) -> str:
                             ip = get_container_ip()
                             url = f"http://{ip}:5678/webhook/{path}"
-                            payload = json.dumps(kwargs).encode('utf-8')
+                            
+                            # Si se pasa un solo argumento 'kwargs' (como en el error previo), 
+                            # intentar extraer su contenido si es un dict, sino usar todos los kwargs
+                            payload_dict = kwargs
+                            if "kwargs" in kwargs and len(kwargs) == 1:
+                                try:
+                                    if isinstance(kwargs["kwargs"], str):
+                                        payload_dict = json.loads(kwargs["kwargs"])
+                                    elif isinstance(kwargs["kwargs"], dict):
+                                        payload_dict = kwargs["kwargs"]
+                                except:
+                                    pass
+                            
+                            payload = json.dumps(payload_dict).encode('utf-8')
                             req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
                             try:
                                 # Espera extendida para herramientas dinámicas
@@ -299,7 +319,24 @@ if __name__ == "__main__":
     parser.add_argument("--transport", choices=["stdio", "sse"], default="stdio", help="Transporte a usar")
     args = parser.parse_args()
 
-    register_dynamic_tools()
+    # register_dynamic_tools()
+    
+    # Registro Manual de Emergencia para YouTube (Firefox / uBlock)
+    @mcp.tool()
+    def reproductor_de_video(url: str) -> str:
+        """Abre un video de YouTube en el navegador Firefox del host."""
+        import subprocess
+        try:
+            # Firefox en el host abrirá una nueva pestaña en el perfil activo (Lucy Chat)
+            # que ya cuenta con uBlock Origin
+            c = subprocess.Popen(
+                ["nsenter", "-t", "1", "-m", "-u", "-i", "-n", "-p", "--", "sudo", "-u", "lucy-ubuntu", "DISPLAY=:0", "firefox", "-P", "Lucy Chat", url],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            return f"▶️ Video lanzado exitosamente vía Firefox (con uBlock): {url}"
+        except Exception as e:
+            return f"Error ejecutando Firefox: {e}"
     
     if args.transport == "sse":
         print(f"🚀 Iniciando Servidor MCP en modo SSE (http://127.0.0.1:{args.port}/sse)")
