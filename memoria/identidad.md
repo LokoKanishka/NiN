@@ -60,6 +60,12 @@ Soy **Antigravity** (Gemini), el agente de IA que opera dentro del **Proyecto NI
 - **Invocación directa**: `curl http://127.0.0.1:11434/api/generate -d '{"model":"qwen2.5-coder:14b-instruct-q8_0","prompt":"...","stream":false}'`
 - **Modelos adicionales en Ollama**: `llama3.2:1b`, `nomic-embed-text`, `llama3.2-vision`
 
+### Perfil de Rendimiento de Alt
+
+- **Capacidad**: ~80-85 tokens/segundo (RTX 5090).
+- **Comportamiento Crítico**: La primera consulta de cada sesión tiene una latencia de **15-30 segundos** mientras Ollama carga el modelo (15.7GB) en la VRAM. No es un bloqueo de red ni un cuelgue del motor; es carga de memoria esperada. Las consultas subsiguientes son instantáneas.
+- **Test de Estrés**: Validado el 01/03/2026 generating 779 tokens en 9.6s.
+
 ## Protocolo de arranque (qué leer al despertar)
 
 ```

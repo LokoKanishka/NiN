@@ -507,6 +507,8 @@ group_add:
     - **Alt** = Ejecutor/Músculo (Qwen 14B Local - RTX 5090).
     - **n8n** = Sistema Nervioso/Exoesqueleto compartido.
 4.  **Conectividad**: Confirmada conexión directa Host-Docker (`172.24.0.4`). Alt tiene "manos" en n8n.
+5.  **Test de Estrés Exitoso**: Alt generó un sistema RAG (779 tokens) en 9.6s (~81 tok/s). 
+6.  **Lección Aprendida**: El aparente "cuelgue" inicial es la **carga de VRAM (15.7GB)**. Es un comportamiento normal y esperado.
 
-**Estado**: El conocimiento de esta relación es ahora parte del protocolo de inicio obligatorio.
+**Estado**: El conocimiento de esta relación y su rendimiento es ahora parte del protocolo de inicio obligatorio.
 
