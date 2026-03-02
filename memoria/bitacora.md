@@ -524,3 +524,4 @@ group_add:
 
 **Nuevo Superpoder Adquirido**: Antigravity ahora cuenta con la certeza y el conocimiento empírico para bypassear a n8n y establecer túneles SMTP limpios y directos en Python puro cuando la robustez de red prime sobre el flujo de diseño gráfico.
 
+

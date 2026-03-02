@@ -26,20 +26,16 @@ def w_log(msg):
 def armar_textos(colegio):
     # Texto Plano
     texto_plano = (
-        f"Estimados,\n\n"
-        f"Me pongo en contacto para acercarles mi Currículum Vitae con la intención de postularme para futuras "
-        f"vacantes en el área de Filosofía. Quedo a su entera disposición para una entrevista o cualquier consulta.\n\n"
-        f"Saludos cordiales,\n"
-        f"Diego Succi"
+        f"A las autoridades de la institución {colegio}:\n\n"
+        "Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución. Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.\n\n"
+        "Atte: Profesor Diego Leonardo Succi."
     )
     
     # HTML
     texto_html = (
-        f"Estimados,<br><br>"
-        f"Me pongo en contacto para acercarles mi Currículum Vitae con la intención de postularme para futuras "
-        f"vacantes en el área de Filosofía. Quedo a su entera disposición para una entrevista o cualquier consulta.<br><br>"
-        f"Saludos cordiales,<br>"
-        f"Diego Succi"
+        f"A las autoridades de la institución <b>{colegio}</b>:<br><br>"
+        "Me dirijo a ustedes para poner a disposición mi currículum vitae a fin de que lo tengan en cuenta en futuras oportunidades en la institución. Poseo título habilitante, experiencia en el manejo de grupos y una amplia disponibilidad horaria.<br><br>"
+        "Atte: Profesor Diego Leonardo Succi."
     )
     return texto_plano, texto_html
 
@@ -79,20 +75,20 @@ import time
 import random
 import datetime
 
-TARGET_TIME = datetime.time(23, 20, 0)
+TARGET_TIME = datetime.time(23, 40, 0)
 
 def principal():
-    w_log("🚀 Iniciando Script Nativo de Envío de CVs (vía Smtplib)...")
+    w_log("🚀 Iniciando Script Nativo de Envío de CVs (vía Smtplib) [ENVÍO COMPLETO]...")
     
-    # 0. Esperar hasta las 23:20
+    # 0. Esperar hasta las 23:40
     ahora = datetime.datetime.now()
     target_dt = datetime.datetime.combine(ahora.date(), TARGET_TIME)
     
     if ahora > target_dt:
-        w_log("⚠️ La hora objetivo (23:20) ya pasó el día de hoy. Avanzando de inmediato.")
+        w_log("⚠️ La hora objetivo (23:40) ya pasó el día de hoy. Avanzando de inmediato.")
     else:
         wait_seconds = (target_dt - ahora).total_seconds()
-        w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las 23:20...")
+        w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las 23:40...")
         time.sleep(wait_seconds)
     
     w_log("⏱️ ¡Hora alcanzada! Leyendo base de datos...")
