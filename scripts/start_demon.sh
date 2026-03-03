@@ -1,12 +1,27 @@
 #!/bin/bash
-# Escudo Anti-Hang para Agentes IA
-echo "Deteniendo instancias previas de NiN..."
-pkill -f "nin_demon.py" || true
+# Lanzador Universal Anti-Hang para Demonios IA (NiN)
+# Evita que el agente quede anclado a stdout/stderr de procesos infinitos
+
+if [ -z "$1" ]; then
+    echo "❌ Uso: ./start_demon.sh <nombre_del_script.py>"
+    echo "Ejemplo: ./start_demon.sh nin_megademon.py"
+    exit 1
+fi
+
+SCRIPT_NAME=$1
+PROJECT_DIR="/home/lucy-ubuntu/Escritorio/NIN"
+LOG_FILE="$PROJECT_DIR/logs/${SCRIPT_NAME%.*}.log"
+
+echo "🛑 [Anti-Hang] Escaneando instancias previas de $SCRIPT_NAME..."
+pkill -f "$SCRIPT_NAME" || true
 sleep 1
 
-echo "Lanzando NiN-Demon de forma segura en el fondo..."
+echo "🚀 [Anti-Hang] Lanzando $SCRIPT_NAME en aislamiento total..."
 export PYTHONUNBUFFERED=1
-nohup /usr/bin/python3 /home/lucy-ubuntu/Escritorio/NIN/scripts/nin_demon.py > /home/lucy-ubuntu/Escritorio/NIN/logs/nin_demon_output.log 2>&1 < /dev/null &
+
+# El escudo maestro: nohup + stderr a stdout + cierre de stdin + disown
+nohup /usr/bin/python3 "$PROJECT_DIR/scripts/$SCRIPT_NAME" > "$LOG_FILE" 2>&1 < /dev/null &
 disown
 
-echo "OK: Proceso lanzado y terminal liberada correctamente."
+echo "✅ OK: $SCRIPT_NAME lanzado. Terminal liberada."
+echo "📄 Logs encolados en: $LOG_FILE"

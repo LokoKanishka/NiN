@@ -25,6 +25,15 @@ OLLAMA_CHAT_URL = "http://127.0.0.1:11434/api/chat"
 TG_TOKEN = "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA"
 DIEGO_ID = 5154360597
 
+PENDING_MISSION = None
+BLACKLISTED_TOOLS = [
+    "mcp_n8n-control_deactivate_n8n_workflow",
+    "mcp_n8n-control_delete_n8n_workflow", 
+    "system_command",
+    "bash",
+    "rm"
+]
+
 async def send_telegram_message(text: str):
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
     payload = {"chat_id": DIEGO_ID, "text": text}
@@ -125,6 +134,10 @@ async def agentic_tool_loop(user_text: str, mcp_session: ClientSession, mcp_tool
             "parameters": {
                 "type": "object",
                 "properties": {
+                    "confidence_score": {
+                        "type": "integer",
+                        "description": "Tu nivel de confianza (0 a 100) en que esta misión es la correcta y segura. Debes estar seguro (>= 85)."
+                    },
                     "tasks": {
                         "type": "array",
                         "items": {
@@ -142,10 +155,10 @@ async def agentic_tool_loop(user_text: str, mcp_session: ClientSession, mcp_tool
                     },
                     "message_for_user": {
                         "type": "string",
-                        "description": "Mensaje amable a Diego avisando que generaste la misión."
+                        "description": "Mensaje amable a Diego avisando que preparaste la misión y le pides confirmación."
                     }
                 },
-                "required": ["tasks", "message_for_user"]
+                "required": ["confidence_score", "tasks", "message_for_user"]
             }
         }
     })
@@ -174,7 +187,7 @@ Reglas estrictas:
         }
         
         try:
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=120)) as http_session:
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=300)) as http_session:
                 async with http_session.post(OLLAMA_CHAT_URL, json=payload) as resp:
                     if resp.status != 200:
                         return f"Error HTTP de Alt: {resp.status}"
@@ -222,19 +235,29 @@ Reglas estrictas:
                             })
                             
                         elif t_name == "create_mission":
-                            # Creación real de la misión JSON
+                            # Creación real de la misión JSON (Con Arnés Nativo)
                             try:
+                                conf = t_args.get("confidence_score", 0)
+                                if conf < 85:
+                                    return f"⚠️ [CRASH] Misión abortada internamente. Tu confianza es muy baja ({conf}%). Pide más contexto a Diego."
+                                
+                                tasks = t_args.get("tasks", [])
+                                for tk in tasks:
+                                    if tk.get("tool") in BLACKLISTED_TOOLS:
+                                        return f"⛔ [Maybe Don't AI] ALERTA: Acción bloqueada. La herramienta '{tk.get('tool')}' está en la lista negra."
+
                                 m_id = f"tg_{datetime.now().strftime('%H%M%S')}"
                                 mission_data = {
                                     "id": m_id,
-                                    "tasks": t_args.get("tasks", [])
+                                    "tasks": tasks
                                 }
-                                m_path = f"{MISSIONS_DIR}/{m_id}.json"
-                                with open(m_path, "w") as f:
-                                    json.dump(mission_data, f, indent=4)
                                 
-                                user_msg = t_args.get("message_for_user", "He generado tu misión en el backend.")
-                                return user_msg # Devolvemos el texto final para Telegram
+                                global PENDING_MISSION
+                                PENDING_MISSION = mission_data
+                                
+                                user_msg = t_args.get("message_for_user", "He preparado tu misión.")
+                                hitl_msg = f"{user_msg}\n\n🛡️ [HITL] Misión '{m_id}' en pausa (Confianza: {conf}%).\n👉 Responde /ok para autorizar o /cancel para destruir."
+                                return hitl_msg
                             except Exception as e:
                                 messages.append({
                                     "role": "tool",
@@ -247,8 +270,12 @@ Reglas estrictas:
                 # Mantener system, user original, y últimos 5 mensajes
                 messages = [messages[0], messages[1]] + messages[-5:]
                 
+        except asyncio.TimeoutError:
+            return "⏳ [Timeout] El Megademonio (Ollama) tardó más de 5 minutos en pensar y se cortó la conexión. ¡El cerebro está trabajando al límite de recursos!"
         except Exception as e:
-            return f"Error en bucle agéntico: {e}"
+            import traceback
+            traceback.print_exc()
+            return f"Error en bucle agéntico: {e.__class__.__name__} - {e}"
             
         loop_count += 1
 
@@ -293,6 +320,23 @@ async def telegram_ears_loop():
                                         print(f"📩 [Megademon] Mensaje: {text}")
                                         
                                         await upsert_to_graph("Diego", "dijo_en_telegram", text)
+
+                                        global PENDING_MISSION
+                                        text_lower = text.strip().lower()
+                                        
+                                        if text_lower == "/ok" and PENDING_MISSION:
+                                            m_id = PENDING_MISSION["id"]
+                                            m_path = f"{MISSIONS_DIR}/{m_id}.json"
+                                            with open(m_path, "w") as f:
+                                                json.dump(PENDING_MISSION, f, indent=4)
+                                            PENDING_MISSION = None
+                                            await send_telegram_message(f"✅ [HITL] Misión '{m_id}' autorizada. Desplegando en n8n...")
+                                            continue
+                                            
+                                        elif text_lower == "/cancel" and PENDING_MISSION:
+                                            PENDING_MISSION = None
+                                            await send_telegram_message("🚫 [HITL] Misión purgada. El sistema está limpio y a la espera de órdenes.")
+                                            continue
 
                                         # BUCLE DE RAZONAMIENTO Y HERRAMIENTAS
                                         response = await agentic_tool_loop(text, mcp_session, mcp_tools)
