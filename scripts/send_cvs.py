@@ -14,12 +14,12 @@ from email.mime.application import MIMEApplication
 # Cargar variables si existen
 load_dotenv("/home/lucy-ubuntu/Escritorio/NIN/.env")
 
-EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/colegios de prueba cv.xltx"
+EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/CVs/prueba/lista prueba xxx.xltx"
 CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/Mi_Curriculum.pdf"
 # Lista de cuentas para rotación (Round-Robin)
 CUENTAS_SMTP = [
-    {"user": "profesordiegofilosofia@gmail.com", "pass": "PON_AQUI_EL_PASSWORD_DE_APLICACION_1"},
-    {"user": "profedefilodiego@gmail.com", "pass": "PON_AQUI_EL_PASSWORD_DE_APLICACION_2"},
+    {"user": "profesordiegofilosofia@gmail.com", "pass": "sohbaizfpetcjiel"},
+    {"user": "profedefilodiego@gmail.com", "pass": "kwnwqhdtkqlopsac"},
 ]
 
 # Credenciales Telegram (NiN-Demon Sync)
@@ -98,7 +98,7 @@ TARGET_TIME = datetime.time(0, 45, 0)
 
 def principal():
     w_log("🚀 Iniciando Script Nativo de Envío de CVs (vía Smtplib) [ENVÍO COMPLETO + TELEGRAM]...")
-    notify_telegram("🚀 Script de CVs iniciado. Esperando a las 00:45 para la tanda completa.")
+    notify_telegram(f"🚀 Script de CVs iniciado. Esperando a las {TARGET_TIME.strftime('%H:%M')} para la tanda completa.")
     
     # 0. Esperar hasta las 00:45
     ahora = datetime.datetime.now()
@@ -108,21 +108,22 @@ def principal():
         if ahora.hour > 12:
             target_dt += datetime.timedelta(days=1)
             wait_seconds = (target_dt - ahora).total_seconds()
-            w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las 00:45 de mañana...")
+            w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las {TARGET_TIME.strftime('%H:%M')} de mañana...")
             time.sleep(wait_seconds)
         else:
-            w_log("⚠️ La hora objetivo (00:45) ya pasó esta madrugada. Avanzando de inmediato.")
+            w_log(f"⚠️ La hora objetivo ({TARGET_TIME.strftime('%H:%M')}) ya pasó esta madrugada. Avanzando de inmediato.")
     else:
         wait_seconds = (target_dt - ahora).total_seconds()
-        w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las 00:45...")
+        w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las {TARGET_TIME.strftime('%H:%M')}...")
         time.sleep(wait_seconds)
     
     w_log("⏱️ ¡Hora alcanzada! Leyendo base de datos...")
-    notify_telegram("⏱️ ¡Hora alcanzada! Iniciando envío a la lista de colegios...")
+    notify_telegram(f"⏱️ ¡Hora alcanzada ({TARGET_TIME.strftime('%H:%M')})! Iniciando envío a la lista de colegios...")
     
     # 1. Leer Excel
     try:
-        df = pd.read_excel(EXCEL_PATH)
+        # Intentamos leer sin encabezados para procesar todo, o definimos comportamiento defensivo
+        df = pd.read_excel(EXCEL_PATH, header=None)
     except Exception as e:
         w_log(f"❌ Error leyendo Excel: {e}")
         notify_telegram(f"❌ Error crítico leyendo Excel: {e}")
@@ -143,8 +144,15 @@ def principal():
             break
             
         fila = colegios_lista[i]
-        nombre = str(fila.get('nombre del colegio', 'Colegio')).strip()
-        email_raw = str(fila.get('Mail', '')).strip()
+        # Usamos índices numéricos ya que leímos con header=None
+        nombre = str(fila.get(0, 'Colegio')).strip()
+        email_raw = str(fila.get(1, '')).strip()
+        
+        # Validación de "falso header" (si la primera fila dice 'Mail' en la segunda columna, saltar)
+        if i == 0 and "mail" in email_raw.lower():
+            w_log("ℹ️ Detectado encabezado en la primera fila. Saltando...")
+            i += 1
+            continue
         
         if not email_raw or email_raw.lower() == 'nan':
             w_log(f"⚠️ Saltando [{nombre}] por falta de email.")
@@ -175,13 +183,13 @@ def principal():
             
         elif resultado == "AUTH_ERROR":
             w_log(f"⚠️ Removiendo cuenta {origen_user} de la rotación por fallo de autenticación.")
-            notify_telegram(f"⚠️ Cuenta {origen_user} bloqueada/rebotada. Cambiando de cuenta para {nombre}...")
+            notify_telegram(f"⛔ CUENTA BLOQUEADA/SPAM: {origen_user}. Se retira de la rotación. Reintentando {nombre} con otra cuenta...")
             cuentas_activas.remove(cuenta_actual)
             # NO incrementamos 'i', el while loop volverá a intentar enviar al mismo colegio con la siguiente cuenta
             
         else: # SMTP_ERROR o ERROR_ARCHIVO
             w_log(f"❌ Falló el envío a: {nombre}. Saltando colegio.")
-            notify_telegram(f"❌ [{i+1}/{total}] FALLÓ envío a: {nombre} (Vía {origen_user})")
+            notify_telegram(f"❌ ERROR ENVÍO/REBOTE: No se pudo enviar a {nombre} ({destino}) vía {origen_user}. Podría ser un error de dirección o spam.")
             i += 1  # Avanzar al siguiente asumiendo que el colegio fue el problema
             time.sleep(10)
 
