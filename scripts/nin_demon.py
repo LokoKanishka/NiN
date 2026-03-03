@@ -26,6 +26,20 @@ OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
 TG_TOKEN = "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA"
 DIEGO_ID = 5154360597
 
+async def send_telegram_message(text: str):
+    """La Boca de NiN: Envía mensajes a Diego."""
+    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
+    payload = {"chat_id": DIEGO_ID, "text": text}
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload) as resp:
+                if resp.status == 200:
+                    print(f"🗨️ [NiN-Demon] Mensaje enviado: {text}")
+                else:
+                    print(f"⚠️ [NiN-Demon] Error Telegram: {resp.status}")
+    except Exception as e:
+        print(f"⚠️ [NiN-Demon] Excepción Telegram: {e}")
+
 async def ask_alt(prompt: str) -> str:
     """Consulta al modelo Alt (Qwen 14B) local para razonamiento avanzado."""
     payload = {
@@ -80,9 +94,13 @@ async def process_mission(mission_file: str):
                 
                 print(f"✅ Misión completada: {report_name}")
                 shutil.move(mission_file, os.path.join(DONE_DIR, basename))
+                
+                # Reportar éxito a Diego
+                await send_telegram_message(f"✅ Misión '{mission_id}' completada con éxito. Resultados guardados en el sistema.")
     except Exception as e:
         print(f"❌ Fallo en misión {basename}: {e}")
         shutil.move(mission_file, os.path.join(FAIL_DIR, basename))
+        await send_telegram_message(f"❌ Fallo en la misión '{basename}': {e}")
 
 async def upsert_to_graph(subject: str, predicate: str, obj: str):
     """Guarda una relación en el grafo de Qdrant."""
@@ -145,6 +163,47 @@ async def telegram_ears_loop():
                                 
                                 # Guardar en el grafo
                                 await upsert_to_graph("Diego", "dijo_en_telegram", text)
+
+                                # --- RAZONAMIENTO AGÉNTICO ---
+                                system_prompt = f"""
+                                Sos NiN (Node in Network), el sistema operativo agéntico de la Colmena.
+                                Tu misión es asistir a Diego.
+                                
+                                Reglas:
+                                1. Si Diego te pide algo que requiere ACCIÓN (ej: descargar un libro, buscar algo, salud del sistema), genera una MISIÓN en JSON.
+                                2. Si es solo charla o comentario, responde cordialmente precedido por 'CHAT: '.
+                                
+                                Herramientas disponibles (vía Misión JSON):
+                                - 'mcp_n8n-control_execute_n8n_workflow' con el workflow_id para tareas complejas.
+                                - Para LIBROS usa el script 'book_fetcher.py' vía 'mcp_n8n-control_execute_n8n_workflow' con id 'L3u6POxhaS2TTjIu' (Bypass Descarga).
+                                
+                                Formato de Respuesta:
+                                CHAT: [Tu respuesta de texto]
+                                O
+                                MISSION: {{ "tasks": [ {{ "tool": "...", "args": {{...}} }} ] }}
+                                """
+                                
+                                print(f"🧠 [NiN-Demon] Alt pensando...")
+                                reasoning = await ask_alt(f"{system_prompt}\n\nMensaje del usuario: {text}")
+                                
+                                if "MISSION:" in reasoning:
+                                    try:
+                                        raw_mission = reasoning.split("MISSION:")[1].strip()
+                                        mission_data = json.loads(raw_mission)
+                                        m_id = f"tg_{datetime.now().strftime('%H%M%S')}"
+                                        mission_data["id"] = m_id
+                                        m_path = f"{MISSIONS_DIR}/{m_id}.json"
+                                        with open(m_path, "w") as f:
+                                            json.dump(mission_data, f, indent=4)
+                                        await send_telegram_message(f"🫡 Entendido. He generado la misión '{m_id}' para procesar tu pedido.")
+                                    except Exception as e:
+                                        await send_telegram_message(f"⚠️ Error al procesar misión: {e}")
+                                elif "CHAT:" in reasoning:
+                                    response = reasoning.split("CHAT:")[1].strip()
+                                    await send_telegram_message(response)
+                                else:
+                                    # Fallback si no sigue el formato
+                                    await send_telegram_message(reasoning)
         except Exception as e:
             print(f"⚠️ Error en Orejas: {e}")
         

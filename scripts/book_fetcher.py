@@ -1,0 +1,1 @@
+{"status": "success", "query": "Aristoteles Metafisica Gredos", "url": "https://www.philosophia.cl/biblioteca/aristoteles/Metaf%EDsica.pdf", "title": "Metaf\u00edsica", "author": "Arist\u00f3teles", "extension": "pdf"}

@@ -15,7 +15,7 @@
         0
       ],
       "id": "wh-resend",
-      "webhookId": "resend-mail",
+      "webhookId": "wh-wh-resend",
       "name": "Webhook"
     },
     {

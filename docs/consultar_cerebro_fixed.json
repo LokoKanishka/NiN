@@ -15,7 +15,7 @@
         0
       ],
       "id": "wh-cerebro",
-      "webhookId": "consultar-cerebro",
+      "webhookId": "wh-wh-cerebro",
       "name": "Webhook"
     },
     {

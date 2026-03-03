@@ -15,7 +15,7 @@
         0
       ],
       "id": "wh-groq",
-      "webhookId": "groq-fast",
+      "webhookId": "wh-wh-groq",
       "name": "Webhook"
     },
     {

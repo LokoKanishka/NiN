@@ -1,0 +1,24 @@
+# NiN Workspace - Agent Safety Rules
+
+¡ATENCIÓN AGENTES DE IA (Cursor, Cline, Roo, Antigravity)!
+
+USTED ESTÁ TRABAJANDO DENTRO DEL ENTORNO DE "NiN" (Node in Network). 
+PARA EVITAR CONGELAR SU PROPIA TERMINAL, DEBE CUMPLIR LA SIGUIENTE REGLA ESTRICTA:
+
+1. **NO USE `nohup` ni procesos en segundo plano directos**:
+   NUNCA intente reiniciar o lanzar demonios persistentes (como `nin_demon.py` o servidores web) ejecutando comandos como `nohup python ... &` o `python ... &` directamente en su terminal. Si lo hace, los file descriptors quedarán enganchados a su proceso (ANTIGRAVITY_AGENT=1) y USTED quedará atrapado en un estado de "Running..." infinito.
+
+2. **CÓMO INICIAR EL DEMONIO CORRECTAMENTE**:
+   Para reiniciar, arrancar o detener a `nin_demon.py`, USTED DEBE usar EXCLUSIVAMENTE el siguiente script wrapper. Este script usa `/dev/null` y `disown` para desvincular el proceso limpiamente y liberará su terminal de inmediato:
+   
+   Ejecute esto en bash:
+   ```bash
+   bash /home/lucy-ubuntu/Escritorio/NIN/scripts/start_demon.sh
+   ```
+
+3. **Verificación**:
+   Si necesita verificar que NiN está corriendo o leer sus logs, use:
+   `ps -ef | grep nin_demon`
+   `tail -n 20 /home/lucy-ubuntu/Escritorio/NIN/logs/nin_demon_output.log`
+
+Por favor, confirme en su pensamiento interno que ha leído esta regla antes de ejecutar cualquier subproceso persistente en este entorno.
