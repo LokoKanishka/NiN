@@ -183,8 +183,21 @@ Reglas estrictas:
                     msg = data.get("message", {})
                     
                     if not msg.get("tool_calls"):
-                        # No usó herramientas -> Respuesta final
-                        return msg.get("content", "")
+                        texto = msg.get("content", "").strip()
+                        if "sequentialthinking" in texto and "thought" in texto:
+                            try:
+                                # Extraer bloque JSON si viene envuelto
+                                if "```json" in texto:
+                                    raw_json = texto.split("```json")[1].split("```")[0].strip()
+                                else:
+                                    raw_json = texto
+                                tc_data = json.loads(raw_json)
+                                msg["tool_calls"] = [{"function": {"name": tc_data.get("name", "sequentialthinking"), "arguments": tc_data.get("arguments", tc_data)}}]
+                            except Exception:
+                                pass
+                        
+                        if not msg.get("tool_calls"):
+                            return msg.get("content", "")
                         
                     messages.append(msg)
                     
