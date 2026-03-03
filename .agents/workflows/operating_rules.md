@@ -88,6 +88,11 @@ Como Agente, tienes 13 conectores blindados hacia la máquina anfitriona. Conóc
 - `control_docker_avanzado`: Enviale un comando simple como `ps` para listar contenedores crudos interactuando con `/var/run/docker.sock`.
 - `administrador_de_apis`: Un puente cURL/WGET para que hagas GET/POST a otras aplicaciones locales (ej. LM Studio, ollama) dentro de la red.
 
+**7. Escudos Anti-Hang (Ejecución y Respaldo Seguros)**
+*Usar estos scripts obligatoriamente para evitar secuestros de terminal.*
+- `start_demon.sh`: Lanzador universal de demonios. Uso: `./scripts/start_demon.sh archivo.py`. Bypassa el bloqueo cerrando TTY y desvinculando PID.
+- `safe_git.sh`: Escudo para push y commit ciegos. Uso: `./scripts/safe_git.sh "Mi Mensaje"`. Evita que prompts como `nano` o contraseñas congelen al agente.
+
 ### Conexión técnica (cómo funciona por debajo)
 
 - **MCP Server**: `scripts/n8n_mcp_server.py` conecta al contenedor `n8n-lucy` vía **HTTP bridge Docker (172.24.0.4:5678)**.

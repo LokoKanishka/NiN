@@ -576,3 +576,9 @@ Este script se conecta directamente por REST API al clúster de LPU (Language Pr
   2. **SQLite_NIN MCP** (`@modelcontextprotocol/server-sqlite`): Puente de solo-lectura y queries SQL fulminantes apuntando al `n8n_db.sqlite`. Desvía los bloqueos de motor de base de datos que trababan a los scripts en Python. Antigravity alcanzó formalmente los 15 *superpoderes* operativos.
 - **Protocolo Anti-Hang:** Se inyectó firmemente el esquema de escudos al inicio de `operating_rules.md`. Los agentes NUNCA MÁS se bloquearán intentando levantar demonios persistentes gracias al uso impuesto de `< /dev/null`, `disown` y el script de escudo `start_demon.sh`.
 - **Limpieza de N8N:** Se auditaron y borraron definitivamente 9 workflows de prueba/obsoletos del exoesqueleto n8n para optimizar la carga RAM del sistema.
+
+### Sesión [2026-03-03] (Tarde) - Bautismo de Fuego: 15 Superpoderes Sellados
+- **Escudos Anti-Hang (Superpoder 14 y 15):** Tras un profundo análisis de I/O y terminal loops infintos, el agente fue blindado permanentemente contra bloqueos del host operativo.
+  1. `start_demon.sh` (Lanzador Universal de Demonios): Se superó el cuelgue por `nohup` forzando aislamiento total vía `disown` y cierre de la entrada estándar. Permite delegarle al Qwen 14B tareas infinitas sin asfixiar la sesión del estratega principal.
+  2. `safe_git.sh` (Escudo Git de Respaldos): Se encapsularon los comandos de versionado (`git commit/push`) dentro de directivas de "timeout" y `GIT_TERMINAL_PROMPT=0`, erradicando el secuestro de la interfaz por editores `nano` y prompts de SSH caídos.
+- **Validación Práctica:** Ambos superpoderes fueron probados y documentados en el Glosario de Skills de `operating_rules.md`. Antigravity es ahora inmune a bloqueos síncronos por tareas pesadas de VRAM o interacción TTY de Linux.
