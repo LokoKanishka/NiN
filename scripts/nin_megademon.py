@@ -11,7 +11,7 @@ from mcp.client.stdio import stdio_client
 from mcp.client.sse import sse_client
 
 # === CONFIGURACIÓN ===
-SSE_URL = "http://127.0.0.1:8000/sse"
+SSE_URL = "http://127.0.0.1:8001/sse"
 BASE_DIR = "/home/lucy-ubuntu/Escritorio/NIN/demon"
 MISSIONS_DIR = f"{BASE_DIR}/misiones"
 DONE_DIR = f"{BASE_DIR}/misiones/completadas"
@@ -95,7 +95,14 @@ async def process_mission(mission_file: str):
                 await session.initialize()
                 results = []
                 for t in tasks:
-                    res = await execute_tool_safe(session, t["tool"], t.get("args", {}))
+                    raw_tool = t["tool"]
+                    if raw_tool.startswith("mcp_n8n-control_"):
+                        raw_tool = raw_tool.replace("mcp_n8n-control_", "")
+                    
+                    tool_args = t.get("args", {})
+                    print(f"[DEBUG] Ejecutando: {raw_tool} con args {tool_args}")
+                        
+                    res = await execute_tool_safe(session, raw_tool, tool_args)
                     results.append(res)
                 
                 report_name = f"report_{mission_id}_{datetime.now().strftime('%H%M%S')}.json"
@@ -107,6 +114,8 @@ async def process_mission(mission_file: str):
                 # await send_telegram_message(f"✅ Misión '{mission_id}' completada.")
     except Exception as e:
         print(f"❌ Fallo en {basename}: {e}")
+        import traceback
+        traceback.print_exc()
         shutil.move(mission_file, os.path.join(FAIL_DIR, basename))
 
 # --- BUCLE DE HERRAMIENTAS Y PENSAMIENTO MCP ---
@@ -147,8 +156,10 @@ async def agentic_tool_loop(user_text: str, mcp_session: ClientSession, mcp_tool
                                 "args": {
                                     "type": "object", 
                                     "properties": {
-                                        "workflow_id": {"type": "string", "description": "ID del workflow. Ej: L3u6POxhaS2TTjIu para Bypass LIBROS"}
-                                    }
+                                        "workflow_id": {"type": "string", "description": "ID del workflow. Ej: L3u6POxhaS2TTjIu para Bypass LIBROS, b0QtaKcqH5I0WLYk para YouTube"},
+                                        "trigger_data": {"type": "object", "description": "Datos adicionales para el workflow. Ej: {'query': 'nombre del video'} para YouTube."}
+                                    },
+                                    "required": ["workflow_id"]
                                 }
                             }
                         }
@@ -165,10 +176,11 @@ async def agentic_tool_loop(user_text: str, mcp_session: ClientSession, mcp_tool
 
     system_prompt = """Sos NiN (Node in Network), el sistema operativo táctico de Diego.
 Reglas estrictas:
-1. Siempre puedes usar 'sequentialthinking' si necesitas planear paso a paso antes de actuar.
-2. Si Diego pide ACCIÓN (descargar libros, buscar datos), usa 'create_mission'.
-3. Si Diego solicita LIBROS a Telegram/Drive, el workflow_id para Bypass Descarga es 'L3u6POxhaS2TTjIu'.
-4. Si es pura charla, asístelo amablemente sin usar tools de misión."""
+1. Puedes usar 'sequentialthinking' para planear paso a paso. IMPORTANTE: Cuando 'nextThoughtNeeded' sea false, DEBES responder directamente al usuario SIN usar más herramientas de pensamiento.
+2. Si Diego pide ACCIÓN (descargar libros, buscar datos, abrir videos), usa 'create_mission'.
+3. TRUCO LIBROS: workflow_id='L3u6POxhaS2TTjIu'.
+4. TRUCO YOUTUBE: Si pide reproducir/buscar en Youtube, workflow_id='b0QtaKcqH5I0WLYk', y en trigger_data pon {"query": "cancion o programa"}.
+5. Si es pura charla (saludos, preguntas simples), asístelo amablemente RESPONDIENDO DIRECTAMENTE EN TEXTO sin usar tools de misión ni pensar en bucle. ¡No pienses demasiado para un simple 'Hola'!"""
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -197,15 +209,31 @@ Reglas estrictas:
                     
                     if not msg.get("tool_calls"):
                         texto = msg.get("content", "").strip()
-                        if "sequentialthinking" in texto and "thought" in texto:
+                        # Intentar extraer llamada de herramienta si viene como texto crudo en JSON
+                        if "{" in texto and "}" in texto:
                             try:
-                                # Extraer bloque JSON si viene envuelto
                                 if "```json" in texto:
                                     raw_json = texto.split("```json")[1].split("```")[0].strip()
+                                elif "```" in texto:
+                                    raw_json = texto.split("```")[1].split("```")[0].strip()
                                 else:
-                                    raw_json = texto
+                                    start_idx = texto.find("{")
+                                    end_idx = texto.rfind("}") + 1
+                                    raw_json = texto[start_idx:end_idx].strip()
+                                
                                 tc_data = json.loads(raw_json)
-                                msg["tool_calls"] = [{"function": {"name": tc_data.get("name", "sequentialthinking"), "arguments": tc_data.get("arguments", tc_data)}}]
+                                t_name = tc_data.get("name")
+                                
+                                # Fallbacks heurísticos si alucina mal el formato
+                                if t_name is None and "thought" in tc_data:
+                                    t_name = "sequentialthinking"
+                                if t_name == "create_mission" and "tasks" in tc_data:
+                                    # Si metió los argumentos directo en la raíz en lugar de "arguments"
+                                    args = tc_data.copy()
+                                    tc_data["arguments"] = args
+                                
+                                if t_name:
+                                    msg["tool_calls"] = [{"function": {"name": t_name, "arguments": tc_data.get("arguments", tc_data)}}]
                             except Exception:
                                 pass
                         
@@ -220,6 +248,13 @@ Reglas estrictas:
                         t_name = func.get("name")
                         t_args = func.get("arguments", {})
                         
+                        # Extraer respuesta del usuario si el modelo alucinó una tool "null" para contestar
+                        if t_name is None or str(t_name).lower() == "null" or t_name == "":
+                            # Agarra cualquier valor de texto dentro de t_args
+                            extracted_text = " ".join([str(v) for v in t_args.values() if isinstance(v, str)])
+                            if extracted_text:
+                                return extracted_text
+                        
                         if t_name == "sequentialthinking":
                             print(f"🧠 [NiN Pensando] Paso {t_args.get('thoughtNumber', '?')}: {t_args.get('thought', '')[:40]}...")
                             try:
@@ -233,6 +268,13 @@ Reglas estrictas:
                                 "name": t_name,
                                 "content": res_text
                             })
+                            
+                            # Forzar salida si ya no necesita pensar más
+                            if t_args.get('nextThoughtNeeded') is False:
+                                messages.append({
+                                    "role": "user",
+                                    "content": "SYSTEM COMMAND: Has terminado de pensar. Ahora genera tu respuesta final en texto plano para el usuario. NO vuelvas a llamar a herramientas de pensamiento."
+                                })
                             
                         elif t_name == "create_mission":
                             # Creación real de la misión JSON (Con Arnés Nativo)
@@ -319,12 +361,13 @@ async def telegram_ears_loop():
                                         with open(CHAT_LOG, "a") as f: f.write(f"[{timestamp}] DIEGO: {text}\n")
                                         print(f"📩 [Megademon] Mensaje: {text}")
                                         
-                                        await upsert_to_graph("Diego", "dijo_en_telegram", text)
-
                                         global PENDING_MISSION
                                         text_lower = text.strip().lower()
-                                        
-                                        if text_lower == "/ok" and PENDING_MISSION:
+
+                                        aprobatorias = ["/ok", "ok", "dale", "mandale", "si", "sí", "yes"]
+                                        cancelatorias = ["/cancel", "cancel", "no", "cancelalo", "abortar"]
+
+                                        if text_lower in aprobatorias and PENDING_MISSION:
                                             m_id = PENDING_MISSION["id"]
                                             m_path = f"{MISSIONS_DIR}/{m_id}.json"
                                             with open(m_path, "w") as f:
@@ -333,7 +376,7 @@ async def telegram_ears_loop():
                                             await send_telegram_message(f"✅ [HITL] Misión '{m_id}' autorizada. Desplegando en n8n...")
                                             continue
                                             
-                                        elif text_lower == "/cancel" and PENDING_MISSION:
+                                        elif text_lower in cancelatorias and PENDING_MISSION:
                                             PENDING_MISSION = None
                                             await send_telegram_message("🚫 [HITL] Misión purgada. El sistema está limpio y a la espera de órdenes.")
                                             continue

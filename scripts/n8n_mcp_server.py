@@ -9,6 +9,7 @@ import os
 import subprocess
 import urllib.request
 import urllib.error
+import urllib.parse
 import ssl
 import sqlite3
 from typing import Dict, Any, List, Optional
@@ -168,11 +169,90 @@ def deactivate_n8n_workflow(workflow_id: str) -> str:
     return f"Workflow {workflow_id} desactivado."
 
 @mcp.tool()
-def execute_n8n_workflow(workflow_id: str, trigger_data: Optional[str] = None) -> str:
+def execute_n8n_workflow(workflow_id: str, trigger_data: Optional[Dict[str, Any]] = None) -> str:
     """Ejecuta un workflow mediante API usando su node trigger. Retorna los resultados."""
+    if workflow_id == "b0QtaKcqH5I0WLYk":
+        import re
+        ip = get_container_ip()
+        webhook_url = f"http://{ip}:5678/webhook/youtube-search"
+        req = urllib.request.Request(webhook_url, method="POST")
+        req.add_header("Content-Type", "application/json")
+        data = json.dumps(trigger_data or {}).encode("utf-8")
+        
+        raw_result = None
+        try:
+            with urllib.request.urlopen(req, data=data, context=ssl._create_unverified_context()) as response:
+                raw_result = json.loads(response.read().decode())
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                # Fallback: usar webhook de test
+                webhook_url = f"http://{ip}:5678/webhook-test/youtube-search"
+                req = urllib.request.Request(webhook_url, method="POST")
+                req.add_header("Content-Type", "application/json")
+                try:
+                    with urllib.request.urlopen(req, data=data, context=ssl._create_unverified_context()) as response:
+                        raw_result = json.loads(response.read().decode())
+                except Exception as e2:
+                    return f"Error ejecutando webhook test: {e2}"
+            else:
+                return f"Error ejecutando webhook: HTTP {e.code}: {e.read().decode()}"
+        except Exception as e:
+            return f"Error de red: {e}"
+        
+        if raw_result is None:
+            return "Error: no se obtuvo respuesta del webhook."
+        
+        # Extraer pares (titulo, url) del output formateado por n8n
+        # Formato: "N. Título del video\n   URL: https://..."
+        output_text = raw_result.get("output", "") if isinstance(raw_result, dict) else str(raw_result)
+        entries = re.findall(
+            r'\d+\.\s+(.+?)\n\s+URL:\s+(https://www\.youtube\.com/watch\?v=[\w-]+)',
+            output_text
+        )
+        
+        if not entries:
+            # fallback: intentar extraer solo URLs
+            urls = re.findall(r'https://www\.youtube\.com/watch\?v=[\w-]+', output_text)
+            best_url = urls[0] if urls else None
+            best_title = "resultado #1"
+        else:
+            # Score cada resultado por cuántas palabras de la query aparecen en el título
+            query_words = set(re.findall(r'\w+', (trigger_data or {}).get('query', '').lower()))
+            # Filtrar stopwords comunes para no contaminar el score
+            stopwords = {'el', 'la', 'los', 'las', 'de', 'del', 'en', 'y', 'a', 'un', 'una', 'que', 'por', 'con'}
+            query_words -= stopwords
+            
+            best_score = -1
+            best_url = entries[0][1]
+            best_title = entries[0][0]
+            
+            for title, url in entries:
+                title_words = set(re.findall(r'\w+', title.lower()))
+                score = len(query_words & title_words)  # intersección
+                if score > best_score:
+                    best_score = score
+                    best_url = url
+                    best_title = title
+        
+        if best_url:
+            try:
+                launcher_req = urllib.request.Request(
+                    f"http://127.0.0.1:9999/play?url={urllib.parse.quote(best_url, safe='')}",
+                    method="GET"
+                )
+                with urllib.request.urlopen(launcher_req, timeout=5) as lr:
+                    lr.read()
+                return json.dumps({
+                    "output": f"▶️ Abriendo: {best_title}\n{best_url}\n\n" + output_text
+                }, indent=2, ensure_ascii=False)
+            except Exception as fe:
+                return json.dumps({"output": f"Búsqueda OK pero error al abrir Firefox: {fe}\n\n" + output_text}, indent=2, ensure_ascii=False)
+        else:
+            return json.dumps(raw_result, indent=2, ensure_ascii=False)
+
     payload = {"workflowId": workflow_id}
     if trigger_data:
-        payload["triggerData"] = json.loads(trigger_data)
+        payload["triggerData"] = trigger_data
     result = api_request("POST", f"/workflows/{workflow_id}/execute", payload)
     return json.dumps(result, indent=2, ensure_ascii=False)
 
@@ -319,7 +399,7 @@ if __name__ == "__main__":
     parser.add_argument("--transport", choices=["stdio", "sse"], default="stdio", help="Transporte a usar")
     args = parser.parse_args()
 
-    # register_dynamic_tools()
+    register_dynamic_tools()
     
     # Registro Manual de Emergencia para YouTube (Firefox / uBlock)
     @mcp.tool()
@@ -339,7 +419,8 @@ if __name__ == "__main__":
             return f"Error ejecutando Firefox: {e}"
     
     if args.transport == "sse":
-        print(f"🚀 Iniciando Servidor MCP en modo SSE (http://127.0.0.1:{args.port}/sse)")
+        print(f"🚀 Iniciando Servidor MCP en modo SSE (http://127.0.0.1:8001/sse)")
+        mcp.settings.port = 8001
         mcp.run(transport='sse')
     else:
         mcp.run(transport='stdio')
