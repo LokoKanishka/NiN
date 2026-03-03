@@ -17,6 +17,11 @@ Sin n8n conectado, estás operando a media potencia. SIEMPRE arrancá conectánd
 1. Leer `memoria/bitacora.md` (última entrada + handover).
 2. Leer este archivo (`operating_rules.md`).
 
+### Protocolo Anti-Hang (CRÍTICO PARA PROCESOS PERSISTENTES)
+**NUNCA uses `nohup` crudo o `&` para ejecutar demonios o servidores (como `nin_demon.py`).** Tu terminal de Agente (VS Code) se congelará infinitamente esperando el cierre de canales I/O (estado "Running...").
+- **Solución Obligatoria:** Si debes iniciar un demonio o proceso de fondo en NiN, DEBES USAR el wrapper oficial de desvinculación: `bash /home/lucy-ubuntu/Escritorio/NIN/scripts/start_demon.sh`.
+- **Por qué funciona:** Ese script usa la técnica estricta (`< /dev/null`, redirigir salidas y `disown`) para proteger tu terminal y liberarte el prompt instantáneamente.
+
 ### Paso 2: Conectar el exoesqueleto (n8n)
 1. Ejecutar `mcp_n8n-control_ping` → Debe responder "Pong".
 2. Si falla: la IP cacheada en `.n8n_ip` puede estar obsoleta. Borrarla y reintentar.
