@@ -13,7 +13,7 @@ PARA EVITAR CONGELAR SU PROPIA TERMINAL, DEBE CUMPLIR LA SIGUIENTE REGLA ESTRICT
    
    Ejecute esto en bash:
    ```bash
-   bash /home/lucy-ubuntu/Escritorio/NIN/scripts/start_demon.sh
+   bash /home/lucy-ubuntu/Escritorio/NIN/scripts/start_megademon.sh
    ```
 
 3. **Verificación**:
