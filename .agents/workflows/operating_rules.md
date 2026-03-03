@@ -121,7 +121,8 @@ Como Agente, tienes 13 conectores blindados hacia la máquina anfitriona. Conóc
 ## Límites de Proyecto (NUNCA violar)
 
 - **NIN** → Contenedores: `n8n-lucy`, `qdrant-lucy`, `searxng-lucy`
-- **cunningham-Espejo** → Contenedores: `lucy_brain_*`, `lucy_eyes_*`, `lucy_hands_*`, `lucy_ui_*`, etc.
+- **cunningham-Espejo / Fusion** → Contenedores ajenos. (Fueron erradicados el 03-03-2026).
+- **PUERTO ÚNICO Y EXCLUSIVO:** El único cliente de n8n válido, oficial y autorizado con el que Antigravity puede interactuar, leer, o inyectar código es el que corre en **`127.0.0.1:5688` (`n8n-lucy`)**. Cualquier otra instancia, puerto (ej. 5690), o base de datos paralela es considerada "Invasora" y debe ser ignorada/reportada. 
 - **NUNCA tocar, diagnosticar, ni eliminar contenedores que no sean del stack NIN sin confirmación explícita del usuario.**
 
 ## Mapa de Puertos

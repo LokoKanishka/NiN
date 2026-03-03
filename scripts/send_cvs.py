@@ -16,8 +16,12 @@ load_dotenv("/home/lucy-ubuntu/Escritorio/NIN/.env")
 
 EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/colegios de prueba cv.xltx"
 CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/Mi_Curriculum.pdf"
-SMTP_USER = "chatjepetex4@gmail.com"
-SMTP_PASS = "pwytqpcqmqwhsjgw"
+# Lista de cuentas para rotación (Round-Robin)
+CUENTAS_SMTP = [
+    {"user": "chatjepetex4@gmail.com", "pass": "pwytqpcqmqwhsjgw"},
+    # Comenta y agrega cuentas aquí para rotar (Asegúrate de tener contraseñas de aplicación)
+    # {"user": "tu_otra_cuenta@gmail.com", "pass": "tu_app_password_2"},
+]
 
 # Credenciales Telegram (NiN-Demon Sync)
 TG_TOKEN = "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA"
@@ -53,12 +57,12 @@ def armar_textos(colegio):
     )
     return texto_plano, texto_html
 
-def enviar_correo(server, origen, destino, colegio):
+def enviar_correo(origen_user, origen_pass, destino, colegio):
     txt, html = armar_textos(colegio)
     
     msg = MIMEMultipart('alternative')
     msg['Subject'] = "CV.PROF.FILOSOFÍA"
-    msg['From'] = origen
+    msg['From'] = origen_user
     msg['To'] = destino
 
     # Partes de texto
@@ -75,14 +79,21 @@ def enviar_correo(server, origen, destino, colegio):
             msg.attach(part3)
     except Exception as e:
         w_log(f"❌ Error al adjuntar CV: {e}")
-        return False
+        return "ERROR_ARCHIVO"
         
     try:
-        server.sendmail(origen, destino, msg.as_string())
-        return True
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(origen_user, origen_pass)
+        server.sendmail(origen_user, destino, msg.as_string())
+        server.quit()
+        return "OK"
+    except smtplib.SMTPAuthenticationError as e:
+        w_log(f"❌ Autenticación fallida o bloqueo para {origen_user}: {e}")
+        return "AUTH_ERROR"
     except Exception as e:
-        w_log(f"❌ Error SMTP: {e}")
-        return False
+        w_log(f"❌ Error SMTP en envío: {e}")
+        return "SMTP_ERROR"
 
 TARGET_TIME = datetime.time(0, 45, 0)
 
@@ -122,51 +133,61 @@ def principal():
     total = len(colegios_lista)
     w_log(f"📚 {total} colegios detectados en la lista.")
     
-    # 2. Conectar a Gmail SMTP
-    w_log("🔐 Conectando al servidor SMTP de Google...")
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        w_log("✅ Conexión SMTP establecida.")
-    except Exception as e:
-        w_log(f"❌ Fallo crítico de Autenticación SMTP: {e}")
-        notify_telegram(f"❌ Fallo de Autenticación SMTP: {e}")
-        return
-
-    # 3. Iterar y Enviar
-    for i, fila in enumerate(colegios_lista, 1):
+    cuentas_activas = CUENTAS_SMTP.copy()
+    
+    # 2. Iterar y Enviar (Round-Robin Dinámico)
+    i = 0
+    while i < total:
+        if not cuentas_activas:
+            w_log("❌ Todas las cuentas SMTP fallaron o fueron bloqueadas. Abortando.")
+            notify_telegram("❌ Abortando envío: Todas las cuentas SMTP fueron bloqueadas.")
+            break
+            
+        fila = colegios_lista[i]
         nombre = str(fila.get('nombre del colegio', 'Colegio')).strip()
         email_raw = str(fila.get('Mail', '')).strip()
         
         if not email_raw or email_raw.lower() == 'nan':
             w_log(f"⚠️ Saltando [{nombre}] por falta de email.")
+            i += 1
             continue
             
         destino = email_raw.replace(" / ", ", ").replace("/", ", ")
         
-        w_log(f"✉️ [{i}/{total}] Enviando a {nombre} ({destino})...")
+        # Selección de cuenta rotativa
+        cuenta_actual = cuentas_activas[i % len(cuentas_activas)]
+        origen_user = cuenta_actual['user']
+        origen_pass = cuenta_actual['pass']
         
-        exito = enviar_correo(server, SMTP_USER, destino, nombre)
+        w_log(f"✉️ [{i+1}/{total}] Enviando a {nombre} ({destino}) desde [{origen_user}]...")
         
-        if exito:
+        resultado = enviar_correo(origen_user, origen_pass, destino, nombre)
+        
+        if resultado == "OK":
             w_log("✅ Enviado.")
-            notify_telegram(f"✅ [{i}/{total}] Enviado a: {nombre}")
-        else:
-            notify_telegram(f"❌ [{i}/{total}] FALLÓ envío a: {nombre}")
-        
-        # 4. Pausa Anti-Spam
-        if i < total:
-            delay = random.randint(50, 70)
-            w_log(f"🛑 Pausa anti-spam de {delay} segundos...")
-            time.sleep(delay)
+            notify_telegram(f"✅ [{i+1}/{total}] Enviado a: {nombre} (Vía {origen_user})")
+            
+            # Pausa Anti-Spam
+            if i + 1 < total:
+                delay = random.randint(50, 110)
+                w_log(f"🛑 Pausa anti-spam de {delay} segundos... (Próximo cambio de cuenta)")
+                time.sleep(delay)
+            i += 1  # Avanzar al siguiente
+            
+        elif resultado == "AUTH_ERROR":
+            w_log(f"⚠️ Removiendo cuenta {origen_user} de la rotación por fallo de autenticación.")
+            notify_telegram(f"⚠️ Cuenta {origen_user} bloqueada/rebotada. Cambiando de cuenta para {nombre}...")
+            cuentas_activas.remove(cuenta_actual)
+            # NO incrementamos 'i', el while loop volverá a intentar enviar al mismo colegio con la siguiente cuenta
+            
+        else: # SMTP_ERROR o ERROR_ARCHIVO
+            w_log(f"❌ Falló el envío a: {nombre}. Saltando colegio.")
+            notify_telegram(f"❌ [{i+1}/{total}] FALLÓ envío a: {nombre} (Vía {origen_user})")
+            i += 1  # Avanzar al siguiente asumiendo que el colegio fue el problema
+            time.sleep(10)
 
-    try:
-        server.quit()
-    except:
-        pass
-    w_log("🏁 Todos los envíos procesados.")
-    notify_telegram("🏁 ¡Misión cumplida! Se procesó la lista completa de colegios.")
+    w_log("🏁 Todos los envíos procesados o cancelados.")
+    notify_telegram("🏁 ¡Misión finalizada! Se procesó la lista completa de colegios o se agotaron las cuentas.")
 
 if __name__ == "__main__":
     principal()
