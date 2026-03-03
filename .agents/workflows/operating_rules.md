@@ -18,9 +18,14 @@ Sin n8n conectado, estás operando a media potencia. SIEMPRE arrancá conectánd
 2. Leer este archivo (`operating_rules.md`).
 
 ### Protocolo Anti-Hang (CRÍTICO PARA PROCESOS PERSISTENTES)
-**NUNCA uses `nohup` crudo o `&` para ejecutar demonios o servidores (como `nin_demon.py`).** Tu terminal de Agente (VS Code) se congelará infinitamente esperando el cierre de canales I/O (estado "Running...").
-- **Solución Obligatoria:** Si debes iniciar un demonio o proceso de fondo en NiN, DEBES USAR el wrapper oficial de desvinculación: `bash /home/lucy-ubuntu/Escritorio/NIN/scripts/start_demon.sh`.
-- **Por qué funciona:** Ese script usa la técnica estricta (`< /dev/null`, redirigir salidas y `disown`) para proteger tu terminal y liberarte el prompt instantáneamente.
+**1. Demonios (Ciclos Infinitos)**: NUNCA uses `nohup` crudo o `&` para ejecutar demonios o servidores (como `nin_demon.py`). Tu terminal de Agente (VS Code) se congelará infinitamente esperando el cierre de canales I/O.
+- **Solución Obligatoria:** Si debes iniciar un demonio o proceso de fondo en NiN, DEBES USAR el lanzador universal: `bash /home/lucy-ubuntu/Escritorio/NIN/scripts/start_demon.sh <nombre_script>`. Bypassa el bloqueo cerrando stdin y desvinculando PID.
+
+**2. Guardados de Código (Git)**: Git lanza prompts interactivos (`nano`, contraseñas) que te dejan ciego y tildado.
+- **Solución Obligatoria:** Si vas a hacer commit/push, USÁ SÍ O SÍ el escudo `scripts/safe_git.sh "tu mensaje"`. Incluye timeouts estrictos (10s/30s) y mata terminal prompts engañosos.
+
+**3. Estrés de VRAM / Modelos Pesados**: El cargado en memoria de modelos gigantes (14B o 32B) frena en seco el I/O del host. Tus requests HTTP síncronos expirarán.
+- **Solución Obligatoria:** Si invocás al Megademon o al Agente Secreto (vía local o n8n), **NUNCA utilices un call síncrono estándar**. Mandalo siempre a Background Commands asíncronos para que tu sub-proceso pueda revisar el log luego.
 
 ### Paso 2: Conectar el exoesqueleto (n8n)
 1. Ejecutar `mcp_n8n-control_ping` → Debe responder "Pong".
