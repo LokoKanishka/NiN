@@ -569,3 +569,10 @@ Este script se conecta directamente por REST API al clúster de LPU (Language Pr
   - Se ha fabricado el Workflow Perfecto y validado.
   - El Usuario debe abrir la interfaz web de n8n, pulsar "Import from File" y elegir el archivo **`/home/lucy-ubuntu/Escritorio/NIN/Flujo_Descargar_Libro_N8N.json`**.
   - Al importarlo, n8n vinculará correctamente OAUTH2 y se podrá usar para siempre conectando la Colmena con su Biblioteca de Drive.
+
+## [2026-03-03] - Actualización Neural: Servidores MCP Directos y Protocolo Anti-Hang
+- **Nuevas Capacidades Bypasseadas (MCP NATVIO):** El agente Antigravity ha sido dotado de dos servidores MCP locales inyectados directamente en VS Code / Cursor (`~/.config/Code/User/mcp.json`).
+  1. **Docker MCP** (`@modelcontextprotocol/server-docker`): Control directo sobre la API de Docker Socket para leer logs, detener y reiniciar contenedores instantáneamente, saltándose los fallos y limitaciones de la terminal interviniente o `n8n`.
+  2. **SQLite_NIN MCP** (`@modelcontextprotocol/server-sqlite`): Puente de solo-lectura y queries SQL fulminantes apuntando al `n8n_db.sqlite`. Desvía los bloqueos de motor de base de datos que trababan a los scripts en Python. Antigravity alcanzó formalmente los 15 *superpoderes* operativos.
+- **Protocolo Anti-Hang:** Se inyectó firmemente el esquema de escudos al inicio de `operating_rules.md`. Los agentes NUNCA MÁS se bloquearán intentando levantar demonios persistentes gracias al uso impuesto de `< /dev/null`, `disown` y el script de escudo `start_demon.sh`.
+- **Limpieza de N8N:** Se auditaron y borraron definitivamente 9 workflows de prueba/obsoletos del exoesqueleto n8n para optimizar la carga RAM del sistema.
