@@ -18,9 +18,8 @@ EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/colegios de prueba 
 CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/Mi_Curriculum.pdf"
 # Lista de cuentas para rotación (Round-Robin)
 CUENTAS_SMTP = [
-    {"user": "chatjepetex4@gmail.com", "pass": "pwytqpcqmqwhsjgw"},
-    # Comenta y agrega cuentas aquí para rotar (Asegúrate de tener contraseñas de aplicación)
-    # {"user": "tu_otra_cuenta@gmail.com", "pass": "tu_app_password_2"},
+    {"user": "profesordiegofilosofia@gmail.com", "pass": "PON_AQUI_EL_PASSWORD_DE_APLICACION_1"},
+    {"user": "profedefilodiego@gmail.com", "pass": "PON_AQUI_EL_PASSWORD_DE_APLICACION_2"},
 ]
 
 # Credenciales Telegram (NiN-Demon Sync)
