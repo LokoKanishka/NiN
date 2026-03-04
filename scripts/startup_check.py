@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 BASE_DIR = "/home/lucy-ubuntu/Escritorio/NIN"
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-N8N_HOST = "http://172.24.0.4:5678"
+N8N_HOST = "http://172.24.0.3:5678"
 N8N_API_KEY = os.getenv("N8N_API_KEY")
 HEADERS = {"X-N8N-API-KEY": N8N_API_KEY, "Content-Type": "application/json"}
 
