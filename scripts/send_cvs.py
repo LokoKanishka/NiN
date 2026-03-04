@@ -14,13 +14,15 @@ from email.mime.application import MIMEApplication
 # Cargar variables si existen
 load_dotenv("/home/lucy-ubuntu/Escritorio/NIN/.env")
 
-EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/CVs/prueba/lista prueba xxx.xltx"
-CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/Mi_Curriculum.pdf"
+EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/1 - 50.xltx"
+CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/CV.PROF.FILO.pdf"
 # Lista de cuentas para rotación (Round-Robin)
 CUENTAS_SMTP = [
-    {"user": "profesordiegofilosofia@gmail.com", "pass": "sohbaizfpetcjiel"},
     {"user": "profedefilodiego@gmail.com", "pass": "kwnwqhdtkqlopsac"},
 ]
+
+# Instituciones ya enviadas exitosamente (no re-enviar)
+ALREADY_SENT = set()
 
 # Credenciales Telegram (NiN-Demon Sync)
 TG_TOKEN = "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA"
@@ -56,6 +58,18 @@ def armar_textos(colegio):
     )
     return texto_plano, texto_html
 
+def parse_emails(email_raw):
+    """Parsea una celda que puede tener múltiples emails separados por / ; Y etc."""
+    import re
+    # Normalizar separadores comunes
+    normalized = email_raw.replace(' Y ', ';').replace(' y ', ';')
+    normalized = normalized.replace(' / ', ';').replace('/', ';')
+    normalized = normalized.replace(', ', ';').replace(',', ';')
+    parts = [e.strip() for e in normalized.split(';') if e.strip()]
+    # Filtrar solo lo que parece un email válido
+    valid = [e for e in parts if '@' in e and '.' in e]
+    return valid
+
 def enviar_correo(origen_user, origen_pass, destino, colegio):
     txt, html = armar_textos(colegio)
     
@@ -73,8 +87,8 @@ def enviar_correo(origen_user, origen_pass, destino, colegio):
     # Adjuntar PDF
     try:
         with open(CV_PATH, "rb") as f:
-            part3 = MIMEApplication(f.read(), Name="Mi_Curriculum.pdf")
-            part3['Content-Disposition'] = 'attachment; filename="Mi_Curriculum.pdf"'
+            part3 = MIMEApplication(f.read(), Name="CV.PROF.FILO.pdf")
+            part3['Content-Disposition'] = 'attachment; filename="CV.PROF.FILO.pdf"'
             msg.attach(part3)
     except Exception as e:
         w_log(f"❌ Error al adjuntar CV: {e}")
@@ -84,7 +98,7 @@ def enviar_correo(origen_user, origen_pass, destino, colegio):
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(origen_user, origen_pass)
-        server.sendmail(origen_user, destino, msg.as_string())
+        server.sendmail(origen_user, [destino], msg.as_string())
         server.quit()
         return "OK"
     except smtplib.SMTPAuthenticationError as e:
@@ -94,31 +108,32 @@ def enviar_correo(origen_user, origen_pass, destino, colegio):
         w_log(f"❌ Error SMTP en envío: {e}")
         return "SMTP_ERROR"
 
-TARGET_TIME = datetime.time(0, 45, 0)
+TARGET_TIME = None  # None = envío inmediato
 
 def principal():
     w_log("🚀 Iniciando Script Nativo de Envío de CVs (vía Smtplib) [ENVÍO COMPLETO + TELEGRAM]...")
-    notify_telegram(f"🚀 Script de CVs iniciado. Esperando a las {TARGET_TIME.strftime('%H:%M')} para la tanda completa.")
     
-    # 0. Esperar hasta las 00:45
-    ahora = datetime.datetime.now()
-    target_dt = datetime.datetime.combine(ahora.date(), TARGET_TIME)
-    
-    if ahora > target_dt:
-        if ahora.hour > 12:
-            target_dt += datetime.timedelta(days=1)
-            wait_seconds = (target_dt - ahora).total_seconds()
-            w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las {TARGET_TIME.strftime('%H:%M')} de mañana...")
-            time.sleep(wait_seconds)
+    if TARGET_TIME is not None:
+        notify_telegram(f"🚀 Script de CVs iniciado. Esperando a las {TARGET_TIME.strftime('%H:%M')} para la tanda completa.")
+        ahora = datetime.datetime.now()
+        target_dt = datetime.datetime.combine(ahora.date(), TARGET_TIME)
+        if ahora > target_dt:
+            if ahora.hour > 12:
+                target_dt += datetime.timedelta(days=1)
+                wait_seconds = (target_dt - ahora).total_seconds()
+                w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las {TARGET_TIME.strftime('%H:%M')} de mañana...")
+                time.sleep(wait_seconds)
+            else:
+                w_log(f"⚠️ La hora objetivo ({TARGET_TIME.strftime('%H:%M')}) ya pasó esta madrugada. Avanzando de inmediato.")
         else:
-            w_log(f"⚠️ La hora objetivo ({TARGET_TIME.strftime('%H:%M')}) ya pasó esta madrugada. Avanzando de inmediato.")
+            wait_seconds = (target_dt - ahora).total_seconds()
+            w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las {TARGET_TIME.strftime('%H:%M')}...")
+            time.sleep(wait_seconds)
+        w_log("⏱️ ¡Hora alcanzada! Leyendo base de datos...")
+        notify_telegram(f"⏱️ ¡Hora alcanzada ({TARGET_TIME.strftime('%H:%M')})! Iniciando envío a la lista de colegios...")
     else:
-        wait_seconds = (target_dt - ahora).total_seconds()
-        w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las {TARGET_TIME.strftime('%H:%M')}...")
-        time.sleep(wait_seconds)
-    
-    w_log("⏱️ ¡Hora alcanzada! Leyendo base de datos...")
-    notify_telegram(f"⏱️ ¡Hora alcanzada ({TARGET_TIME.strftime('%H:%M')})! Iniciando envío a la lista de colegios...")
+        w_log("⚡ Modo inmediato activado. Leyendo base de datos...")
+        notify_telegram("🚀 Script de CVs iniciado en MODO INMEDIATO. Enviando a la lista de colegios...")
     
     # 1. Leer Excel
     try:
@@ -148,6 +163,12 @@ def principal():
         nombre = str(fila.get(0, 'Colegio')).strip()
         email_raw = str(fila.get(1, '')).strip()
         
+        # Saltar instituciones ya enviadas exitosamente
+        if nombre in ALREADY_SENT:
+            w_log(f"⏭️ Saltando [{nombre}] — ya enviado anteriormente.")
+            i += 1
+            continue
+        
         # Validación de "falso header" (si la primera fila dice 'Mail' en la segunda columna, saltar)
         if i == 0 and "mail" in email_raw.lower():
             w_log("ℹ️ Detectado encabezado en la primera fila. Saltando...")
@@ -158,40 +179,46 @@ def principal():
             w_log(f"⚠️ Saltando [{nombre}] por falta de email.")
             i += 1
             continue
-            
-        destino = email_raw.replace(" / ", ", ").replace("/", ", ")
+        
+        emails = parse_emails(email_raw)
+        if not emails:
+            w_log(f"⚠️ Saltando [{nombre}] — no se encontró email válido en: {email_raw}")
+            i += 1
+            continue
         
         # Selección de cuenta rotativa
         cuenta_actual = cuentas_activas[i % len(cuentas_activas)]
         origen_user = cuenta_actual['user']
         origen_pass = cuenta_actual['pass']
         
-        w_log(f"✉️ [{i+1}/{total}] Enviando a {nombre} ({destino}) desde [{origen_user}]...")
+        # Enviar a CADA email de esta institución
+        all_ok = True
+        for destino in emails:
+            w_log(f"✉️ [{i+1}/{total}] Enviando a {nombre} ({destino}) desde [{origen_user}]...")
+            resultado = enviar_correo(origen_user, origen_pass, destino, nombre)
+            
+            if resultado == "OK":
+                w_log(f"✅ Enviado a {destino}.")
+                notify_telegram(f"✅ [{i+1}/{total}] Enviado a: {nombre} → {destino} (Vía {origen_user})")
+            elif resultado == "AUTH_ERROR":
+                w_log(f"⚠️ Removiendo cuenta {origen_user} de la rotación por fallo de autenticación.")
+                notify_telegram(f"⛔ CUENTA BLOQUEADA/SPAM: {origen_user}. Se retira de la rotación. Reintentando...")
+                cuentas_activas.remove(cuenta_actual)
+                all_ok = False
+                break  # Salir del loop de emails, reintentar este colegio
+            else:
+                w_log(f"❌ Falló envío a {destino} de {nombre}.")
+                notify_telegram(f"❌ ERROR: No se pudo enviar a {nombre} ({destino}) vía {origen_user}.")
         
-        resultado = enviar_correo(origen_user, origen_pass, destino, nombre)
+        if resultado == "AUTH_ERROR":
+            continue  # Reintentar mismo colegio con otra cuenta
         
-        if resultado == "OK":
-            w_log("✅ Enviado.")
-            notify_telegram(f"✅ [{i+1}/{total}] Enviado a: {nombre} (Vía {origen_user})")
-            
-            # Pausa Anti-Spam
-            if i + 1 < total:
-                delay = random.randint(50, 110)
-                w_log(f"🛑 Pausa anti-spam de {delay} segundos... (Próximo cambio de cuenta)")
-                time.sleep(delay)
-            i += 1  # Avanzar al siguiente
-            
-        elif resultado == "AUTH_ERROR":
-            w_log(f"⚠️ Removiendo cuenta {origen_user} de la rotación por fallo de autenticación.")
-            notify_telegram(f"⛔ CUENTA BLOQUEADA/SPAM: {origen_user}. Se retira de la rotación. Reintentando {nombre} con otra cuenta...")
-            cuentas_activas.remove(cuenta_actual)
-            # NO incrementamos 'i', el while loop volverá a intentar enviar al mismo colegio con la siguiente cuenta
-            
-        else: # SMTP_ERROR o ERROR_ARCHIVO
-            w_log(f"❌ Falló el envío a: {nombre}. Saltando colegio.")
-            notify_telegram(f"❌ ERROR ENVÍO/REBOTE: No se pudo enviar a {nombre} ({destino}) vía {origen_user}. Podría ser un error de dirección o spam.")
-            i += 1  # Avanzar al siguiente asumiendo que el colegio fue el problema
-            time.sleep(10)
+        # Pausa Anti-Spam entre colegios
+        i += 1
+        if i < total:
+            delay = random.randint(50, 110)
+            w_log(f"🛑 Pausa anti-spam de {delay} segundos...")
+            time.sleep(delay)
 
     w_log("🏁 Todos los envíos procesados o cancelados.")
     notify_telegram("🏁 ¡Misión finalizada! Se procesó la lista completa de colegios o se agotaron las cuentas.")
