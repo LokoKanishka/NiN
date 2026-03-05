@@ -14,7 +14,9 @@ const mcpServers = [
     { id: 'notion', name: 'Notion', port: 13016, command: 'npx', args: ['-y', '@notionhq/notion-mcp-server'] },
     { id: 'postgres', name: 'Postgres', port: 13017, command: 'npx', args: ['-y', '@modelcontextprotocol/server-postgres'] },
     { id: 'bigquery', name: 'BigQuery', port: 13018, command: 'npx', args: ['-y', '@modelcontextprotocol/server-bigquery'] },
-    { id: 'n8n-v3', name: 'n8n V3', port: 13019, command: 'npx', args: ['-y', '@leonardsellem/n8n-mcp-server'] }
+    { id: 'n8n-v3', name: 'n8n V3', port: 13019, command: 'npx', args: ['-y', '@leonardsellem/n8n-mcp-server'] },
+    { id: 'tavily', name: 'Tavily', port: 13020, command: 'npx', args: ['-y', '@modelcontextprotocol/server-tavily'], env: { TAVILY_API_KEY: process.env.TAVILY_API_KEY } },
+    { id: 'system-health', name: 'System Health', port: 13021, command: 'npx', args: ['-y', '@modelcontextprotocol/server-system-health'] }
 ];
 
 const targetId = process.env.MCP_ID;

@@ -1,0 +1,163 @@
+{
+    "name": "NIN | Trading Bot v1 (Phase 1)",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes",
+                            "interval": 15
+                        }
+                    ]
+                }
+            },
+            "name": "Schedule",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "position": [
+                0,
+                0
+            ],
+            "typeVersion": 1.1,
+            "id": "schedule-id"
+        },
+        {
+            "parameters": {
+                "url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true",
+                "options": {}
+            },
+            "name": "CoinGecko API",
+            "type": "n8n-nodes-base.httpRequest",
+            "position": [
+                200,
+                -200
+            ],
+            "typeVersion": 4.1,
+            "id": "coingecko-id"
+        },
+        {
+            "parameters": {
+                "url": "https://api.alternative.me/fng/?limit=1",
+                "options": {}
+            },
+            "name": "Fear & Greed API",
+            "type": "n8n-nodes-base.httpRequest",
+            "position": [
+                200,
+                0
+            ],
+            "typeVersion": 4.1,
+            "id": "alternative-id"
+        },
+        {
+            "parameters": {
+                "url": "https://cryptopanic.com/api/v1/posts/?auth_token={{$env.CRYPTOPANIC_API_KEY}}&regions=en",
+                "options": {}
+            },
+            "name": "CryptoPanic API",
+            "type": "n8n-nodes-base.httpRequest",
+            "position": [
+                200,
+                200
+            ],
+            "typeVersion": 4.1,
+            "id": "cryptopanic-id"
+        },
+        {
+            "parameters": {
+                "mode": "wait",
+                "join": {
+                    "mode": "wait"
+                }
+            },
+            "name": "Merge Data",
+            "type": "n8n-nodes-base.merge",
+            "position": [
+                400,
+                0
+            ],
+            "typeVersion": 2.1,
+            "id": "merge-id"
+        },
+        {
+            "parameters": {
+                "jsCode": "const coingecko = $items('CoinGecko API')[0].json;\nconst fng = $items('Fear & Greed API')[0].json;\nconst news = $items('CryptoPanic API')[0].json;\n\nconst btcData = coingecko.bitcoin;\nconst current_price = btcData.usd;\nconst volume_24h = btcData.usd_24h_vol;\nconst change_24h = btcData.usd_24h_change;\n\nconst fearValue = fng.data[0].value;\nconst fearClass = fng.data[0].value_classification;\n\nconst headlines = news.results ? news.results.slice(0, 5).map(r => r.title).join(' | ') : 'No news extracted (Check API Key limit)';\n\n// RSI Simulado por ahora en esta plantilla cruda.\nreturn {\n  json: {\n    precio_actual: current_price,\n    variacion_24h: change_24h,\n    volumen_24h: volume_24h,\n    fng_valor: fearValue,\n    fng_clase: fearClass,\n    noticias_recientes: headlines,\n    rsi_simulado: 70\n  }\n};"
+            },
+            "name": "Data Consolidation",
+            "type": "n8n-nodes-base.code",
+            "position": [
+                600,
+                0
+            ],
+            "typeVersion": 2,
+            "id": "code-id"
+        }
+    ],
+    "connections": {
+        "Schedule": {
+            "main": [
+                [
+                    {
+                        "node": "CoinGecko API",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Fear & Greed API",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "CryptoPanic API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "CoinGecko API": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fear & Greed API": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "CryptoPanic API": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 2
+                    }
+                ]
+            ]
+        },
+        "Merge Data": {
+            "main": [
+                [
+                    {
+                        "node": "Data Consolidation",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

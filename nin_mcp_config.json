@@ -99,6 +99,26 @@
                 "MCP_ID": "n8n-v3",
                 "PORT": "13019"
             }
+        },
+        "nin-tavily": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "tavily",
+                "PORT": "13020"
+            }
+        },
+        "nin-system-health": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "system-health",
+                "PORT": "13021"
+            }
         }
     }
 }
