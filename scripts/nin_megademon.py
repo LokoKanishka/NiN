@@ -36,20 +36,28 @@ BLACKLISTED_TOOLS = [
 NIN_BUNKER_CONTEXT = []
 
 async def fetch_bunker_memory():
-    print("🧠 [NiN-Búnker] Recuperando historia de n8n...")
+    print("🧠 [NiN-Búnker] Recuperando historia desde disco (Sincronización Host)...")
+    log_path = "/home/lucy-ubuntu/Escritorio/NIN/data/nin_bunker_log.jsonl"
+    history = []
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get("http://127.0.0.1:5688/webhook/bunker-read", timeout=5) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    history = data.get("history", [])
-                    print(f"📖 [NiN-Búnker] Se recuperaron {len(history)} fragmentos de memoria recientes.")
-                    return history
-                else:
-                    print(f"⚠️ [NiN-Búnker] Webhook respondió: {resp.status}")
+        import os
+        if os.path.exists(log_path):
+            with open(log_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+                # Tomar los últimos 30 fragmentos (JSONL)
+                for line in lines[-30:]:
+                    line = line.strip()
+                    if not line: continue
+                    try:
+                        history.append(json.loads(line))
+                    except:
+                        history.append(line)
+            print(f"📖 [NiN-Búnker] Se recuperaron {len(history)} fragmentos de memoria recientes.")
+        else:
+            print("ℹ️ [NiN-Búnker] No se encontró log previo (inicio limpio).")
     except Exception as e:
-        print(f"⚠️ [NiN-Búnker] Error al conectar con n8n: {e}")
-    return []
+        print(f"⚠️ [NiN-Búnker] Error al leer memoria desde host: {e}")
+    return history
 
 async def send_telegram_message(text: str):
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
