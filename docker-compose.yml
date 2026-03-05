@@ -3,7 +3,7 @@ version: '3.8'
 services:
   n8n:
     image: n8nio/n8n:latest
-    container_name: n8n-lucy
+    container_name: N8N-NiN-uso-exclusivo-del-proyecto-nin
     restart: always
     ports:
       - "127.0.0.1:5688:5678"
