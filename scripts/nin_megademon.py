@@ -33,6 +33,23 @@ BLACKLISTED_TOOLS = [
     "bash",
     "rm"
 ]
+NIN_BUNKER_CONTEXT = []
+
+async def fetch_bunker_memory():
+    print("🧠 [NiN-Búnker] Recuperando historia de n8n...")
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("http://127.0.0.1:5688/webhook/bunker-read", timeout=5) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    history = data.get("history", [])
+                    print(f"📖 [NiN-Búnker] Se recuperaron {len(history)} fragmentos de memoria recientes.")
+                    return history
+                else:
+                    print(f"⚠️ [NiN-Búnker] Webhook respondió: {resp.status}")
+    except Exception as e:
+        print(f"⚠️ [NiN-Búnker] Error al conectar con n8n: {e}")
+    return []
 
 async def send_telegram_message(text: str):
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
@@ -181,6 +198,17 @@ Reglas estrictas:
 3. TRUCO LIBROS: workflow_id='L3u6POxhaS2TTjIu'.
 4. TRUCO YOUTUBE: Si pide reproducir/buscar en Youtube, workflow_id='b0QtaKcqH5I0WLYk', y en trigger_data pon {"query": "cancion o programa"}.
 5. Si es pura charla (saludos, preguntas simples), asístelo amablemente RESPONDIENDO DIRECTAMENTE EN TEXTO sin usar tools de misión ni pensar en bucle. ¡No pienses demasiado para un simple 'Hola'!"""
+
+    global NIN_BUNKER_CONTEXT
+    if NIN_BUNKER_CONTEXT:
+        bunker_str = "\n\n[CONTEXTO HISTÓRICO RECIENTE (BÚNKER DE MEMORIA)]\n"
+        # Tomar las últimas 3 memorias sincronizadas
+        for m in NIN_BUNKER_CONTEXT[-3:]:
+            if isinstance(m, dict):
+                ts = m.get('timestamp', '')
+                task = unicode_truncate(m.get('task', ''), 300)
+                bunker_str += f"- Sincro {ts}:\n  Tareas activas/recientes:\n  {task}\n"
+        system_prompt += bunker_str
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -407,11 +435,17 @@ async def main():
     for d in [DONE_DIR, FAIL_DIR, MISSIONS_DIR, CHAT_DIR]: 
         os.makedirs(d, exist_ok=True)
     
+    global NIN_BUNKER_CONTEXT
+    NIN_BUNKER_CONTEXT = await fetch_bunker_memory()
+    
     print(f"👹 Megademon 2.0 (CoT Enable) - Motores encendidos.")
     await asyncio.gather(
         mission_watcher_loop(),
         telegram_ears_loop()
     )
+
+def unicode_truncate(s, length):
+    return (s[:length] + '...') if len(s) > length else s
 
 if __name__ == "__main__":
     try:

@@ -1,0 +1,192 @@
+{
+    "name": "NIN | Búnker de Memoria Dinámica",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "bunker-sync",
+                "options": {}
+            },
+            "id": "c1a2b3c4-post",
+            "name": "Recibidor (POST)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "return { json: { content: JSON.stringify($input.item.json.body) + '\\n' } };"
+            },
+            "id": "code-format-ingest",
+            "name": "Format Ingest",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "fileSelector": "/home/node/.n8n/nin_bunker_log.jsonl",
+                "dataPropertyName": "content",
+                "options": {}
+            },
+            "id": "write-file",
+            "name": "Guardar Memoria",
+            "type": "n8n-nodes-base.readWriteFile",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "{\"status\": \"memoria almacenada en el bunker\"}",
+                "options": {}
+            },
+            "id": "i9j0k1l2-res1",
+            "name": "Respond to Webhook",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                850,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "GET",
+                "path": "bunker-read",
+                "options": {}
+            },
+            "id": "m3n4o5p6-get",
+            "name": "Lector (GET)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "fileSelector": "/home/node/.n8n/nin_bunker_log.jsonl",
+                "dataPropertyName": "data",
+                "options": {}
+            },
+            "id": "read-file",
+            "name": "Leer Historial",
+            "type": "n8n-nodes-base.readWriteFile",
+            "typeVersion": 1,
+            "position": [
+                450,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const txt = $input.item.json.data || '';\nconst lines = txt.trim().split('\\n').slice(-50);\nreturn { json: { history: lines.map(l => { try { return JSON.parse(l); } catch(e) { return l; } }) } };"
+            },
+            "id": "code-format-out",
+            "name": "Format History",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                650,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify($input.item.json) }}",
+                "options": {}
+            },
+            "id": "u1v2w3x4-res2",
+            "name": "Respond to Lector",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                850,
+                500
+            ]
+        }
+    ],
+    "connections": {
+        "Recibidor (POST)": {
+            "main": [
+                [
+                    {
+                        "node": "Format Ingest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Ingest": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar Memoria",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Guardar Memoria": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Lector (GET)": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Historial",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Historial": {
+            "main": [
+                [
+                    {
+                        "node": "Format History",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format History": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Lector",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {}
+}
