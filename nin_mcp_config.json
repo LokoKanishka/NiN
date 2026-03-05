@@ -1,0 +1,104 @@
+{
+    "mcpServers": {
+        "nin-github": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "github",
+                "PORT": "13010"
+            }
+        },
+        "nin-figma": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "figma",
+                "PORT": "13011"
+            }
+        },
+        "nin-slack": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "slack",
+                "PORT": "13012"
+            }
+        },
+        "nin-sentry": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "sentry",
+                "PORT": "13013"
+            }
+        },
+        "nin-playwright": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "playwright",
+                "PORT": "13014"
+            }
+        },
+        "nin-context7": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "context7",
+                "PORT": "13015"
+            }
+        },
+        "nin-notion": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "notion",
+                "PORT": "13016"
+            }
+        },
+        "nin-postgres": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "postgres",
+                "PORT": "13017"
+            }
+        },
+        "nin-bigquery": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "bigquery",
+                "PORT": "13018"
+            }
+        },
+        "nin-n8n-v3": {
+            "command": "node",
+            "args": [
+                "/home/lucy-ubuntu/Escritorio/NIN/scripts/nin_mcp_bridge.js"
+            ],
+            "env": {
+                "MCP_ID": "n8n-v3",
+                "PORT": "13019"
+            }
+        }
+    }
+}

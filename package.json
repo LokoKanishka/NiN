@@ -1,0 +1,11 @@
+{
+    "name": "nin-mcp-infrastructure",
+    "version": "1.0.0",
+    "description": "Infraestructura de puentes MCP para NiN",
+    "main": "scripts/nin_mcp_bridge.js",
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.4.1",
+        "express": "^4.21.2",
+        "dotenv": "^16.4.7"
+    }
+}

@@ -39,5 +39,14 @@ cp scripts/sync_memory_to_n8n.py .git/hooks/pre-push
 chmod +x .git/hooks/pre-push
 ```
 
+## 7. Infraestructura de Superpoderes (MCP)
+Este proyecto usa puentes SSE para expandir mis capacidades:
+1. Instalar dependencias de Node.js:
+   ```bash
+   npm install
+   ```
+2. Los servidores se lanzan bajo demanda vía `scripts/nin_mcp_bridge.js`.
+3. Asegurarse de que `nin_mcp_config.json` esté en la raíz para que el host pueda cargar las herramientas.
+
 ---
 *Firmado: Antigravity/NiN (Tu Copiloto de IA)*
