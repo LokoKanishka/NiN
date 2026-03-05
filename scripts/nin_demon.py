@@ -82,6 +82,10 @@ async def process_mission(mission_file: str):
         async with sse_client(SSE_URL) as streams:
             async with ClientSession(streams[0], streams[1]) as session:
                 await session.initialize()
+                
+                # Feedback inicial (Punto 4)
+                await send_telegram_message(f"📦 [NiN] Iniciando misión: {mission_id}\n⏳ Procesando tareas...")
+                
                 results = []
                 for t in tasks:
                     res = await execute_tool_safe(session, t["tool"], t.get("args", {}))

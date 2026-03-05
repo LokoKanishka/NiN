@@ -1,0 +1,175 @@
+{
+    "name": "NIN | notenin (Investigador Autónomo)",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "trigger-id",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "query-id",
+                            "name": "search_query",
+                            "value": "Mejores prácticas para optimizar workflows de n8n",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "id": "set-query",
+            "name": "Define Misión",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                220,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.tavily.com/search",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"api_key\": \"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\",\n  \"query\": \"{{ $json.search_query }}\",\n  \"search_depth\": \"advanced\",\n  \"include_answer\": true,\n  \"include_raw_content\": false,\n  \"max_results\": 5\n}",
+                "options": {}
+            },
+            "id": "tavily-search",
+            "name": "Tavily Deep Search",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                440,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://host.docker.internal:11434/api/chat",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"model\": \"qwen2.5:14b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Eres 'notenin', el Demonio Librero del proyecto NIN. Tu trabajo es leer resultados de búsquedas web y extraer/sintetizar SOLO la información técnica valiosa (código, estrategias, matemáticas) en formato Markdown estructurado. Ignora el ruido publicitario. Genera un reporte detallado.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Misión: {{ $('Define Misión').item.json.search_query }}\\n\\nResumen Tavily: {{ $json.answer }}\\n\\nFuentes:\\n{{ JSON.stringify($json.results) }}\"\n    }\n  ],\n  \"stream\": false\n}",
+                "options": {}
+            },
+            "id": "ollama-curator",
+            "name": "Ollama (RTX 5090) - Librero",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                660,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const timestamp = new Date().toISOString().replace(/[:.]/g, '-');\nconst filename = `/home/node/.n8n-files/docs/notenin/research_${timestamp}.md`;\nconst content = $items('Ollama (RTX 5090) - Librero')[0].json.message.content;\n\nreturn {\n  json: {\n    filename: filename,\n    content: `# [notenin] Reporte de Investigación\\n\\n${content}`\n  }\n};"
+            },
+            "id": "format-note",
+            "name": "Prepara Notebook",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                880,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "write",
+                "fileName": "={{ $json.filename }}",
+                "fileContent": "={{ $json.content }}",
+                "options": {
+                    "append": false
+                }
+            },
+            "id": "write-file",
+            "name": "Guardar en Disco",
+            "type": "n8n-nodes-base.readWriteFile",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                0
+            ]
+        }
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Define Misión",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Define Misión": {
+            "main": [
+                [
+                    {
+                        "node": "Tavily Deep Search",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Tavily Deep Search": {
+            "main": [
+                [
+                    {
+                        "node": "Ollama (RTX 5090) - Librero",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Ollama (RTX 5090) - Librero": {
+            "main": [
+                [
+                    {
+                        "node": "Prepara Notebook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepara Notebook": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar en Disco",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "callerPolicy": "workflowsFromSameOwner",
+        "availableInMCP": false
+    }
+}

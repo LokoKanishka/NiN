@@ -20,7 +20,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(SCRIPT_DIR)
 ENV_FILE = os.path.join(REPO_DIR, ".env")
 DB_PATH = os.path.join(REPO_DIR, "agente_memoria.db")
-CONTAINER = "n8n-lucy"
+CONTAINER = "N8N-NiN-uso-exclusivo-del-proyecto-nin"
 TIMEOUT = 5
 
 # === LÍMITES DE PROYECTO ===

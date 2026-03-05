@@ -14,11 +14,12 @@ from email.mime.application import MIMEApplication
 # Cargar variables si existen
 load_dotenv("/home/lucy-ubuntu/Escritorio/NIN/.env")
 
-EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/1 - 50.xltx"
-CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/CV.PROF.FILO.pdf"
+EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/8 9 10.xltx"
+CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/CV.PROF.FILOSOFIA.pdf"
 # Lista de cuentas para rotación (Round-Robin)
 CUENTAS_SMTP = [
     {"user": "profedefilodiego@gmail.com", "pass": "kwnwqhdtkqlopsac"},
+    {"user": "chatjepetex4@gmail.com", "pass": "unpvcqjttreubpvd"}, # He recuperado esta pass de n8n
 ]
 
 # Instituciones ya enviadas exitosamente (no re-enviar)
@@ -87,9 +88,10 @@ def enviar_correo(origen_user, origen_pass, destino, colegio):
     # Adjuntar PDF
     try:
         with open(CV_PATH, "rb") as f:
-            part3 = MIMEApplication(f.read(), Name="CV.PROF.FILO.pdf")
-            part3['Content-Disposition'] = 'attachment; filename="CV.PROF.FILO.pdf"'
+            part3 = MIMEApplication(f.read(), Name="CV.PROF.FILOSOFIA.pdf")
+            part3['Content-Disposition'] = 'attachment; filename="CV.PROF.FILOSOFIA.pdf"'
             msg.attach(part3)
+            w_log(f"📎 CV adjuntado correctamente: {CV_PATH}")
     except Exception as e:
         w_log(f"❌ Error al adjuntar CV: {e}")
         return "ERROR_ARCHIVO"
@@ -106,7 +108,7 @@ def enviar_correo(origen_user, origen_pass, destino, colegio):
         return "AUTH_ERROR"
     except Exception as e:
         w_log(f"❌ Error SMTP en envío: {e}")
-        return "SMTP_ERROR"
+        return str(e)
 
 TARGET_TIME = None  # None = envío inmediato
 
@@ -134,6 +136,9 @@ def principal():
     else:
         w_log("⚡ Modo inmediato activado. Leyendo base de datos...")
         notify_telegram("🚀 Script de CVs iniciado en MODO INMEDIATO. Enviando a la lista de colegios...")
+    
+    TEST_MODE = False # Envío real activado
+    TEST_EMAIL = "chatjepetex4@gmail.com" # Email de prueba (ignorado en False)
     
     # 1. Leer Excel
     try:
@@ -202,16 +207,22 @@ def principal():
                 notify_telegram(f"✅ [{i+1}/{total}] Enviado a: {nombre} → {destino} (Vía {origen_user})")
             elif resultado == "AUTH_ERROR":
                 w_log(f"⚠️ Removiendo cuenta {origen_user} de la rotación por fallo de autenticación.")
-                notify_telegram(f"⛔ CUENTA BLOQUEADA/SPAM: {origen_user}. Se retira de la rotación. Reintentando...")
+                notify_telegram(f"⛔ CUENTA BLOQUEADA/AUTH: {origen_user}. Se retira de la rotación. Reintentando...")
                 cuentas_activas.remove(cuenta_actual)
                 all_ok = False
-                break  # Salir del loop de emails, reintentar este colegio
+                break
+            elif "Daily user sending limit exceeded" in str(resultado) or "550" in str(resultado):
+                w_log(f"⚠️ Removiendo cuenta {origen_user} por alcanzar LÍMITE DIARIO.")
+                notify_telegram(f"⛔ LÍMITE ALCANZADO: {origen_user}. Se retira de la rotación. Reintentando...")
+                cuentas_activas.remove(cuenta_actual)
+                all_ok = False
+                break
             else:
-                w_log(f"❌ Falló envío a {destino} de {nombre}.")
+                w_log(f"❌ Falló envío a {destino} de {nombre}: {resultado}")
                 notify_telegram(f"❌ ERROR: No se pudo enviar a {nombre} ({destino}) vía {origen_user}.")
         
-        if resultado == "AUTH_ERROR":
-            continue  # Reintentar mismo colegio con otra cuenta
+        if not all_ok and cuentas_activas:
+            continue # Reintentar mismo colegio con otra cuenta
         
         # Pausa Anti-Spam entre colegios
         i += 1
