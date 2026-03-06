@@ -1,7 +1,7 @@
 # NIN | Arquitectura Canónica Actual (SSOT)
 
 **Fecha:** 2026-03-06
-**Versión:** 1.0.0
+**Versión:** 1.1.0
 **Estado:** DOCUMENTO MAESTRO VIGENTE
 
 > [!IMPORTANT]
@@ -17,13 +17,18 @@ El sistema NIN opera bajo un modelo de **Soberanía de Datos Local** utilizando 
 | **Orquestador** | n8n | Cerebro lógico y disparador de eventos. | `http://localhost:5688` |
 | **Inferencia** | Ollama | Motor de IA (notenin, Doctor, Mapeador). | `http://host.docker.internal:11434` |
 | **Escucha/Alertas** | Telegram | Canal único de notificaciones. | `/webhook/sirena-telegram` |
-| **Búsqueda** | SearXNG | Motor de búsqueda local soberano. | `http://localhost:8080` |
+| **Búsqueda** | SearXNG | Motor de búsqueda local soberano. | `http://localhost:8080` (searxng-lucy) |
 | **Base Vectorial** | Qdrant | Memoria RAG a largo plazo. | `http://localhost:6335` |
+| **Bridge MCP** | JS/Node | Conector de infraestructura NiN. | `scripts/nin_mcp_bridge.js` |
+
+> [!WARNING]
+> **Contexto de Vecinos:** Este host convive con otros entornos (ej. `Fusion`, `Doctor Lucy`). **NO TOCAR** contenedores como `lucy_fusion_*` o `doctor_lucy_n8n` por error. Solo intervenir en los servicios definidos en el `docker-compose.yml` de este directorio.
+> **Puertos Confusos:** Distinguir `searxng-lucy` (8080 - Oficial) de `lucy_eyes_searxng` (8081 - Externo).
 
 ## 2. Modelos en Uso
 El motor de inferencia oficial es **Ollama**.
 - **Demonio 14B (notenin):** `qwen2.5:14b` (Investigación y síntesis).
-- **Mapeador (Secret Agent):** `qwen2.5:32b` (Razonamiento complejo).
+- **Mapeador (Secret Agent):** `qwen2.5:32b` (Razonamiento complejo con 32B).
 - **Embedded:** `nomic-embed-text` (Vectores).
 
 > [!WARNING]
@@ -35,21 +40,24 @@ Los flujos de trabajo críticos que mantienen NIN operativo son:
 2. **notenin researcher (`6iwgu2R2WDXyUHYN`):** Investigador autónomo con blindaje de red.
 3. **NIN Telegram Service (`WrslsGzYsDP8hJZT`):** Puente unificado de comunicación.
 
-## 4. Topología de Red Interna
-- Los contenedores se comunican con el Host a través del bridge `host-gateway`.
-- El alias oficial para servicios del host (Ollama) es `host.docker.internal`.
+## 4. Topología de Red y Rutas
+- **Comunicación:** Bridge `host-gateway` con alias `host.docker.internal`.
+- **Hogar de Datos:** La carpeta `data/` del root es obsoleta. El nuevo hogar de todo el ruido operativo, bases de datos (.sqlite, .db) y estado es la carpeta **`runtime/`**.
 
 ## 5. Árbol de Lectura para Agentes (Precedencia)
 Cualquier agente que intervenga en NIN debe leer la documentación en este orden exacto:
 1. `operating_rules.md` (Cómo comportarse).
 2. `docs/ARCHITECTURE_CURRENT.md` (Cómo funciona el sistema HOY).
-3. `docker-compose.yml` (Cómo se despliega el sistema).
-4. `audit_protocol.md` (Historial de estabilidad reciente).
+3. `docs/ENTRY_POINT.md` (Cómo empezar a trabajar de forma segura).
+4. `docker-compose.yml` (Cómo se despliega el sistema).
 
 ## 6. Áreas Sensibles y Restricciones
-- **No modificar:** El socket de Docker (`/var/run/docker.sock`) ni la configuración de red `extra_hosts` sin aprobación explícita.
-- **No duplicar:** La mensajería debe pasar siempre por el servicio unificado de Telegram.
-- **Ruido Runtime:** Ignorar carpetas `node_modules`, `data`, `memoria` y archivos `.db`. Son subproductos operativos, no arquitectura.
+- **No modificar:** El socket de Docker (`/var/run/docker.sock`) ni la configuración de red `extra_hosts`.
+- **Categorización de Archivos:**
+    - **Core:** `docs/`, `workflows/`, `scripts/`.
+    - **Verticales:** `verticals/` (Trading, CV).
+    - **Ruido Runtime:** `runtime/`, `node_modules/`. **IGNORAR** en lecturas de arquitectura.
+    - **Legado:** `legacy/` (Material histórico). **NO USAR** como base técnica.
 
 ---
 **Certificado por:** Antigravity AI - Agente de Arquitectura NIN

@@ -1,28 +1,43 @@
 # NIN | Orden de Lectura para Agentes (Entry Point)
 
-Para asegurar una intervención segura y evitar la contaminación con información legada o experimental, todo agente (IA o Humano) debe seguir este orden de lectura obligatorio al entrar al repositorio:
+Para asegurar una intervención segura y evitar la contaminación con información legada o experimental, todo agente (Codex o Antigravity) debe seguir este orden de lectura obligatorio:
 
 ---
 
 ## 1. El Manifiesto Operativo
 **Archivo:** `operating_rules.md`
-**Por qué:** Define la ética de "Zero Cloud Leak", el protocolo de aislamiento "Blindfold" y las reglas de seguridad para la ejecución de comandos. Es el "System Prompt" del proyecto.
+**Por qué:** Define la ética (Zero Cloud Leak) y las reglas de seguridad. Es el "System Prompt" del proyecto.
 
 ## 2. La Verdad Técnica (SSOT)
 **Archivo:** `docs/ARCHITECTURE_CURRENT.md`
-**Por qué:** Es el mapa del mundo real. Define qué servicios están vivos (Ollama), qué servicios son leyendas (LM Studio) y cuáles son los endpoints productivos. **Ignorar el README.md si contradice este archivo.**
+**Por qué:** Define qué está vivo (Ollama) y qué es leyenda (LM Studio). **Ignorar expresamente el `README.md`** si hay contradicción técnica.
 
-## 3. La Infraestructura Viva
-**Archivo:** `docker-compose.yml`
-**Por qué:** Es la radiografía de la red. Define cómo se hablan los contenedores y qué puertos están realmente expuestos.
-
-## 4. El Historial de Estabilidad
-**Archivo:** `audit_protocol.md`
-**Por qué:** Contiene la evidencia primaria de las últimas pruebas de estrés y la resolución de la falla de conectividad de los 3 segundos. Es el contexto de "por qué las cosas están así ahora".
+## 3. La Infraestructura y el Onboarding
+**Archivo:** `docker-compose.yml` y este mismo archivo (`ENTRY_POINT.md`).
 
 ---
 
 ## Zonas de Exclusión / Ignorar al inicio
-- **`README.md`:** Solo contexto histórico. No usar para configurar endpoints.
-- **`AGENTS.md`:** Documentación vertical de trading. Solo leer si la tarea es específica de trading.
-- **`node_modules/`, `data/`, `memoria/`, `*.db`:** Ruido de runtime. No contienen arquitectura.
+- **Documentación Histórica:** `legacy/` y `README.md`. No usar para configurar servicios.
+- **Documentación Vertical:** `verticals/` y `AGENTS.md`. Solo leer si la tarea es de trading/CV.
+- **Ruido Runtime:** Carpeta `runtime/`, `node_modules/`, `*.db`. No contienen arquitectura.
+
+---
+
+## 🛠️ Verificación Operativa Inicial
+Antes de proponer o ejecutar cambios, el agente **DEBE** verificar su entorno con este mini-bloque de comandos:
+
+```bash
+# 1. ¿En qué estado estoy?
+git branch --show-current
+git log -1 --oneline
+
+# 2. ¿Existe la arquitectura canónica?
+ls docs/ARCHITECTURE_CURRENT.md docs/ENTRY_POINT.md
+
+# 3. ¿El backend es Ollama (esperado) y no LM Studio?
+curl -s http://localhost:11434/api/tags | grep -q "qwen2.5" && echo "Ollama OK"
+```
+
+> [!CAUTION]
+> Si los comandos fallan o el backend no responde en el puerto 11434, el agente está en un entorno desactualizado o erróneo. **NO PROCEDER** sin consulta.
