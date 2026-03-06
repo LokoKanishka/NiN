@@ -28,7 +28,7 @@ services:
       - N8N_LOCAL_FILES_ACCESS_MODE=allow
     volumes:
       - n8n_data:/home/node/.n8n
-      - ./data:/home/node/.n8n-files
+      - ./runtime/data:/home/node/.n8n-files
       - ~/.n8n-custom-extension:/home/node/.n8n/custom
       - ~/Escritorio/Cerebro:/mnt/Cerebro
       - /home/lucy-ubuntu:/home/lucy-ubuntu

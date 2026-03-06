@@ -12,7 +12,7 @@ from mcp.client.sse import sse_client
 
 # === CONFIGURACIÓN ===
 SSE_URL = "http://127.0.0.1:8001/sse"
-BASE_DIR = "/home/lucy-ubuntu/Escritorio/NIN/demon"
+BASE_DIR = "/home/lucy-ubuntu/Escritorio/NIN/runtime/demon"
 MISSIONS_DIR = f"{BASE_DIR}/misiones"
 DONE_DIR = f"{BASE_DIR}/misiones/completadas"
 FAIL_DIR = f"{BASE_DIR}/misiones/fallidas"
@@ -37,7 +37,7 @@ NIN_BUNKER_CONTEXT = []
 
 async def fetch_bunker_memory():
     print("🧠 [NiN-Búnker] Recuperando historia desde disco (Sincronización Host)...")
-    log_path = "/home/lucy-ubuntu/Escritorio/NIN/data/nin_bunker_log.jsonl"
+    log_path = "/home/lucy-ubuntu/Escritorio/NIN/runtime/data/nin_bunker_log.jsonl"
     history = []
     try:
         import os

@@ -14,8 +14,8 @@ from email.mime.application import MIMEApplication
 # Cargar variables si existen
 load_dotenv("/home/lucy-ubuntu/Escritorio/NIN/.env")
 
-EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/1 3 14.xltx"
-CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/CV.PROF.FILOSOFIA.pdf"
+EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/verticals/gmail_cv/data/1 3 14.xltx"
+CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/verticals/gmail_cv/data/CV.PROF.FILOSOFIA.pdf"
 # Cuenta fija solicitada por el usuario
 CUENTAS_SMTP = [
     {"user": "profedefilodiego@gmail.com", "pass": "kwnwqhdtkqlopsac"},

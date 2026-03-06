@@ -1,0 +1,92 @@
+{
+    "name": "NIN | Telegram Service (Unified)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "nin-telegram-service",
+                "responseMode": "onReceived",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ],
+            "webhookId": "nin_telegram_service"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "text-id",
+                            "name": "message_text",
+                            "value": "={{ $json.body.message || $json.body.mensaje || $json.body.text || 'Alerta NiN indefinida' }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "format-message",
+            "name": "Format Message",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.telegram.org/bot8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA/sendMessage",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"chat_id\": \"5154360597\",\n  \"text\": \"{{ $json.message_text }}\",\n  \"parse_mode\": \"Markdown\"\n}",
+                "options": {}
+            },
+            "id": "telegram-http",
+            "name": "Telegram API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                650,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Format Message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Message": {
+            "main": [
+                [
+                    {
+                        "node": "Telegram API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "meta": null,
+    "active": true
+}

@@ -10,7 +10,7 @@ fi
 
 SCRIPT_NAME=$1
 PROJECT_DIR="/home/lucy-ubuntu/Escritorio/NIN"
-LOG_FILE="$PROJECT_DIR/logs/${SCRIPT_NAME%.*}.log"
+LOG_FILE="$PROJECT_DIR/runtime/logs/${SCRIPT_NAME%.*}.log"
 
 echo "🛑 [Anti-Hang] Escaneando instancias previas de $SCRIPT_NAME..."
 pkill -f "$SCRIPT_NAME" || true

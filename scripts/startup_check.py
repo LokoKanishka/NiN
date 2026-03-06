@@ -66,10 +66,10 @@ def run_startup():
         "alt": alt
     }
     
-    with open(os.path.join(BASE_DIR, "memoria/startup_report.json"), "w") as f:
+    with open(os.path.join(BASE_DIR, "runtime/memoria/startup_report.json"), "w") as f:
         json.dump(report, f, indent=4)
     
-    print("✅ [STARTUP] Protocolo finalizado. Reporte guardado en memoria/startup_report.json")
+    print("✅ [STARTUP] Protocolo finalizado. Reporte guardado en runtime/memoria/startup_report.json")
 
 if __name__ == "__main__":
     run_startup()

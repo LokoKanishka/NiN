@@ -17,9 +17,21 @@ download_model.py
 __pycache__/
 *.pyc
 .env
-# NiN Demon
-demon/
-*.pid
+# NiN Runtime & State
+runtime/
+*.db
+*.sqlite
+*.sqlite3
 *.log
-entrenamiento/.venv_train/
-entrenamiento/.venv_train_fix/
+*.pid
+*.gz
+
+# Environment / OS
+.env
+.DS_Store
+__pycache__/
+*.pyc
+
+# Legacy / Experimental
+legacy/
+verticals/
