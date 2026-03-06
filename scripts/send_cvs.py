@@ -14,28 +14,74 @@ from email.mime.application import MIMEApplication
 # Cargar variables si existen
 load_dotenv("/home/lucy-ubuntu/Escritorio/NIN/.env")
 
-EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/8 9 10.xltx"
+EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/1 3 14.xltx"
 CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/gmail_cv/data/CV.PROF.FILOSOFIA.pdf"
-# Lista de cuentas para rotación (Round-Robin)
+# Cuenta fija solicitada por el usuario
 CUENTAS_SMTP = [
     {"user": "profedefilodiego@gmail.com", "pass": "kwnwqhdtkqlopsac"},
-    {"user": "chatjepetex4@gmail.com", "pass": "unpvcqjttreubpvd"}, # He recuperado esta pass de n8n
 ]
 
-# Instituciones ya enviadas exitosamente (no re-enviar)
-ALREADY_SENT = set()
+# Instituciones ya enviadas exitosamente según logs previos (para evitar duplicados hoy)
+ALREADY_SENT = {
+    "INST. MATER DOLOROSA", 
+    "INSTITUTO SCHILLER", 
+    "CENTRO EDUCATIVO BUENOS AIRES", 
+    "INST NUESTRA SRA DE LA MISERICORDIA",
+    "INSTITUTO GRIEGO ATENÁGORAS I",
+    "INSTITUTO CAROLINA ESTRADA DE MARTINEZ",
+    "COLEGIO BUENOS AIRES S.R.L",
+    "INSTITUTO PRIVADO REGINA VIRGINUM",
+    "ESCUELA SCHOLEM ALEIJEM",
+    "INSTITUTO ECOS ESCUELA SECUNDARIA",
+    "COLEGIO PAIDEIA",
+    "INSTITUTO SAN ROQUE",
+    "INSTITUTO COMUNICACIONES",
+    "INSTITUTO PRIVADO DAVID WOLFSOHN",
+    "BACH. POP. DE JOVENES Y ADULTOS LA DIGNIDAD",
+    "BACH. POP. DE JOVENES Y ADULTOS VILLA CRESPO-NUESTRAMERICA",
+    "CFP DE LA ESC. TECSON SRL",
+    "EAG (ESCUELA DE ARTE GASTRONOMICO)",
+    "CENTRO DE FORMACIÓN PROFESIONAL ESCUELA ARGENTINA DE SOCORRISMO Y SALVAMENTO ACUATICO S.A  (EASSA)",
+    "COLEGIO OLIVOS DEL SOL",
+    "COLEGIO SAN ANTONIO",
+    "INSTITUTO JOSÉ MANUEL ESTRADA",
+    "COLEGIO SAN NICOLAS",
+    "ESCUELA SAN GABRIEL",
+    "COLEGIO SAN GABRIEL",
+    "COLEGIO LOS MOLINOS",
+    "ESCUELA JESUS EN EL HUERTO DE LOS OLIVOS",
+    "INSTITUTO JESUS EN EL H. DE LOS OLIVOS",
+    "INSTITUTO DE EDUCACION INTEGRAL DE MUNRO",
+    # Envíos de la sesión actual 2026-03-06 (Configuración corregida)
+    "COLEGIO SECUNDARIO SANTO TOMAS DE AQUINO",
+    "INSTITUTO ESPAÑOL VIRGEN DEL PILAR"
+}
 
 # Credenciales Telegram (NiN-Demon Sync)
 TG_TOKEN = "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA"
 DIEGO_ID = 5154360597
 
-def notify_telegram(message):
+import threading
+
+# URL de la Sirena n8n para desacoplo total (Blindaje Permanente)
+SIRENA_URL = "http://127.0.0.1:5678/webhook/sirena-telegram"
+
+def notify_telegram_sync(message):
+    """Envío directo a Telegram para evitar dependencia de webhooks externos."""
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
     payload = {"chat_id": DIEGO_ID, "text": message}
     try:
-        requests.post(url, json=payload, timeout=10)
-    except Exception as e:
-        w_log(f"⚠️ Error al notificar Telegram: {e}")
+        requests.post(url, json=payload, timeout=5)
+    except Exception:
+        pass
+
+def notify_telegram(message):
+    """
+    Blindaje Permanente NiN: Envía notificaciones a través de la Sirena
+    asíncrona en n8n. El script principal es inmune a colapsos de red.
+    """
+    t = threading.Thread(target=notify_telegram_sync, args=(message,), daemon=True)
+    t.start()
 
 def w_log(msg):
     full_msg = f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {msg}"
@@ -110,7 +156,7 @@ def enviar_correo(origen_user, origen_pass, destino, colegio):
         w_log(f"❌ Error SMTP en envío: {e}")
         return str(e)
 
-TARGET_TIME = None  # None = envío inmediato
+TARGET_TIME = datetime.time(6, 15)  # Programado para las 06:15
 
 def principal():
     w_log("🚀 Iniciando Script Nativo de Envío de CVs (vía Smtplib) [ENVÍO COMPLETO + TELEGRAM]...")
@@ -174,11 +220,8 @@ def principal():
             i += 1
             continue
         
-        # Validación de "falso header" (si la primera fila dice 'Mail' en la segunda columna, saltar)
-        if i == 0 and "mail" in email_raw.lower():
-            w_log("ℹ️ Detectado encabezado en la primera fila. Saltando...")
-            i += 1
-            continue
+        # El chequeo de 'falso header' fue eliminado para evitar saltos erróneos. 
+        # El parse_emails ya se encarga de validar si hay correos reales.
         
         if not email_raw or email_raw.lower() == 'nan':
             w_log(f"⚠️ Saltando [{nombre}] por falta de email.")
@@ -227,7 +270,7 @@ def principal():
         # Pausa Anti-Spam entre colegios
         i += 1
         if i < total:
-            delay = random.randint(50, 110)
+            delay = 60 # Delay fijo de 1 minuto solicitado
             w_log(f"🛑 Pausa anti-spam de {delay} segundos...")
             time.sleep(delay)
 
