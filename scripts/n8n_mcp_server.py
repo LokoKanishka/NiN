@@ -291,7 +291,23 @@ def recordar_contexto(project_name: str, session_goal: str, open_files: str = ""
         ''', (project_name, session_goal, open_files, active_workflows))
         conn.commit()
         conn.close()
-        return "Contexto de sesión guardado correctamente en SQLite."
+
+        # [CONSOLIDACIÓN DE MEMORIA] - Generar Snapshot JSON para arranque rápido
+        snapshot_path = os.path.join(REPO_DIR, "runtime", "session_latest.json")
+        snapshot_data = {
+            "last_session": {
+                "timestamp": subprocess.getoutput("date -Iseconds"),
+                "project_name": project_name,
+                "session_goal": session_goal,
+                "open_files": open_files.split(", ") if open_files else [],
+                "active_workflows": active_workflows.split(", ") if active_workflows else [],
+                "status": "Persisted via MCP"
+            }
+        }
+        with open(snapshot_path, "w") as f:
+            json.dump(snapshot_data, f, indent=2)
+
+        return "Contexto de sesión y Snapshot JSON guardados correctamente."
     except Exception as e:
         return f"Error guardando contexto: {e}"
 
