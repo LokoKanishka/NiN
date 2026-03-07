@@ -44,12 +44,19 @@ Los flujos de trabajo críticos que mantienen NIN operativo son:
 - **Comunicación:** Bridge `host-gateway` con alias `host.docker.internal`.
 - **Hogar de Datos:** La carpeta `data/` del root es obsoleta. El nuevo hogar de todo el ruido operativo, bases de datos (.sqlite, .db) y estado es la carpeta **`runtime/`**.
 
-## 5. Árbol de Lectura para Agentes (Precedencia)
+## 7. Capacidades Latentes y Periferia
+Para entender qué scripts y workflows de la periferia son operativos y cuáles son candidatos a legacy, consultar:
+- [CAPABILITIES_MAP.md](file:///home/lucy-ubuntu/Escritorio/NIN/docs/CAPABILITIES_MAP.md)
+
+---
+
+## 8. Árbol de Lectura para Agentes (Precedencia)
 Cualquier agente que intervenga en NIN debe leer la documentación en este orden exacto:
 1. `operating_rules.md` (Cómo comportarse).
 2. `docs/ARCHITECTURE_CURRENT.md` (Cómo funciona el sistema HOY).
-3. `docs/ENTRY_POINT.md` (Cómo empezar a trabajar de forma segura).
-4. `docker-compose.yml` (Cómo se despliega el sistema).
+3. `docs/CAPABILITIES_MAP.md` (Habilidades latentes y periferia).
+4. `docs/ENTRY_POINT.md` (Cómo empezar a trabajar de forma segura).
+5. `docker-compose.yml` (Cómo se despliega el sistema).
 
 ## 6. Áreas Sensibles y Restricciones
 - **No modificar:** El socket de Docker (`/var/run/docker.sock`) ni la configuración de red `extra_hosts`.

@@ -9,8 +9,8 @@ Para asegurar una intervención segura y evitar la contaminación con informaci�
 **Por qué:** Define la ética (Zero Cloud Leak) y las reglas de seguridad. Es el "System Prompt" del proyecto.
 
 ## 2. La Verdad Técnica (SSOT)
-**Archivo:** `docs/ARCHITECTURE_CURRENT.md`
-**Por qué:** Define qué está vivo (Ollama) y qué es leyenda (LM Studio). **Ignorar expresamente el `README.md`** si hay contradicción técnica.
+**Archivos:** `docs/ARCHITECTURE_CURRENT.md` y `docs/CAPABILITIES_MAP.md`.
+**Por qué:** Definen qué está vivo y cómo se clasifican las capacidades del sistema. **Ignorar expresamente el `README.md`** si hay contradicción técnica.
 
 ## 3. La Infraestructura y el Onboarding
 **Archivo:** `docker-compose.yml` y este mismo archivo (`ENTRY_POINT.md`).
