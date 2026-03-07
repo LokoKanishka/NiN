@@ -1,3 +1,7 @@
+# --- NIN STATUS: UTILITY / FALLBACK ---
+# Autoridad Funcional: Workflow OSINT (n8n)
+# Herramienta de consulta rápida. No es la capa de decisión principal.
+
 import requests, sys, os
 from dotenv import load_dotenv
 

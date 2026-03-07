@@ -1,0 +1,139 @@
+{
+    "name": "NIN | Búnker de Memoria Dinámica",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "bunker-sync",
+                "options": {}
+            },
+            "id": "c1a2b3c4-post",
+            "name": "Recibidor (POST)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "command": "echo '{{ JSON.stringify($json.body) }}' >> /home/node/.n8n/nin_bunker_log.jsonl"
+            },
+            "id": "e5f6g7h8-write",
+            "name": "Guardar Memoria",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "{\"status\": \"memoria almacenada en el bunker\"}",
+                "options": {}
+            },
+            "id": "i9j0k1l2-res1",
+            "name": "Respond to Webhook",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "GET",
+                "path": "bunker-read",
+                "options": {}
+            },
+            "id": "m3n4o5p6-get",
+            "name": "Lector (GET)",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "command": "tail -n 50 /home/node/.n8n/nin_bunker_log.jsonl || echo '[]'"
+            },
+            "id": "q7r8s9t0-read",
+            "name": "Leer Historial",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                450,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ $json.stdout }}",
+                "options": {}
+            },
+            "id": "u1v2w3x4-res2",
+            "name": "Respond to Lector",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                650,
+                500
+            ]
+        }
+    ],
+    "connections": {
+        "Recibidor (POST)": {
+            "main": [
+                [
+                    {
+                        "node": "Guardar Memoria",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Guardar Memoria": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Lector (GET)": {
+            "main": [
+                [
+                    {
+                        "node": "Leer Historial",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Leer Historial": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Lector",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {}
+}

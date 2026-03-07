@@ -4,6 +4,14 @@ Este documento cataloga los artefactos (scripts y workflows) que residen en la p
 
 ---
 
+## 0. Autoridad Funcional (Regla de la Capa Superior) ⚖️
+Para evitar ambigüedad operativa en NIN, se aplica el siguiente criterio de precedencia:
+1.  **VERTICAL:** Si existe una carpeta en `verticals/` para una tarea, esa es la **AUTORIDAD MÁXIMA**.
+2.  **WORKFLOW CORE:** Si no hay vertical, el workflow en n8n es la autoridad lógica.
+3.  **SCRIBIT/UTILITY:** Los archivos en `scripts/` son herramientas de apoyo, fallbacks o patrones históricos, NO la autoridad de decisión.
+
+---
+
 ## 1. Clasificación por Capas
 
 | Clase | Descripción | Elementos |
@@ -48,7 +56,19 @@ Este documento cataloga los artefactos (scripts y workflows) que residen en la p
 
 ---
 
-## 3. Zona de Pre-Legacy (Próxima Poda)
+## 3. Resoluciones de Autoridad (Fase 2.5)
+
+### Caso 1: Automatización de CVs 📧
+- **Autoridad:** **`verticals/gmail_cv/`** (Vertical estructurada).
+- **Estatus de `scripts/send_cvs.py`:** **LEGACY-PATTERN / APOYO**. No debe usarse como punto de entrada operativo. Su lógica de filtrado es referencia para la vertical.
+
+### Caso 2: Búsqueda OSINT / Tavily 🔍
+- **Autoridad:** **Workflow n8n** (Capa de orquestación y misiones).
+- **Estatus de `scripts/tavily_search.py`:** **UTILITY / FALLBACK**. Herramienta de consulta rápida para el demonio o terminal, sin peso en la lógica de decisión.
+
+---
+
+## 4. Zona de Pre-Legacy (Próxima Poda)
 Artefactos que no han demostrado valor operativo en el stack actual y serán movidos a `legacy/` en la Fase 2:
 - `scrape_templates.py`: Superado por la curaduría manual de la Biblioteca.
 - `tool_notebook`: Redundante con el sistema de memoria persistente de Antigravity.

@@ -1,3 +1,7 @@
+# --- NIN STATUS: LEGACY-PATTERN / APOYO ---
+# Autoridad Funcional: verticals/gmail_cv/
+# Este script no es el punto de entrada oficial para el flujo operativo de CVs.
+
 import os
 import time
 import requests
