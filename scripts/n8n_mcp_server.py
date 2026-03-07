@@ -19,7 +19,7 @@ from mcp.server.fastmcp import FastMCP
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(SCRIPT_DIR)
 ENV_FILE = os.path.join(REPO_DIR, ".env")
-DB_PATH = os.path.join(REPO_DIR, "agente_memoria.db")
+DB_PATH = os.path.join(REPO_DIR, "runtime", "agente_memoria.db")
 CONTAINER = "N8N-NiN-uso-exclusivo-del-proyecto-nin"
 TIMEOUT = 5
 
@@ -292,22 +292,25 @@ def recordar_contexto(project_name: str, session_goal: str, open_files: str = ""
         conn.commit()
         conn.close()
 
-        # [CONSOLIDACIÓN DE MEMORIA] - Generar Snapshot JSON para arranque rápido
+        # [CONSOLIDACIÓN DE MEMORIA] - Generar Snapshot JSON para arranque rápido (Sincronizado con SQL)
         snapshot_path = os.path.join(REPO_DIR, "runtime", "session_latest.json")
+        now_iso = subprocess.getoutput("date -Iseconds")
         snapshot_data = {
             "last_session": {
-                "timestamp": subprocess.getoutput("date -Iseconds"),
+                "timestamp": now_iso,
                 "project_name": project_name,
                 "session_goal": session_goal,
+                "fase": "Consolidación de Memoria NiN 1.0",
                 "open_files": open_files.split(", ") if open_files else [],
                 "active_workflows": active_workflows.split(", ") if active_workflows else [],
-                "status": "Persisted via MCP"
+                "status": "Sincronizado (JSON + SQL)",
+                "last_commit": subprocess.getoutput("git rev-parse --short HEAD")
             }
         }
         with open(snapshot_path, "w") as f:
             json.dump(snapshot_data, f, indent=2)
 
-        return "Contexto de sesión y Snapshot JSON guardados correctamente."
+        return f"ÉXITO: Memoria sincronizada en SQL y Snapshot JSON ({now_iso})"
     except Exception as e:
         return f"Error guardando contexto: {e}"
 
