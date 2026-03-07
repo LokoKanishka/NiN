@@ -37,8 +37,9 @@ Sin n8n conectado, estás operando a media potencia. SIEMPRE arrancá conectánd
 3. `mcp_n8n-control_doctor_system` → Verificar y reparar contenedores NIN/Espejo.
 
 ### Paso 4: Recuperar Memoria y Contexto
-1. `mcp_n8n-control_recuperar_contexto` → Cargar último estado de sesión.
-2. `mcp_n8n-control_memory_search` → Buscar temas relacionados a la sesión actual.
+1. **Arranque**: Consultar `runtime/session_latest.json` para recuperar el hilo conductor de la misión.
+2. **Cierre**: Usar `mcp_n8n-control_recordar_contexto` al finalizar para persistir metas, archivos y estado actual.
+3. **Consulta Histórica**: `mcp_n8n-control_memory_search` o `bitacora.md` para temas profundos.
 
 ### Herramientas disponibles (autodescubiertas vía MCP)
 
