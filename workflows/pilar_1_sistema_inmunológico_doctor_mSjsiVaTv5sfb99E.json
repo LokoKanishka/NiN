@@ -27,7 +27,7 @@
           "parameters": [
             {
               "name": "model",
-              "value": "qwq-abliterated:32b"
+              "value": "qwen2.5-coder:14b-instruct-q8_0"
             },
             {
               "name": "stream",

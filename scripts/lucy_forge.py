@@ -6,7 +6,7 @@ import re
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
 N8N_URL = "http://localhost:5678/api/v1/workflows"
-MODEL = "huihui_ai/qwq-abliterated:32b-Q6_K"
+MODEL = "qwen2.5-coder:14b-instruct-q8_0"
 
 # Leer Llave del Bunker
 API_KEY = ""

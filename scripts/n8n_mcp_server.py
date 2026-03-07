@@ -259,8 +259,7 @@ def execute_n8n_workflow(workflow_id: str, trigger_data: Optional[Dict[str, Any]
 @mcp.tool()
 def invoke_secret_agent(consulta: str) -> str:
     """
-    Invoca al 'Agente Secreto - Mapeador' de n8n para tareas de REZONAMIENTO que requieren
-    el modelo de 32B (Advertencia: Latencia alta de 1-3 minutos).
+    Invoca al 'Agente Secreto - Mapeador' de n8n para tareas de RAZONAMIENTO.
     """
     ip = get_container_ip()
     webhook_url = f"http://{ip}:5678/webhook/agente-secreto"

@@ -16,7 +16,7 @@ Para evitar ambigüedad operativa en NIN, se aplica el siguiente criterio de pre
 
 | Clase | Descripción | Elementos |
 | :--- | :--- | :--- |
-| **CORE** | Funciones críticas para la operación o razonamiento. | `agente_secreto_mapeador`, `youtube_launcher_service.py` |
+| **CORE** | Funciones críticas para la operación o razonamiento. | `notenin_researcher`, `youtube_launcher_service.py` |
 | **CORE LATENTE** | Infraestructura de soporte y diagnóstico. | `youtube_watchdog.py`, `agente_estado_...` |
 | **VERTICAL** | Lógica específica de una línea de negocio/acción. | `book_fetcher.py`, `telegram_book_sender.py` |
 | **HIBERNACIÓN** | Prototipos funcionales no activos hoy. | `agente_leer_...` |
@@ -43,10 +43,8 @@ Para evitar ambigüedad operativa en NIN, se aplica el siguiente criterio de pre
     - **Función:** Envía archivos a dispositivos Kindle/Telegram.
     - **Estado:** **VERTICAL**. Parte de la automatización de biblioteca personal.
 
-### C. Capa de Orquestación (Agentes)
-*   **`workflows/agente_secreto_mapeador`**
-    - **Función:** Orquestador de razonamiento complejo (DeepSeek-32B).
-    - **Estado:** **CORE**. Indispensable para misiones de análisis profundo.
+    - **Función:** Orquestador de misiones de investigación y síntesis.
+    - **Estado:** **CORE**. Motor de razonamiento basado en el modelo canónico 14B.
 *   **`workflows/agente_estado_...`**
     - **Función:** Diagnóstico de salud de servicios y contenedores.
     - **Estado:** **LATENTE**. Herramienta de auditoría bajo demanda.

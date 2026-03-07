@@ -26,10 +26,12 @@ El sistema NIN opera bajo un modelo de **Soberanía de Datos Local** utilizando 
 > **Puertos Confusos:** Distinguir `searxng-lucy` (8080 - Oficial) de `lucy_eyes_searxng` (8081 - Externo).
 
 ## 2. Modelos en Uso
-El motor de inferencia oficial es **Ollama**.
-- **Demonio 14B (notenin):** `qwen2.5-coder:14b-instruct-q8_0` (Investigación y síntesis).
-- **Mapeador (Secret Agent):** `huihui_ai/deepseek-r1-abliterated:32b-qwen-distill-q6_K` (Razonamiento complejo con 32B).
+El motor de inferencia oficial y único para la operación de NIN es **Ollama**.
+- **Motor Único (notenin / Mapeador / Demonio):** `qwen2.5-coder:14b-instruct-q8_0` (Investigación, síntesis y razonamiento).
 - **Embedded:** `nomic-embed-text` (Vectores).
+
+> [!NOTE]
+> NIN utiliza exclusivamente la cuantización **Q8** para el modelo 14B para optimizar el equilibrio entre precisión y latencia en hardware local. No se utilizan variantes BF16/FP16 en la operativa estándar.
 
 ## 3. Workflows Core (Producción)
 Los flujos de trabajo críticos que mantienen NIN operativo son:
