@@ -67,7 +67,7 @@
                 "url": "http://host.docker.internal:11434/api/chat",
                 "sendBody": true,
                 "specifyBody": "json",
-                "jsonBody": "={\n  \"model\": \"qwen2.5:14b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Eres 'notenin', el Demonio Librero del proyecto NIN. Tu trabajo es leer resultados de búsquedas web y extraer/sintetizar SOLO la información técnica valiosa (código, estrategias, matemáticas) en formato Markdown estructurado. Ignora el ruido publicitario. Genera un reporte detallado.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Misión: {{ $('Define Misión').item.json.search_query }}\\n\\nResumen Tavily: {{ $json.answer }}\\n\\nFuentes:\\n{{ JSON.stringify($json.results) }}\"\n    }\n  ],\n  \"stream\": false\n}",
+                "jsonBody": "={\n  \"model\": \"qwen2.5-coder:14b-instruct-q8_0\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Eres 'notenin', el Demonio Librero del proyecto NIN. Tu trabajo es leer resultados de búsquedas web y extraer/sintetizar SOLO la información técnica valiosa (código, estrategias, matemáticas) en formato Markdown estructurado. Ignora el ruido publicitario. Genera un reporte detallado.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Misión: {{ $('Define Misión').item.json.search_query }}\\n\\nResumen Tavily: {{ $json.answer }}\\n\\nFuentes:\\n{{ JSON.stringify($json.results) }}\"\n    }\n  ],\n  \"stream\": false\n}",
                 "options": {}
             },
             "id": "ollama-curator",

@@ -36,7 +36,7 @@ git log -1 --oneline
 ls docs/ARCHITECTURE_CURRENT.md docs/ENTRY_POINT.md
 
 # 3. ¿El backend es Ollama (esperado) y no LM Studio?
-curl -s http://localhost:11434/api/tags | grep -q "qwen2.5" && echo "Ollama OK"
+curl -s http://localhost:11434/api/tags | grep -q "qwen2.5-coder:14b" && echo "Ollama OK"
 ```
 
 > [!CAUTION]

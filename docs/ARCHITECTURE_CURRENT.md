@@ -27,12 +27,9 @@ El sistema NIN opera bajo un modelo de **Soberanía de Datos Local** utilizando 
 
 ## 2. Modelos en Uso
 El motor de inferencia oficial es **Ollama**.
-- **Demonio 14B (notenin):** `qwen2.5:14b` (Investigación y síntesis).
-- **Mapeador (Secret Agent):** `qwen2.5:32b` (Razonamiento complejo con 32B).
+- **Demonio 14B (notenin):** `qwen2.5-coder:14b-instruct-q8_0` (Investigación y síntesis).
+- **Mapeador (Secret Agent):** `huihui_ai/deepseek-r1-abliterated:32b-qwen-distill-q6_K` (Razonamiento complejo con 32B).
 - **Embedded:** `nomic-embed-text` (Vectores).
-
-> [!WARNING]
-> **LM Studio (Puerto 1234) es LEGADO.** No se utiliza en la arquitectura actual. Ignorar cualquier referencia a `gpt-oss-120b`.
 
 ## 3. Workflows Core (Producción)
 Los flujos de trabajo críticos que mantienen NIN operativo son:
