@@ -8,8 +8,13 @@ from dotenv import load_dotenv
 BASE_DIR = "/home/lucy-ubuntu/Escritorio/NIN"
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-TG_TOKEN = "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA"
-DIEGO_ID = 5154360597
+# Credenciales Telegram (desde .env)
+TG_TOKEN = os.getenv("TG_TOKEN")
+DIEGO_ID = int(os.getenv("TG_CHAT_ID", "0"))
+
+if not TG_TOKEN:
+    print("❌ FATAL: TG_TOKEN no está definido en .env. Abortando.")
+    import sys; sys.exit(1)
 
 LIBGEN_SEARCH_URL = "https://libgen.is/search.php?req={query}&open=0&res=25&view=simple&phrase=1&column=def"
 

@@ -6,10 +6,15 @@ import aiohttp
 import shutil
 from datetime import datetime
 from typing import List, Dict, Any
+from dotenv import load_dotenv
 from mcp import ClientSession
 from mcp.client.sse import sse_client
 
 # === CONFIGURACIÓN ===
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR_ROOT = os.path.dirname(SCRIPT_DIR)
+load_dotenv(os.path.join(BASE_DIR_ROOT, ".env"))
+
 SSE_URL = "http://127.0.0.1:8000/sse"
 BASE_DIR = "/home/lucy-ubuntu/Escritorio/NIN/demon"
 MISSIONS_DIR = f"{BASE_DIR}/misiones"
@@ -22,9 +27,13 @@ CHAT_LOG = f"{CHAT_DIR}/diego_mensajes.log"
 OLLAMA_MODEL = "qwen2.5-coder:14b-instruct-q8_0"
 OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
 
-# Credenciales Telegram (Detectadas)
-TG_TOKEN = "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA"
-DIEGO_ID = 5154360597
+# Credenciales Telegram (desde .env)
+TG_TOKEN = os.getenv("TG_TOKEN")
+DIEGO_ID = int(os.getenv("TG_CHAT_ID", "0"))
+
+if not TG_TOKEN:
+    print("❌ FATAL: TG_TOKEN no está definido en .env. Abortando.")
+    sys.exit(1)
 
 async def send_telegram_message(text: str):
     """La Boca de NiN: Envía mensajes a Diego."""

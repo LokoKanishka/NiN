@@ -36,9 +36,9 @@ CUENTAS_SMTP = [
     {"user": SMTP_USER, "pass": SMTP_PASS},
 ]
 
-# Credenciales Telegram NiN
-TG_TOKEN = os.getenv("TG_TOKEN", "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA")
-DIEGO_ID = os.getenv("DIEGO_ID", "5154360597")
+# Credenciales Telegram NiN (desde .env)
+TG_TOKEN = os.getenv("TG_TOKEN")
+DIEGO_ID = os.getenv("TG_CHAT_ID", "0")
 SIRENA_URL = "http://127.0.0.1:5678/webhook/sirena-telegram"
 
 # --- UTILIDADES DE PERSISTENCIA Y LOCK ---

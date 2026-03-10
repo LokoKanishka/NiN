@@ -49,7 +49,7 @@
                 },
                 "sendBody": true,
                 "specifyBody": "json",
-                "jsonBody": "={\n  \"api_key\": \"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\",\n  \"query\": \"{{ $json.search_query }}\",\n  \"search_depth\": \"advanced\",\n  \"include_answer\": true,\n  \"include_raw_content\": false,\n  \"max_results\": 5\n}",
+                "jsonBody": "={\n  \"api_key\": \"{{ $env.TAVILY_API_KEY }}\",\n  \"query\": \"{{ $json.search_query }}\",\n  \"search_depth\": \"advanced\",\n  \"include_answer\": true,\n  \"include_raw_content\": false,\n  \"max_results\": 5\n}",
                 "options": {}
             },
             "id": "tavily-search",
