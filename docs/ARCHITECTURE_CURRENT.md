@@ -57,13 +57,10 @@ Cualquier agente que intervenga en NIN debe leer la documentación en este orden
 4. `docs/ENTRY_POINT.md` (Cómo empezar a trabajar de forma segura).
 5. `docker-compose.yml` (Cómo se despliega el sistema).
 
-## 6. Áreas Sensibles y Restricciones
-- **No modificar:** El socket de Docker (`/var/run/docker.sock`) ni la configuración de red `extra_hosts`.
-- **Categorización de Archivos:**
-    - **Core:** `docs/`, `workflows/`, `scripts/`.
-    - **Verticales:** `verticals/` (Trading, CV).
-    - **Ruido Runtime:** `runtime/`, `node_modules/`. **IGNORAR** en lecturas de arquitectura.
-    - **Legado:** `legacy/` (Material histórico). **NO USAR** como base técnica.
+## 6. Soberanía y Legacy
+- **Liquidación de Infraestructura Obsoleta:** NiN ha migrado fuera de LM Studio y modelos mixtos de 120B.
+- **Estándar Vigente:** Se utiliza exclusivamente `qwen2.5-coder:14b-instruct-q8_0` en Ollama por su balance superior de razonamiento/latencia.
+- **Frontera Histórica:** Cualquier configuración que mencione el puerto `1234` es considerada **Legacy** y ha sido movida a la carpeta `legacy/`.
 
 ---
-**Certificado por:** Antigravity AI - Agente de Arquitectura NIN
+**Certificado por:** Antigravity AI - Agente de Arquitectura NIN (Marzo 2026)

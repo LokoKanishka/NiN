@@ -1,5 +1,8 @@
-# Project LUCY: Sovereign AI Automation Protocol
-> **NiN — Network in Network | Zero Cloud Leak | $0 SaaS**
+# NiN | Archivo de Material Histórico (Legacy)
+
+> [!WARNING]
+> **ESTE DIRECTORIO REPRESENTA ARQUITECTURA OBSOLETA.**
+> La información contenida aquí (referencias a LM Studio, modelos de 120B, puerto 1234) NO debe ser utilizada para diagnósticos técnicos ni configuraciones activas. La Fuente de Verdad es `docs/ARCHITECTURE_CURRENT.md`.
 
 ## 📖 Abstract
 Project LUCY is a sovereign automation system designed for academic research, philosophy, and high-complexity task orchestration. It leverages a massive **120B parameter Mixture-of-Experts (MoE)** model as the "Architect" for reasoning and planning, while **n8n** serves as the "Executor" for cross-platform integration and file management.
