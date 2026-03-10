@@ -1,29 +1,18 @@
 {
-  "project_name": "NIN 1.0 (PROYECTO SANEADO)",
-  "version": "1.0.0",
-  "last_milestone": "Limpieza Física y Reconciliación de n8n",
-  "model_unified": "qwen2.5-coder:14b-instruct-q8_0",
-  "memory_status": "Consolidada y Sincronizada",
-  "n8n_status": {
-    "workflows_total": 47,
-    "authorities_protected": 8,
-    "catalog_db": "Poblado y Activo",
-    "governance": "docs/N8N_GOVERNANCE.md"
-  },
-  "session_metadata": {
-    "close_timestamp": "2026-03-07T20:30:00-03:00",
-    "session_goal": "Saneamiento y Gobernanza",
-    "status": "COMPLETED"
-  },
-  "pending_tasks": [
-    "Observar uso real del sistema post-limpieza",
-    "Evitar más saneamientos estructurales inmediatos",
-    "Iniciar fase operativa propiamente dicha"
-  ],
-  "critical_files": [
-    "library/catalog.db",
-    "docs/N8N_GOVERNANCE.md",
-    "runtime/agente_memoria.db",
-    "scripts/n8n_mcp_server.py"
-  ]
+  "last_session": {
+    "timestamp": "2026-03-09T23:19:08-03:00",
+    "project_name": "NIN 1.0 - Mailing Stabilized",
+    "session_goal": "Deduplicaci\u00f3n inteligente corregida, Telegram fallback reparado y Protocolo Preflight establecido. Sistema listo para reanudaci\u00f3n real.v",
+    "fase": "Consolidaci\u00f3n de Memoria NiN 1.0",
+    "open_files": [
+      "scripts/send_cvs.py",
+      "runtime/cv_sent_history.json",
+      ".agents/workflows/operating_rules.md"
+    ],
+    "active_workflows": [
+      "NIN Mailing (send_cvs.py)"
+    ],
+    "status": "Sincronizado (JSON + SQL)",
+    "last_commit": "fatal: no es un repositorio git (ni ninguno de los directorios superiores): .git"
+  }
 }
