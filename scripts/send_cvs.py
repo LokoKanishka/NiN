@@ -1,94 +1,126 @@
-# --- NIN STATUS: LEGACY-PATTERN / APOYO ---
-# Autoridad Funcional: verticals/gmail_cv/
-# Este script no es el punto de entrada oficial para el flujo operativo de CVs.
+# --- NIN STATUS: STABILIZED ---
+# Authority: scripts/send_cvs.py (Current Operational Authority)
+# This script handles the daily CV mailing with persistence, locking, and safety.
 
 import os
+import sys
 import time
-import requests
+import json
 import random
 import datetime
+import threading
 import pandas as pd
-from dotenv import load_dotenv
-
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+from dotenv import load_dotenv
 
-# Cargar variables si existen
-load_dotenv("/home/lucy-ubuntu/Escritorio/NIN/.env")
+# --- CONFIGURACIÓN DE RUTA Y AMBIENTE ---
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(SCRIPT_DIR)
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-EXCEL_PATH = "/home/lucy-ubuntu/Escritorio/NIN/verticals/gmail_cv/data/1 3 14.xltx"
-CV_PATH = "/home/lucy-ubuntu/Escritorio/NIN/verticals/gmail_cv/data/CV.PROF.FILOSOFIA.pdf"
-# Cuenta fija solicitada por el usuario
+# --- CONSTANTES OPERATIVAS ---
+EXCEL_PATH = os.path.join(BASE_DIR, "verticals/gmail_cv/data/lista_produccion_colegios.xlsx")
+CV_PATH = os.path.join(BASE_DIR, "verticals/gmail_cv/data/CV.PROF.FILOSOFIA.pdf")
+HISTORY_PATH = os.path.join(BASE_DIR, "runtime/cv_sent_history.json")
+LOCK_FILE = "/tmp/send_cvs.lock"
+
+# --- SEGURIDAD Y CREDENCIALES ---
+DRY_RUN = False  # Cambiar a True para simular sin enviar mails
+SMTP_USER = os.getenv("SMTP_USER_DIEGO", "profedefilodiego@gmail.com")
+SMTP_PASS = os.getenv("SMTP_PASS_DIEGO") # Tomado de .env
+
 CUENTAS_SMTP = [
-    {"user": "profedefilodiego@gmail.com", "pass": "kwnwqhdtkqlopsac"},
+    {"user": SMTP_USER, "pass": SMTP_PASS},
 ]
 
-# Instituciones ya enviadas exitosamente según logs previos (para evitar duplicados hoy)
-ALREADY_SENT = {
-    "INST. MATER DOLOROSA", 
-    "INSTITUTO SCHILLER", 
-    "CENTRO EDUCATIVO BUENOS AIRES", 
-    "INST NUESTRA SRA DE LA MISERICORDIA",
-    "INSTITUTO GRIEGO ATENÁGORAS I",
-    "INSTITUTO CAROLINA ESTRADA DE MARTINEZ",
-    "COLEGIO BUENOS AIRES S.R.L",
-    "INSTITUTO PRIVADO REGINA VIRGINUM",
-    "ESCUELA SCHOLEM ALEIJEM",
-    "INSTITUTO ECOS ESCUELA SECUNDARIA",
-    "COLEGIO PAIDEIA",
-    "INSTITUTO SAN ROQUE",
-    "INSTITUTO COMUNICACIONES",
-    "INSTITUTO PRIVADO DAVID WOLFSOHN",
-    "BACH. POP. DE JOVENES Y ADULTOS LA DIGNIDAD",
-    "BACH. POP. DE JOVENES Y ADULTOS VILLA CRESPO-NUESTRAMERICA",
-    "CFP DE LA ESC. TECSON SRL",
-    "EAG (ESCUELA DE ARTE GASTRONOMICO)",
-    "CENTRO DE FORMACIÓN PROFESIONAL ESCUELA ARGENTINA DE SOCORRISMO Y SALVAMENTO ACUATICO S.A  (EASSA)",
-    "COLEGIO OLIVOS DEL SOL",
-    "COLEGIO SAN ANTONIO",
-    "INSTITUTO JOSÉ MANUEL ESTRADA",
-    "COLEGIO SAN NICOLAS",
-    "ESCUELA SAN GABRIEL",
-    "COLEGIO SAN GABRIEL",
-    "COLEGIO LOS MOLINOS",
-    "ESCUELA JESUS EN EL HUERTO DE LOS OLIVOS",
-    "INSTITUTO JESUS EN EL H. DE LOS OLIVOS",
-    "INSTITUTO DE EDUCACION INTEGRAL DE MUNRO",
-    # Envíos de la sesión actual 2026-03-06 (Configuración corregida)
-    "COLEGIO SECUNDARIO SANTO TOMAS DE AQUINO",
-    "INSTITUTO ESPAÑOL VIRGEN DEL PILAR"
-}
-
-# Credenciales Telegram (NiN-Demon Sync)
-TG_TOKEN = "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA"
-DIEGO_ID = 5154360597
-
-import threading
-
-# URL de la Sirena n8n para desacoplo total (Blindaje Permanente)
+# Credenciales Telegram NiN
+TG_TOKEN = os.getenv("TG_TOKEN", "8235094378:AAG-EKXPVUjmXGTZQigDIxyciWqlNMsJ8oA")
+DIEGO_ID = os.getenv("DIEGO_ID", "5154360597")
 SIRENA_URL = "http://127.0.0.1:5678/webhook/sirena-telegram"
 
-def notify_telegram_sync(message):
-    """Envío directo a Telegram para evitar dependencia de webhooks externos."""
-    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
-    payload = {"chat_id": DIEGO_ID, "text": message}
+# --- UTILIDADES DE PERSISTENCIA Y LOCK ---
+
+def acquire_lock():
+    if os.path.exists(LOCK_FILE):
+        try:
+            with open(LOCK_FILE, "r") as f:
+                pid = int(f.read().strip())
+            os.kill(pid, 0) # Verifica si el proceso existe
+            return False, pid
+        except (ValueError, ProcessLookupError, OSError):
+            pass # El PID no es válido o el proceso murió
+    with open(LOCK_FILE, "w") as f:
+        f.write(str(os.getpid()))
+    return True, os.getpid()
+
+def release_lock():
+    if os.path.exists(LOCK_FILE):
+        os.remove(LOCK_FILE)
+
+def load_history():
+    if not os.path.exists(HISTORY_PATH):
+        return []
     try:
+        with open(HISTORY_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+def save_to_history(colegio, email, status):
+    history = load_history()
+    entry = {
+        "timestamp": datetime.datetime.now().isoformat(),
+        "colegio": colegio,
+        "colegio_norm": normalize_name(colegio),
+        "email": email,
+        "status": status
+    }
+    history.append(entry)
+    # Crear carpeta runtime si no existe
+    os.makedirs(os.path.dirname(HISTORY_PATH), exist_ok=True)
+    with open(HISTORY_PATH, "w", encoding="utf-8") as f:
+        json.dump(history, f, indent=2, ensure_ascii=False)
+
+def normalize_name(name):
+    import unicodedata
+    if not isinstance(name, str): return ""
+    # Normalizar a minúsculas, quitar espacios y acentos
+    s = name.lower().strip()
+    s = "".join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+    return s
+
+# --- NOTIFICACIONES ---
+
+def notify_telegram_sync(message):
+    """Envío vía Sirena NiN con fallback directo (best-effort)."""
+    # 1. Intentar vía Sirena (n8n Webhook)
+    try:
+        import requests
+        r = requests.post(SIRENA_URL, json={"mensaje": message}, timeout=3)
+        if r.ok:
+            return
+    except Exception:
+        pass
+    
+    # 2. Fallback Directo
+    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
+    payload = {"chat_id": DIEGO_ID, "text": f"NiN-Alert: {message}"}
+    try:
+        import requests
         requests.post(url, json=payload, timeout=5)
     except Exception:
         pass
 
 def notify_telegram(message):
-    """
-    Blindaje Permanente NiN: Envía notificaciones a través de la Sirena
-    asíncrona en n8n. El script principal es inmune a colapsos de red.
-    """
+    """Notificación no bloqueante."""
     t = threading.Thread(target=notify_telegram_sync, args=(message,), daemon=True)
     t.start()
 
 def w_log(msg):
-    full_msg = f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {msg}"
+    full_msg = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}"
     print(full_msg)
 
 def armar_textos(colegio):
@@ -160,126 +192,128 @@ def enviar_correo(origen_user, origen_pass, destino, colegio):
         w_log(f"❌ Error SMTP en envío: {e}")
         return str(e)
 
-TARGET_TIME = datetime.time(6, 15)  # Programado para las 06:15
+TARGET_TIME = None # Cambiar a un objeto time (ej. datetime.time(6, 15)) para programar
 
 def principal():
-    w_log("🚀 Iniciando Script Nativo de Envío de CVs (vía Smtplib) [ENVÍO COMPLETO + TELEGRAM]...")
+    # 0. Check Lock
+    success, pid = acquire_lock()
+    if not success:
+        print(f"❌ ERROR: El script ya está corriendo (PID: {pid}). Abortando para evitar duplicados.")
+        sys.exit(1)
     
-    if TARGET_TIME is not None:
-        notify_telegram(f"🚀 Script de CVs iniciado. Esperando a las {TARGET_TIME.strftime('%H:%M')} para la tanda completa.")
-        ahora = datetime.datetime.now()
-        target_dt = datetime.datetime.combine(ahora.date(), TARGET_TIME)
-        if ahora > target_dt:
-            if ahora.hour > 12:
-                target_dt += datetime.timedelta(days=1)
-                wait_seconds = (target_dt - ahora).total_seconds()
-                w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las {TARGET_TIME.strftime('%H:%M')} de mañana...")
-                time.sleep(wait_seconds)
-            else:
-                w_log(f"⚠️ La hora objetivo ({TARGET_TIME.strftime('%H:%M')}) ya pasó esta madrugada. Avanzando de inmediato.")
-        else:
-            wait_seconds = (target_dt - ahora).total_seconds()
-            w_log(f"⏳ Esperando {wait_seconds:.0f} segundos hasta las {TARGET_TIME.strftime('%H:%M')}...")
-            time.sleep(wait_seconds)
-        w_log("⏱️ ¡Hora alcanzada! Leyendo base de datos...")
-        notify_telegram(f"⏱️ ¡Hora alcanzada ({TARGET_TIME.strftime('%H:%M')})! Iniciando envío a la lista de colegios...")
-    else:
-        w_log("⚡ Modo inmediato activado. Leyendo base de datos...")
-        notify_telegram("🚀 Script de CVs iniciado en MODO INMEDIATO. Enviando a la lista de colegios...")
-    
-    TEST_MODE = False # Envío real activado
-    TEST_EMAIL = "chatjepetex4@gmail.com" # Email de prueba (ignorado en False)
-    
-    # 1. Leer Excel
     try:
-        # Intentamos leer sin encabezados para procesar todo, o definimos comportamiento defensivo
-        df = pd.read_excel(EXCEL_PATH, header=None)
-    except Exception as e:
-        w_log(f"❌ Error leyendo Excel: {e}")
-        notify_telegram(f"❌ Error crítico leyendo Excel: {e}")
-        return
+        w_log("🚀 Iniciando Script de Envío de CVs (NiN Stabilized)...")
+        if DRY_RUN: w_log("🧪 MODO DRY-RUN ACTIVADO: No se enviarán correos reales.")
 
-    colegios_lista = df.to_dict(orient='records')
-    total = len(colegios_lista)
-    w_log(f"📚 {total} colegios detectados en la lista.")
-    
-    cuentas_activas = CUENTAS_SMTP.copy()
-    
-    # 2. Iterar y Enviar (Round-Robin Dinámico)
-    i = 0
-    while i < total:
-        if not cuentas_activas:
-            w_log("❌ Todas las cuentas SMTP fallaron o fueron bloqueadas. Abortando.")
-            notify_telegram("❌ Abortando envío: Todas las cuentas SMTP fueron bloqueadas.")
-            break
-            
-        fila = colegios_lista[i]
-        # Usamos índices numéricos ya que leímos con header=None
-        nombre = str(fila.get(0, 'Colegio')).strip()
-        email_raw = str(fila.get(1, '')).strip()
+        if not SMTP_PASS and not DRY_RUN:
+            w_log("❌ ERROR: No se encontró SMTP_PASS_DIEGO en el ambiente (.env). Abortando.")
+            sys.exit(1)
+
+        # 1. Programación o Inmediato
+        if TARGET_TIME is not None:
+            w_log(f"⏰ Programado para las {TARGET_TIME.strftime('%H:%M')}.")
+            # ... (lógica de espera simplificada) ...
+            ahora = datetime.datetime.now()
+            target_dt = datetime.datetime.combine(ahora.date(), TARGET_TIME)
+            if ahora > target_dt: target_dt += datetime.timedelta(days=1)
+            wait_seconds = (target_dt - ahora).total_seconds()
+            w_log(f"⏳ Esperando {wait_seconds:.0f} segundos...")
+            time.sleep(wait_seconds)
         
-        # Saltar instituciones ya enviadas exitosamente
-        if nombre in ALREADY_SENT:
-            w_log(f"⏭️ Saltando [{nombre}] — ya enviado anteriormente.")
-            i += 1
-            continue
+        # 2. Leer Datos e Historial
+        try:
+            df = pd.read_excel(EXCEL_PATH, header=None)
+        except Exception as e:
+            w_log(f"❌ Error leyendo Excel: {e}")
+            return
+
+        history = load_history()
+        # Crear conjuntos de comparación rápida
+        sent_names = {entry['colegio_norm'] for entry in history}
+        sent_combos = {(entry['colegio_norm'], entry['email'].lower()) for entry in history}
         
-        # El chequeo de 'falso header' fue eliminado para evitar saltos erróneos. 
-        # El parse_emails ya se encarga de validar si hay correos reales.
-        
-        if not email_raw or email_raw.lower() == 'nan':
-            w_log(f"⚠️ Saltando [{nombre}] por falta de email.")
-            i += 1
-            continue
-        
-        emails = parse_emails(email_raw)
-        if not emails:
-            w_log(f"⚠️ Saltando [{nombre}] — no se encontró email válido en: {email_raw}")
-            i += 1
-            continue
-        
-        # Selección de cuenta rotativa
-        cuenta_actual = cuentas_activas[i % len(cuentas_activas)]
-        origen_user = cuenta_actual['user']
-        origen_pass = cuenta_actual['pass']
-        
-        # Enviar a CADA email de esta institución
-        all_ok = True
-        for destino in emails:
-            w_log(f"✉️ [{i+1}/{total}] Enviando a {nombre} ({destino}) desde [{origen_user}]...")
-            resultado = enviar_correo(origen_user, origen_pass, destino, nombre)
-            
-            if resultado == "OK":
-                w_log(f"✅ Enviado a {destino}.")
-                notify_telegram(f"✅ [{i+1}/{total}] Enviado a: {nombre} → {destino} (Vía {origen_user})")
-            elif resultado == "AUTH_ERROR":
-                w_log(f"⚠️ Removiendo cuenta {origen_user} de la rotación por fallo de autenticación.")
-                notify_telegram(f"⛔ CUENTA BLOQUEADA/AUTH: {origen_user}. Se retira de la rotación. Reintentando...")
-                cuentas_activas.remove(cuenta_actual)
-                all_ok = False
+        colegios_lista = df.to_dict(orient='records')
+        total = len(colegios_lista)
+        w_log(f"📚 {total} registros cargados de {os.path.basename(EXCEL_PATH)}")
+
+        cuentas_activas = CUENTAS_SMTP.copy()
+        stats = {"sent": 0, "skipped": 0, "failed": 0}
+        current_session_sent = set()
+
+        # 3. Iterar y Enviar
+        for i, fila in enumerate(colegios_lista):
+            if not cuentas_activas and not DRY_RUN:
+                w_log("❌ Sin cuentas SMTP disponibles. Abortando.")
                 break
-            elif "Daily user sending limit exceeded" in str(resultado) or "550" in str(resultado):
-                w_log(f"⚠️ Removiendo cuenta {origen_user} por alcanzar LÍMITE DIARIO.")
-                notify_telegram(f"⛔ LÍMITE ALCANZADO: {origen_user}. Se retira de la rotación. Reintentando...")
-                cuentas_activas.remove(cuenta_actual)
-                all_ok = False
-                break
+
+            nombre = str(fila.get(0, '')).strip()
+            email_raw = str(fila.get(1, '')).strip()
+            nombre_norm = normalize_name(nombre)
+
+            if not nombre or not email_raw or email_raw.lower() == 'nan':
+                continue
+
+            # --- DEDUPLICACIÓN ---
+            # 1. Contra el historial persistente
+            if nombre_norm in sent_names:
+                w_log(f"⏭️  [Deduplicado-Historial] {nombre}")
+                stats["skipped"] += 1
+                continue
+            
+            # 2. Contra la sesión actual (duplicados en el mismo Excel)
+            if nombre_norm in current_session_sent:
+                w_log(f"⏭️  [Deduplicado-Sesión] {nombre}")
+                stats["skipped"] += 1
+                continue
+
+            emails_to_send = parse_emails(email_raw)
+            valid_emails = [e for e in emails_to_send if (nombre_norm, e.lower()) not in sent_combos]
+            
+            if not valid_emails:
+                w_log(f"⏭️  [Deduplicado-Email Historial] {nombre}")
+                stats["skipped"] += 1
+                continue
+
+            # --- ENVÍO ---
+            cuenta = cuentas_activas[stats["sent"] % len(cuentas_activas)]
+            
+            success_at_least_one = False
+            for destino in valid_emails:
+                w_log(f"✉️  [{i+1}/{total}] Enviando a {nombre} ({destino})...")
+                
+                if DRY_RUN:
+                    resultado = "OK"
+                    time.sleep(0.1)
+                else:
+                    resultado = enviar_correo(cuenta['user'], cuenta['pass'], destino, nombre)
+                
+                if resultado == "OK":
+                    success_at_least_one = True
+                    w_log(f"✅ Éxito.")
+                    if not DRY_RUN: save_to_history(nombre, destino, "OK")
+                else:
+                    w_log(f"❌ Fallo: {resultado}")
+                    if "Daily user sending limit exceeded" in str(resultado):
+                        cuentas_activas.remove(cuenta)
+                        break
+
+            if success_at_least_one:
+                stats["sent"] += 1
+                current_session_sent.add(nombre_norm)
+                notify_telegram(f"✅ Enviado: {nombre}")
+                # Pausa Anti-Spam
+                if i < total - 1:
+                    delay = random.randint(50, 110)
+                    w_log(f"⏳ Pausa de {delay}s...")
+                    time.sleep(delay)
             else:
-                w_log(f"❌ Falló envío a {destino} de {nombre}: {resultado}")
-                notify_telegram(f"❌ ERROR: No se pudo enviar a {nombre} ({destino}) vía {origen_user}.")
-        
-        if not all_ok and cuentas_activas:
-            continue # Reintentar mismo colegio con otra cuenta
-        
-        # Pausa Anti-Spam entre colegios
-        i += 1
-        if i < total:
-            delay = 60 # Delay fijo de 1 minuto solicitado
-            w_log(f"🛑 Pausa anti-spam de {delay} segundos...")
-            time.sleep(delay)
+                stats["failed"] += 1
 
-    w_log("🏁 Todos los envíos procesados o cancelados.")
-    notify_telegram("🏁 ¡Misión finalizada! Se procesó la lista completa de colegios o se agotaron las cuentas.")
+        w_log(f"🏁 FIN DE MISIÓN. Resumen: Enviados: {stats['sent']}, Saltados: {stats['skipped']}, Fallidos: {stats['failed']}")
+        notify_telegram(f"🏁 Tanda finalizada. Enviados: {stats['sent']}, Saltados: {stats['skipped']}")
+
+    finally:
+        release_lock()
 
 if __name__ == "__main__":
     principal()

@@ -144,10 +144,25 @@ Como Agente, tienes 13 conectores blindados hacia la máquina anfitriona. Conóc
 | SearXNG | `127.0.0.1:8080` | `127.0.0.1:8081` |
 | Qdrant | `127.0.0.1:6335` | `127.0.0.1:6333` |
 
-## Required Response Fields
+### Required Response Fields
 
 1. `workflow`
 2. `status`
 3. `result_id` (si aplica)
 4. `error` (si aplica)
 5. `memory_key` (si aplica)
+
+## ✉️ Regla Operativa: Mailing (CV Sending)
+
+Cada vez que el usuario solicite "enviar mails a los colegios", es **OBLIGATORIO** realizar un **Preflight Check** antes de cualquier ejecución:
+
+1. **Detección Automática**:
+   - Buscar en `verticals/gmail_cv/data/` el archivo Excel (`.xlsx` o `.xltx`) y el PDF más recientes.
+   - **FILTRO ESTRICTO**: Ignorar cualquier archivo cuyo nombre contenga las palabras `test`, `prueba` o `controlled`.
+2. **Validación de Cambio**:
+   - Comparar los archivos detectados con el último registro en `runtime/mailing_config.json`.
+   - Determinar si el contenido/archivo es **NUEVO** o **REPETIDO**.
+3. **Reporte Preflight**:
+   - Mostrar al usuario: Excel detectado, CV detectado y cantidad de filas netas (sin contar cabeceras).
+4. **Bloqueo de Ejecución**:
+   - **PROHIBIDO** iniciar el envío real hasta recibir confirmación explícita del usuario post-reporte.
