@@ -9,6 +9,7 @@ import os
 import argparse
 from ingest import ingest_document
 from document_classifier import process_all_documents
+from relational_extractor import process_relational_traces
 from dialogue_extractor import extract_dialogue_turns
 from cleaner import run_cleaner
 from scorer import run_scorer
@@ -40,28 +41,32 @@ def run_pipeline(input_file: str = None, max_scores: int = 15):
     print("\n[ FASE 2: CLASIFICACIÓN DE BLOQUES (Demonio Local) ]")
     process_all_documents()
 
-    # 3. Extract Dialogue 
-    print("\n[ FASE 3: EXTRACCIÓN DE DIÁLOGO ]")
+    # 3. Extract Relational Traces
+    print("\n[ FASE 3: EXTRACCIÓN RELACIONAL (Demonio Local) ]")
+    process_relational_traces()
+
+    # 4. Extract Dialogue 
+    print("\n[ FASE 4: EXTRACCIÓN DE DIÁLOGO ]")
     extract_dialogue_turns()
 
-    # 4. Clean
-    print("\n[ FASE 4: LIMPIEZA ]")
+    # 5. Clean
+    print("\n[ FASE 5: LIMPIEZA ]")
     run_cleaner()
 
-    # 5. Score
-    print("\n[ FASE 5: SCORING (Demonio Local) ]")
+    # 6. Score
+    print("\n[ FASE 6: SCORING (Demonio Local) ]")
     run_scorer(max_items=max_scores)
 
-    # 6. Profile
-    print("\n[ FASE 6: EXTRACCIÓN PERFIL ]")
+    # 7. Profile
+    print("\n[ FASE 7: EXTRACCIÓN PERFIL ]")
     extract_profile(max_examples=10)
 
-    # 7. Builder
-    print("\n[ FASE 7: OPENCLAW SEED ]")
+    # 8. Builder
+    print("\n[ FASE 8: OPENCLAW SEED ]")
     build_seed(max_examples=5)
 
-    # 8. Evaluate
-    print("\n[ FASE 8: EVALUACIÓN EMPÍRICA ]")
+    # 9. Evaluate
+    print("\n[ FASE 9: EVALUACIÓN EMPÍRICA ]")
     run_evaluator()
 
     print("\n" + "=" * 60)

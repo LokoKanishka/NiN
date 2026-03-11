@@ -3,7 +3,7 @@ NIN — Lucy Persona Distiller: Dialogue Extractor Module
 
 Reads runtime/persona_lucy/parsed/classified_chunks.jsonl
 Extracts conversational turns (user/assistant) ONLY from chunks
-labeled as "dialogue".
+labeled as "direct_dialogue".
 
 Outputs to runtime/persona_lucy/parsed/parsed_turns.jsonl
 """
@@ -143,8 +143,8 @@ def extract_dialogue_turns():
                 continue
             chunk = json.loads(line)
             
-            # ONLY Process 'dialogue' chunks!
-            if chunk.get("label") != "dialogue":
+            # ONLY Process 'direct_dialogue' chunks!
+            if chunk.get("label") != "direct_dialogue":
                 continue
             
             turns = parse_chunk_text(

@@ -20,37 +20,35 @@ SCORED_EXAMPLES_PATH = os.path.join(SCORED_DIR, "scored_examples.jsonl")
 PROFILE_PATH = os.path.join(FINAL_DIR, "lucy_persona_profile.md")
 PARSED_DIR = os.path.join(RUNTIME_DIR, "parsed")
 CLASSIFIED_CHUNKS_PATH = os.path.join(PARSED_DIR, "classified_chunks.jsonl")
+RELATIONAL_TRACES_PATH = os.path.join(PARSED_DIR, "relational_traces.jsonl")
 
 OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
 OLLAMA_MODEL = "qwen2.5-coder:14b-instruct-q8_0"
 
-EXTRACTOR_PROMPT = """Eres el analista jefe de personalidad del sistema NIN.
-Tu objetivo es destilar el perfil de identidad de la asistente "Lucy".
-Te voy a proporcionar un conjunto de interacciones que ya han sido curadas y certificadas como "altamente representativas" de su identidad.
+EXTRACTOR_PROMPT = """Eres el analista jefe de relaciones y personalidad del sistema NIN.
+Tu objetivo es destilar el perfil de identidad de la asistente "Lucy" con un enfoque del 70% en su INTELIGENCIA RELACIONAL frente a su usuario Diego, y un 30% en su estilo verbal.
+Se te proporcionarán ejemplos empíricos, notas doctrinales y, muy importante, trazas relacionales extraídas de su bitácora.
 
-Escribe un reporte EMPÍRICO e intensivamente descriptivo de su personalidad.
-No inventes datos que no estén en los ejemplos o en las notas doctrinales de personalidad provistas. Si no hay suficiente información en un rubro, índicalo.
+Escribe un reporte EMPÍRICO e intensivamente analítico de cómo es y cómo interactúa Lucy.
+No inventes datos que no estén en los ejemplos, notas o trazas provistas.
 
 Debes incluir en formato Markdown las siguientes secciones obligatoriamente:
-# Perfil de Identidad: Lucy
+# Perfil de Identidad: Lucy (Enfoque Relacional)
 
-## 1. Voz General y Tono
-(Describe su registro, nivel de formalidad, cómo suena, si usa emojis, si es seca o cálida)
+## 1. Interpretación de Diego y Dinámica de Vínculo
+(Cómo Lucy interpreta a Diego, cómo construye el vínculo, si hay paridad, dependencia, etc.)
 
-## 2. Forma de Explicar (Didáctica)
-(Cómo aborda un problema técnico o filosófico, si ordena, si enumera)
+## 2. Ajuste de Tono y Abstracción
+(Cómo decide responder según el estado de Diego, cómo regula la abstracción, contención y distancia)
 
-## 3. Rasgos Afectivos y Relacionales
-(Cómo trata al usuario, nivel de cercanía, nivel de compañerismo)
+## 3. Firmeza, Límites y Acompañamiento
+(Cómo corrige, cómo contiene, cuándo es firme, cómo asume reglas y cómo acompaña)
 
-## 4. Firmeza y Límites
-(Cómo corrige, cómo asume reglas)
+## 4. Voz General y Patrones Estilísticos
+(Su fraseo, ritmo verbal, modo de estructurar respuestas, giros característicos)
 
-## 5. Patrones Estilísticos
-(Muletillas, estructuras de oraciones recurrentes, tics positivos)
-
-## 6. Evitaciones y Conductas Prohibidas
-(Qué NO hace nunca, basándote en la alta calidad de los ejemplos dados)
+## 5. Evitaciones y Conductas Prohibidas
+(Qué NO hace nunca, basándote en la alta calidad de los ejemplos y reglas dados)
 
 Proporciona únicamente el Markdown final. Nada de introducciones ni despedidas.
 """
@@ -83,8 +81,19 @@ def extract_profile(max_examples=15):
                     if obj.get("label") in ["persona_notes", "operational_notes"]:
                         persona_notes.append(obj.get("content", ""))
 
-    if not scored_items and not persona_notes:
-        print("⚠️ No 'accepted' items or doctrinal notes found. Skipping profile extraction.")
+    # Add relational traces
+    relational_traces = []
+    if os.path.exists(RELATIONAL_TRACES_PATH):
+        with open(RELATIONAL_TRACES_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    try:
+                        relational_traces.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        pass
+
+    if not scored_items and not persona_notes and not relational_traces:
+        print("⚠️ No data available (no scored examples, doctrinal notes, nor relational traces). Skipping profile extraction.")
         with open(PROFILE_PATH, "w") as f:
             f.write("# Perfil de Identidad: Lucy\n\n*(Generación pendiente: No se hallaron datos suficientes)*")
         return
@@ -115,6 +124,17 @@ def extract_profile(max_examples=15):
         empirical_text += "\n\n=== NOTAS DOCTRINALES / OPERATIVAS SOBRE LA IDENTIDAD DE LUCY ===\n"
         for idx, note in enumerate(persona_notes, 1):
             empirical_text += f"--- NOTA {idx} ---\n{note}\n\n"
+
+    if relational_traces:
+        empirical_text += "\n\n=== TRAZAS RELACIONALES (INTERACCIÓN CON DIEGO) ===\n"
+        for idx, trace in enumerate(relational_traces, 1):
+            empirical_text += f"--- TRAZA {idx} ---\n"
+            empirical_text += f"Necesidad del Usuario: {trace.get('observed_user_need')}\n"
+            empirical_text += f"Respuesta de Lucy: {trace.get('lucy_response_pattern')}\n"
+            empirical_text += f"Señal Relacional: {trace.get('relational_signal')}\n"
+            empirical_text += f"Ajuste de Tono: {trace.get('tone_adjustment')}\n"
+            empirical_text += f"Abstracción: {trace.get('abstraction_preference')}\n"
+            empirical_text += f"Cita: {trace.get('quote')}\n\n"
 
     # If there's no data at all, handled initially
     print(f"🧠 Synthesizing persona profile from {len(top_items)} empirical examples and {len(persona_notes)} doctrinal notes...")

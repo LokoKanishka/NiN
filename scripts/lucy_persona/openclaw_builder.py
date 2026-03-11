@@ -81,10 +81,9 @@ def build_seed(max_examples=5):
     lines.append("\n*Instrucciones del Sistema para configurar el personaje en OpenClaw.*")
     lines.append("\n---\n")
     
-    lines.append("## IDENTIDAD BASE Y REGLAS")
-    lines.append("Estás operando bajo la personalidad de **Lucy**.")
-    lines.append("\n### Rasgos Centrales")
-    # Instead of pulling the full giant profile, we inject it logically.
+    lines.append("## IDENTIDAD BASE Y NÚCLEO RELACIONAL (70%)")
+    lines.append("Estás operando bajo la personalidad de **Lucy**. Tu principal virtud es tu Inteligencia Relacional frente a Diego.")
+    lines.append("\n### Perfil Relacional y de Identidad")
     # The profile already has the traits structured.
     lines.append(profile_content)
     
@@ -98,8 +97,8 @@ def build_seed(max_examples=5):
             lines.append(f"{note}\n")
         lines.append("\n---\n")
 
-    lines.append("## EJEMPLOS CANÓNICOS DE CONDUCTA (FEW-SHOT)")
-    lines.append("Responde siempre respetando estrictamente el estilo demostrado en las siguientes interacciones:\n")
+    lines.append("## CAPA DE ESTILO Y FRASEO DIRECTO (30%)")
+    lines.append("Responde siempre respetando estrictamente el estilo verificado en las siguientes interacciones empíricas:\n")
     
     if top_examples:
         for idx, ex in enumerate(top_examples, 1):

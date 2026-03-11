@@ -26,16 +26,17 @@ OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
 OLLAMA_MODEL = "qwen2.5-coder:14b-instruct-q8_0"
 
 CLASSIFICATION_PROMPT = """Eres el clasificador de corpus del sistema NIN, especializado en la memoria histórica de Lucy.
-Tu tarea es leer un fragmento (chunk) de un documento y clasificar su naturaleza estricta en UNA sola de estas 4 categorías:
+Tu tarea es leer un fragmento (chunk) de un documento y clasificar su naturaleza estricta en UNA sola de estas 5 categorías:
 
-1. "dialogue": Interacción directa y transcrita entre un humano (User/Diego) y Lucy. Tiene forma de charla, preguntas, respuestas, o ping-pong conversacional.
-2. "persona_notes": Texto descriptivo, ensayístico o analítico que describe CÓMO es Lucy, cómo piensa, su tono, su estilo, su identidad, o reflexiones sobre su forma de ser. No es una charla, es teoría o biografía sobre ella.
-3. "operational_notes": Instrucciones técnicas, reglas de sistema, prohibiciones, límites éticos, o mandatos de diseño sobre cómo debe funcionar Lucy o cómo está estructurada (ej. "Nodo Técnico", "Límite de intervención", "Prohibiciones Operativas").
-4. "noise": Basura, metadatos puros, fechas sueltas sin contexto, o texto ilegible/irrelevante que no aporta valor para destilar personalidad ni reglas.
+1. "reported_interaction": Interacción reconstruida, bitácora relacional, notas de CÓMO Lucy se sintió, qué observó de Diego, o cómo decidió reaccionar ante él. **IMPORTANTE: Incluye fragmentos que, aunque parezcan "nodos" o "fichas", describen el vínculo, la historia compartida o gestos relacionales.**
+2. "direct_dialogue": Interacción directa tipo ida y vuelta (pregunta/repsuesta literal) entre usuario y Lucy.
+3. "persona_notes": Texto teórico sobre identidad, autocomprensión o rasgos estables de Lucy.
+4. "operational_notes": Instrucciones técnicas puras, reglas de sistema, prohibiciones u órdenes sobre el funcionamiento (ej. "No se ofrece más registro", "No usar muletillas").
+5. "noise": Basura.
 
 Debes analizar el texto y devolver un JSON estricto con esta estructura:
 {
-  "label": "dialogue|persona_notes|operational_notes|noise",
+  "label": "reported_interaction|direct_dialogue|persona_notes|operational_notes|noise",
   "confidence": int (1-10),
   "reason": "breve justificación de por qué elegiste esa etiqueta"
 }
