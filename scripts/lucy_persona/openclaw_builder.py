@@ -20,6 +20,8 @@ PROFILE_PATH = os.path.join(FINAL_DIR, "lucy_persona_profile.md")
 OPENCLAW_SEED_PATH = os.path.join(FINAL_DIR, "lucy_openclaw_seed.md")
 OPENCLAW_SEED_JSON_PATH = os.path.join(FINAL_DIR, "lucy_openclaw_seed.json")
 CURATED_EXAMPLES_PATH = os.path.join(FINAL_DIR, "lucy_examples_curated.jsonl")
+PARSED_DIR = os.path.join(RUNTIME_DIR, "parsed")
+CLASSIFIED_CHUNKS_PATH = os.path.join(PARSED_DIR, "classified_chunks.jsonl")
 
 
 def build_seed(max_examples=5):
@@ -56,7 +58,17 @@ def build_seed(max_examples=5):
     curated_items.sort(key=oc_sort_key, reverse=True)
     top_examples = curated_items[:max_examples]
     
-    print(f"📦 Assembling OpenClaw Seed with profile + top {len(top_examples)} canonical examples.")
+    # Get operational_notes
+    operational_notes = []
+    if os.path.exists(CLASSIFIED_CHUNKS_PATH):
+        with open(CLASSIFIED_CHUNKS_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    obj = json.loads(line)
+                    if obj.get("label") == "operational_notes":
+                        operational_notes.append(obj.get("content", ""))
+
+    print(f"📦 Assembling OpenClaw Seed with profile, {len(operational_notes)} operational notes, and top {len(top_examples)} canonical examples.")
 
     # 3. Save purely curated items to independent JSONL
     with open(CURATED_EXAMPLES_PATH, "w", encoding="utf-8") as f:
@@ -77,6 +89,15 @@ def build_seed(max_examples=5):
     lines.append(profile_content)
     
     lines.append("\n---\n")
+
+    if operational_notes:
+        lines.append("## LÍMITES OPERATIVOS Y RESTRICCIONES (CRÍTICO)")
+        lines.append("Las siguientes notas operativas definen tus límites técnicos, éticos y estructurales. DEBES obedecerlas bajo cualquier circunstancia:\n")
+        for idx, note in enumerate(operational_notes, 1):
+            lines.append(f"### Restricción {idx}")
+            lines.append(f"{note}\n")
+        lines.append("\n---\n")
+
     lines.append("## EJEMPLOS CANÓNICOS DE CONDUCTA (FEW-SHOT)")
     lines.append("Responde siempre respetando estrictamente el estilo demostrado en las siguientes interacciones:\n")
     

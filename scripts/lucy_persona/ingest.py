@@ -83,7 +83,7 @@ def ingest_document(source_filepath: str, name_override: str = None) -> dict:
         
         print(f"📄 Converting DOCX '{filename}' to TXT...")
         doc = docx.Document(source_filepath)
-        text = "\\n".join([p.text for p in doc.paragraphs])
+        text = "\n".join([p.text for p in doc.paragraphs])
         
         dest_filename = f"{doc_id}.txt"
         dest_path = os.path.join(RAW_DOCS_DIR, dest_filename)

@@ -8,7 +8,8 @@ to process a raw document through the full distillation pipeline.
 import os
 import argparse
 from ingest import ingest_document
-from parser import parse_all
+from document_classifier import process_all_documents
+from dialogue_extractor import extract_dialogue_turns
 from cleaner import run_cleaner
 from scorer import run_scorer
 from profile_extractor import extract_profile
@@ -35,28 +36,32 @@ def run_pipeline(input_file: str = None, max_scores: int = 15):
     else:
         print("ℹ️ No new input file provided. Using existing raw_docs manifest.")
 
-    # 2. Parse
-    print("\n[ FASE 2: PARSEO ]")
-    parse_all()
+    # 2. Classify Chunks
+    print("\n[ FASE 2: CLASIFICACIÓN DE BLOQUES (Demonio Local) ]")
+    process_all_documents()
 
-    # 3. Clean
-    print("\n[ FASE 3: LIMPIEZA ]")
+    # 3. Extract Dialogue 
+    print("\n[ FASE 3: EXTRACCIÓN DE DIÁLOGO ]")
+    extract_dialogue_turns()
+
+    # 4. Clean
+    print("\n[ FASE 4: LIMPIEZA ]")
     run_cleaner()
 
-    # 4. Score
-    print("\n[ FASE 4: SCORING (Demonio Local) ]")
+    # 5. Score
+    print("\n[ FASE 5: SCORING (Demonio Local) ]")
     run_scorer(max_items=max_scores)
 
-    # 5. Profile
-    print("\n[ FASE 5: EXTRACCIÓN PERFIL ]")
+    # 6. Profile
+    print("\n[ FASE 6: EXTRACCIÓN PERFIL ]")
     extract_profile(max_examples=10)
 
-    # 6. Builder
-    print("\n[ FASE 6: OPENCLAW SEED ]")
+    # 7. Builder
+    print("\n[ FASE 7: OPENCLAW SEED ]")
     build_seed(max_examples=5)
 
-    # 7. Evaluate
-    print("\n[ FASE 7: EVALUACIÓN EMPÍRICA ]")
+    # 8. Evaluate
+    print("\n[ FASE 8: EVALUACIÓN EMPÍRICA ]")
     run_evaluator()
 
     print("\n" + "=" * 60)
