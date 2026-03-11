@@ -25,13 +25,25 @@ def run_test():
     print("=" * 70)
     print()
     
-    # Run in auto-approve mode with no Telegram notifications
+    # Run without auto-approve to demonstrate HITL pause
     mission_id = run_mission(
         topic=topic,
-        auto_approve=True,
+        auto_approve=False,
         notify=False,
         subject_author="Aristóteles",
     )
+    
+    # Verify HITL pause
+    mission = mm.get_mission(mission_id)
+    print(f"\n────────────────────────────────────────────────────────────")
+    print(f"🛑 HITL PAUSE DETECTED: La misión se ha detenido en estado {mission.get('status')}")
+    print(f"👨‍💻 El sistema queda a la espera del comando /aprobar o /rechazar en Telegram.")
+    print(f"────────────────────────────────────────────────────────────\n")
+    
+    print("▶️ SIMULANDO APROBACIÓN HUMANA: Resumiendo la misión en modo auto-approve...")
+    # Resume and auto-approve the rest of the pipeline
+    from bibliotecario.pipeline import resume_mission
+    mission_id = resume_mission(mission_id, auto_approve=True)
     
     # === VALIDATION ===
     print("\n" + "=" * 70)

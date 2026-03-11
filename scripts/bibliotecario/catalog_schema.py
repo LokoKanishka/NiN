@@ -31,6 +31,7 @@ class BibEntry:
     identifier_type: str = ""  # "doi", "isbn", etc.
     edition: str = ""
     notes: str = ""
+    quality_tier: str = "contextual"  # primaria | academica_alta | contextual
 
     def to_dict(self) -> dict:
         return asdict(self)

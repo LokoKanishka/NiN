@@ -21,14 +21,17 @@ CLASSIFICATION_PROMPT = """Eres un bibliotecario académico experto en humanidad
 Recibirás una lista de resultados de búsqueda web sobre un tema de investigación.
 Tu tarea es extraer referencias bibliográficas válidas y clasificarlas.
 
-Reglas:
+Reglas CRÍTICAS de Clasificación:
 1. Extrae SOLO referencias que sean REALES (autor, título, año verificables).
-2. Clasifica cada una como "primary" (obra del autor principal) o "secondary" (comentario, monografía, artículo).
-3. Asigna un subtipo: obra_original, traduccion, edicion_critica, comentario, monografia, articulo, capitulo, tesis, compilacion.
-4. Si hay DOI o ISBN, inclúyelos.
-5. NO inventes referencias que no aparezcan en los resultados.
+2. Clasifica "type" ESTRICTAMENTE como "primary" u "obra original" SOLO si es el texto original del autor estudiado. Enciclopedias (Stanford Encyclopedia of Philosophy, IEP, Wikipedia), diccionarios y comentarios son SIEMPRE "secondary".
+3. Asigna un subtipo: obra_original, traduccion, edicion_critica, comentario, monografia, articulo, capitulo, tesis, compilacion, enciclopedia.
+4. Asigna un "quality_tier" basado en la fuente:
+   - "primaria": solo para obras originales/traducciones del autor (type="primary").
+   - "academica_alta": ediciones académicas, Oxford, Cambridge, JSTOR, SEP (Stanford), IEP, revistas peer-reviewed.
+   - "contextual": Wikipedia, Philopedia, blogs, sitios generales.
+5. NO inventes referencias que no aparezcan en los resultados. Incluye DOI o ISBN si están presentes.
 
-Responde SOLO con JSON válido, un array de objetos:
+Responde SOLO con JSON válido, un array de objetos extactamente con esta estructura:
 [
   {
     "author": "Nombre del autor",
@@ -41,7 +44,8 @@ Responde SOLO con JSON válido, un array de objetos:
     "identifier": "DOI o ISBN si hay",
     "identifier_type": "doi|isbn|",
     "edition": "edición si se conoce",
-    "notes": "nota breve"
+    "notes": "nota breve",
+    "quality_tier": "primaria|academica_alta|contextual"
   }
 ]"""
 

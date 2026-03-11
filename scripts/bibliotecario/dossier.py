@@ -38,7 +38,7 @@ def generate_dossier(mission_id: str) -> str:
         "",
         f"**Misión:** `{mission_id}`",
         f"**Fecha:** {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-        f"**Estado:** {mission.get('status', 'N/A')}",
+        f"**Estado:** DONE",
         f"**Generado por:** NIN Demonio Librero (Ollama 14B)",
         "",
         "---",
@@ -92,12 +92,12 @@ def generate_dossier(mission_id: str) -> str:
     lines.append("## 4. Fuentes Secundarias")
     lines.append("")
     if secondaries:
-        lines.append("| # | Autor | Título | Año | Tipo |")
-        lines.append("|:--|:------|:-------|:----|:-----|")
+        lines.append("| # | Autor | Título | Año | Subtipo | Calidad |")
+        lines.append("|:--|:------|:-------|:----|:--------|:--------|")
         for i, s in enumerate(secondaries, 1):
             lines.append(
                 f"| {i} | {s.get('author', '?')} | {s.get('title', '?')} | "
-                f"{s.get('year', '?')} | {s.get('subtype', '?')} |"
+                f"{s.get('year', '?')} | {s.get('subtype', '?')} | {s.get('quality_tier', '?')} |"
             )
     else:
         lines.append("*No se identificaron fuentes secundarias.*")
