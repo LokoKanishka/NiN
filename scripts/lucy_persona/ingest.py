@@ -11,6 +11,10 @@ import json
 import shutil
 import hashlib
 from datetime import datetime
+try:
+    import docx
+except ImportError:
+    docx = None
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -57,7 +61,7 @@ def ingest_document(source_filepath: str, name_override: str = None) -> dict:
     name = name_override if name_override else filename
     ext = os.path.splitext(filename)[1].lower()
 
-    if ext not in [".txt", ".md", ".jsonl"]:
+    if ext not in [".txt", ".md", ".jsonl", ".docx"]:
         print(f"⚠️ Warning: Non-standard extension '{ext}' ingested.")
 
     file_size = os.path.getsize(source_filepath)
@@ -72,10 +76,25 @@ def ingest_document(source_filepath: str, name_override: str = None) -> dict:
 
     # Generate internal doc_id
     doc_id = f"doc_{file_hash[:8]}"
-    dest_filename = f"{doc_id}{ext}"
-    dest_path = os.path.join(RAW_DOCS_DIR, dest_filename)
-
-    shutil.copy2(source_filepath, dest_path)
+    
+    if ext == ".docx":
+        if docx is None:
+            raise ImportError("python-docx is required to ingest .docx files. Install it with pip install python-docx")
+        
+        print(f"📄 Converting DOCX '{filename}' to TXT...")
+        doc = docx.Document(source_filepath)
+        text = "\\n".join([p.text for p in doc.paragraphs])
+        
+        dest_filename = f"{doc_id}.txt"
+        dest_path = os.path.join(RAW_DOCS_DIR, dest_filename)
+        with open(dest_path, "w", encoding="utf-8") as f:
+            f.write(text)
+            
+        file_size = os.path.getsize(dest_path) 
+    else:
+        dest_filename = f"{doc_id}{ext}"
+        dest_path = os.path.join(RAW_DOCS_DIR, dest_filename)
+        shutil.copy2(source_filepath, dest_path)
 
     doc_metadata = {
         "doc_id": doc_id,
