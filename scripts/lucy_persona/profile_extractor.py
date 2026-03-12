@@ -18,6 +18,7 @@ FINAL_DIR = os.path.join(RUNTIME_DIR, "final")
 
 SCORED_EXAMPLES_PATH = os.path.join(SCORED_DIR, "scored_examples.jsonl")
 PROFILE_PATH = os.path.join(FINAL_DIR, "lucy_persona_profile.md")
+DISTILLED_PATH = os.path.join(FINAL_DIR, "lucy_core_distilled.md")
 PARSED_DIR = os.path.join(RUNTIME_DIR, "parsed")
 CLASSIFIED_CHUNKS_PATH = os.path.join(PARSED_DIR, "classified_chunks.jsonl")
 RELATIONAL_TRACES_PATH = os.path.join(PARSED_DIR, "relational_traces.jsonl")
@@ -166,7 +167,15 @@ def extract_profile(max_examples=15):
         with open(PROFILE_PATH, "w", encoding="utf-8") as f:
             f.write(profile_md.strip() + "\n")
             
+        # Also generate the distilled version (humano-legible)
         print(f"✅ Persona profile generated successfully at {PROFILE_PATH}")
+        
+        # 2nd pass or derivation for the distilled version
+        distilled_content = f"# LUCY — NÚCLEO DESTILADO\n\nEste documento es la esencia viva de Lucy extraída de su bitácora histórica.\n\n{profile_md.strip()}"
+        with open(DISTILLED_PATH, "w", encoding="utf-8") as f:
+            f.write(distilled_content + "\n")
+            
+        print(f"✅ Distilled profile generated successfully at {DISTILLED_PATH}")
         return profile_md
         
     except Exception as e:

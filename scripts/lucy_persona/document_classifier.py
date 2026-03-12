@@ -53,28 +53,45 @@ def load_manifest() -> list:
                 return []
     return []
 
-def split_into_chunks(text: str) -> list:
+def split_into_chunks(text: str, min_chars: int = 5000, max_chars: int = 20000) -> list:
     """
-    Splits text into chunks. 
-    A double newline usually denotes a paragraph or block in Markdown/TXT.
-    Avoids extremely tiny chunks.
+    Splits text into chunks between min_chars and max_chars.
+    Tries to split at double newlines (paragraphs) for semantic integrity.
     """
-    raw_chunks = re.split(r'\n\s*\n', text)
+    paragraphs = re.split(r'\n\s*\n', text)
     chunks = []
-    buffer = ""
-    for rc in raw_chunks:
-        clump = rc.strip()
-        if not clump:
+    current_chunk = ""
+
+    for p in paragraphs:
+        p = p.strip()
+        if not p:
             continue
-        # If the chunk is very small, append it to buffer to avoid over-fragmentation
-        if len(buffer) < 100 or len(clump) < 50:
-            buffer += "\n\n" + clump if buffer else clump
+        
+        # If adding this paragraph exceeds max_chars and we already have a substantial chunk
+        if len(current_chunk) + len(p) > max_chars and len(current_chunk) >= min_chars:
+            chunks.append(current_chunk.strip())
+            current_chunk = p
         else:
-            if buffer:
-                chunks.append(buffer)
-            buffer = clump
-    if buffer:
-        chunks.append(buffer)
+            if current_chunk:
+                current_chunk += "\n\n" + p
+            else:
+                current_chunk = p
+        
+        # If current_chunk is already > max_chars (e.g. a single giant paragraph)
+        while len(current_chunk) > max_chars:
+            # Hard cut at max_chars
+            split_point = max_chars
+            # Try to find a last-resort newline before max_chars
+            last_newline = current_chunk.rfind('\n', 0, max_chars)
+            if last_newline > min_chars:
+                split_point = last_newline
+            
+            chunks.append(current_chunk[:split_point].strip())
+            current_chunk = current_chunk[split_point:].strip()
+
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+
     return chunks
 
 def classify_chunk(chunk_text: str) -> dict:
