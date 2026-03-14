@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BitNin Analysis Output v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "analysis_id",
+    "timestamp",
+    "market_state",
+    "dominant_hypothesis",
+    "supporting_factors",
+    "counterarguments",
+    "retrieved_episodes",
+    "confidence",
+    "recommended_action",
+    "risk_level",
+    "why_now",
+    "why_not",
+    "data_coverage_score",
+    "narrative_coverage_score",
+    "final_status"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "market_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "symbol",
+        "interval",
+        "as_of",
+        "close",
+        "return_1d",
+        "return_3d",
+        "return_7d",
+        "volatility_regime",
+        "breakout",
+        "volume_anomaly",
+        "summary"
+      ],
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interval": {
+          "type": "string",
+          "minLength": 1
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "close": {
+          "type": "number"
+        },
+        "return_1d": {
+          "$ref": "#/$defs/metricValue"
+        },
+        "return_3d": {
+          "$ref": "#/$defs/metricValue"
+        },
+        "return_7d": {
+          "$ref": "#/$defs/metricValue"
+        },
+        "volatility_regime": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "unknown"
+          ]
+        },
+        "breakout": {
+          "type": "boolean"
+        },
+        "volume_anomaly": {
+          "type": "boolean"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "dominant_hypothesis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supporting_factors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "counterarguments": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "retrieved_episodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "episode_id",
+          "score",
+          "summary_local"
+        ],
+        "properties": {
+          "episode_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0
+          },
+          "summary_local": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dominant_cause": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "recommended_action": {
+      "type": "string",
+      "enum": [
+        "long",
+        "short",
+        "flat",
+        "reduce",
+        "hedge",
+        "observe",
+        "no_trade"
+      ]
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical",
+        "unknown"
+      ]
+    },
+    "why_now": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "why_not": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "data_coverage_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "narrative_coverage_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "final_status": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "no_trade",
+        "insufficient_evidence",
+        "blocked"
+      ]
+    },
+    "model_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prompt_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_versions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "query_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "metricValue": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "insufficient_history"
+          ]
+        }
+      ]
+    }
+  }
+}

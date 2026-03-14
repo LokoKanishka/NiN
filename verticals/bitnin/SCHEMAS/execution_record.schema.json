@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BitNin Execution Record v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "execution_id",
+    "intent_id",
+    "executed_at",
+    "status",
+    "execution_mode",
+    "result_ref",
+    "notes"
+  ],
+  "properties": {
+    "execution_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intent_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "simulated",
+        "shadow_logged",
+        "blocked",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "simulation",
+        "shadow"
+      ]
+    },
+    "result_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,2 @@
+"""BitNin backtester package."""
+

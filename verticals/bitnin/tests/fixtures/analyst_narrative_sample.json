@@ -1,0 +1,38 @@
+[
+  {
+    "event_id": "evt_a",
+    "timestamp_start": "2026-03-12T10:00:00.000Z",
+    "timestamp_end": "2026-03-12T10:01:00.000Z",
+    "source_name": "example.com",
+    "url": "https://example.com/a",
+    "title": "Bitcoin ETF flows improve",
+    "summary_local": "Bitcoin ETF flows improve and institutional demand remains active.",
+    "topics": ["etf_institucional"],
+    "entities": ["Bitcoin", "ETF"],
+    "source_type": "news_article_candidate",
+    "region": "United States",
+    "confidence_source": 0.8,
+    "relevance_btc": 0.7,
+    "retention_mode": "metadata_only",
+    "ingested_at": "2026-03-12T10:05:00.000Z",
+    "dataset_version": "narrative-v0-gdelt"
+  },
+  {
+    "event_id": "evt_b",
+    "timestamp_start": "2026-03-13T09:00:00.000Z",
+    "timestamp_end": "2026-03-13T09:01:00.000Z",
+    "source_name": "example.com",
+    "url": "https://example.com/b",
+    "title": "Macro tension pressures risk assets",
+    "summary_local": "Macro tension pressures risk assets and raises volatility expectations.",
+    "topics": ["geopolitica", "riesgo_global"],
+    "entities": ["Bitcoin", "United States"],
+    "source_type": "news_article_candidate",
+    "region": "United States",
+    "confidence_source": 0.8,
+    "relevance_btc": 0.65,
+    "retention_mode": "metadata_only",
+    "ingested_at": "2026-03-13T09:05:00.000Z",
+    "dataset_version": "narrative-v0-gdelt"
+  }
+]

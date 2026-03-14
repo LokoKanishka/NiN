@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BitNin Narrative Event v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "timestamp_start",
+    "timestamp_end",
+    "source_name",
+    "url",
+    "title",
+    "summary_local",
+    "topics",
+    "entities",
+    "dataset_version"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "timestamp_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary_local": {
+      "type": "string",
+      "minLength": 1
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "source_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "region": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence_source": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "relevance_btc": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "retention_mode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ingested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dataset_version": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

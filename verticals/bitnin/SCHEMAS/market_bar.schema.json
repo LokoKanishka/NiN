@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BitNin Market Bar v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "symbol",
+    "source",
+    "interval",
+    "open_time",
+    "close_time",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "dataset_version"
+  ],
+  "properties": {
+    "symbol": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interval": {
+      "type": "string",
+      "minLength": 1
+    },
+    "open_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "close_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "open": {
+      "type": "number"
+    },
+    "high": {
+      "type": "number"
+    },
+    "low": {
+      "type": "number"
+    },
+    "close": {
+      "type": "number"
+    },
+    "volume": {
+      "type": "number"
+    },
+    "ingested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "quote_volume": {
+      "type": "number"
+    },
+    "trade_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "checksum": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_version": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

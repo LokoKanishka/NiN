@@ -1,0 +1,1 @@
+"""BitNin analyst package."""

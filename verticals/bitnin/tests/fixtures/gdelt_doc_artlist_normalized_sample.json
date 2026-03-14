@@ -1,0 +1,20 @@
+[
+  {
+    "event_id": "evt_sample",
+    "timestamp_start": "2026-03-13T21:15:00.000Z",
+    "timestamp_end": "2026-03-13T21:16:00.000Z",
+    "source_name": "tickerreport.com",
+    "url": "https://www.tickerreport.com/example",
+    "title": "Bitcoin ETF short interest falls",
+    "summary_local": "Bitcoin ETF short interest falls. Fuente detectada: tickerreport.com.",
+    "topics": ["etf_institucional"],
+    "entities": ["Bitcoin", "ETF"],
+    "source_type": "news_article_candidate",
+    "region": "United States",
+    "confidence_source": 0.9,
+    "relevance_btc": 0.7,
+    "retention_mode": "metadata_only",
+    "ingested_at": "2026-03-13T22:13:43.367Z",
+    "dataset_version": "narrative-v0-gdelt"
+  }
+]

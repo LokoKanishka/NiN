@@ -1,0 +1,42 @@
+[
+  {
+    "episode_id": "ep_sample",
+    "window_start": "2026-03-01T00:00:00.000Z",
+    "window_end": "2026-03-10T23:59:59.999Z",
+    "market_signature": {
+      "interval": "1d",
+      "return_1d": 0.04,
+      "return_3d": 0.06,
+      "return_7d": 0.1,
+      "volatility_regime": "medium",
+      "drawdown_pre": -0.03,
+      "breakout": true,
+      "volume_anomaly": true,
+      "volume_anomaly_score": 2.1
+    },
+    "narrative_signature": {
+      "topics": ["geopolitica", "etf_institucional"],
+      "entities": ["Bitcoin", "ETF"],
+      "dominant_cause": "geopolitica",
+      "narrative_confidence": 0.54,
+      "event_count": 2
+    },
+    "summary_local": "Episodio disparado por return con narrativa geopolitica.",
+    "outcome": {
+      "forward_return_1d": 0.01,
+      "forward_return_7d": 0.05,
+      "forward_return_30d": "insufficient_horizon",
+      "forward_max_up": 0.08,
+      "forward_max_down": -0.02,
+      "continuation_or_reversion": "continuation"
+    },
+    "sources": ["market#a", "narrative#b"],
+    "dataset_version": "episodes-v0-real",
+    "trigger_type": "return|narrative_reinforced",
+    "trigger_strength": 1.4,
+    "market_source_ref": "market.jsonl",
+    "narrative_source_refs": ["narrative.jsonl#evt1"],
+    "status": "confirmed",
+    "created_at": "2026-03-05T23:59:59.999Z"
+  }
+]
