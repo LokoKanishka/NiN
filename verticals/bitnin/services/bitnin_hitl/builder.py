@@ -100,11 +100,12 @@ class BitNinHitlRunner:
             notes=notes,
         )
         self._validate(updated)
-        request_payload.update(updated)
-        request_file.write_text(json.dumps(request_payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        # HARDENING: We no longer update the request file in-place.
+        # The request remains "awaiting_human_approval" in the requests/ folder.
         decision_payload = {
             **updated,
             "source_channel": updated["channel"],
+            "request_ref": str(request_file),
         }
         decision_path = self.decisions_root / f"approval_decision__{updated['approval_id']}__{updated['status']}.json"
         decision_path.write_text(json.dumps(decision_payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -131,14 +132,17 @@ class BitNinHitlRunner:
             notes="Approval expired without human decision.",
         )
         self._validate(updated)
-        request_payload.update(updated)
-        request_file.write_text(json.dumps(request_payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        # HARDENING: We no longer update the request file in-place.
         decision_path = self.decisions_root / f"approval_decision__{updated['approval_id']}__expired.json"
-        decision_path.write_text(json.dumps(updated, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        decision_payload = {
+            **updated,
+            "request_ref": str(request_file),
+        }
+        decision_path.write_text(json.dumps(decision_payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         snapshot_path = write_hitl_snapshot(
             snapshot_dir=self.snapshots_root,
             approval_id=updated["approval_id"],
-            payload={"request": request_payload, "expired": updated},
+            payload={"request": request_payload, "expired": decision_payload},
         )
         return {
             "request_path": str(request_file),

@@ -15,8 +15,8 @@
       "position": [220, 300],
       "credentials": {
         "telegramApi": {
-          "id": "telegram-nin",
-          "name": "NIN Telegram Bot"
+          "id": "telegram-bitnin",
+          "name": "BitNin Telegram Bot"
         }
       }
     },

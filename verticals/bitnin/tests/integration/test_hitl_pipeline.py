@@ -15,6 +15,7 @@ def test_hitl_pipeline_request_approve_reject_and_expire(tmp_path):
     analysis_path = tmp_path / "analysis.json"
     _write_json(analysis_path, analysis)
     intent = build_shadow_intent(analysis=analysis, reasoning_ref=str(analysis_path))
+    intent["valid_until"] = "2027-03-14T23:59:59.999Z"
     intent_path = tmp_path / "intent.json"
     _write_json(intent_path, intent)
 
@@ -38,6 +39,7 @@ def test_hitl_pipeline_request_approve_reject_and_expire(tmp_path):
 
     second_intent = build_shadow_intent(analysis=analysis, reasoning_ref=str(analysis_path))
     second_intent["intent_id"] = "second-intent"
+    second_intent["valid_until"] = "2027-03-14T23:59:59.999Z"
     second_intent_path = tmp_path / "intent_2.json"
     _write_json(second_intent_path, second_intent)
     second_request = runner.request(intent_path=str(second_intent_path))
@@ -52,7 +54,7 @@ def test_hitl_pipeline_request_approve_reject_and_expire(tmp_path):
 
     third_intent = build_shadow_intent(analysis=analysis, reasoning_ref=str(analysis_path))
     third_intent["intent_id"] = "third-intent"
-    third_intent["valid_until"] = "2026-03-13T00:00:00.000Z"
+    third_intent["valid_until"] = "2026-03-01T00:00:00.000Z"
     third_intent_path = tmp_path / "intent_3.json"
     _write_json(third_intent_path, third_intent)
     third_request = runner.request(intent_path=str(third_intent_path))

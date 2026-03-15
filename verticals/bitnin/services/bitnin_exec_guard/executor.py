@@ -31,9 +31,9 @@ class ExecGuardExecutor:
         status = "accepted_dry_run" if is_valid else "rejected"
         
         # If the intent itself is invalid structurally/expired
-        if "intent_expired" in blocking_guards or "invalid_date_format_valid_until" in blocking_guards:
+        if any(r.startswith("intent_expired") or r.startswith("invalid_date_format_valid_until") for r in blocking_guards):
             status = "expired"
-        elif "invalid_action" in blocking_guards:
+        elif any(r.startswith("invalid_action") for r in blocking_guards):
             status = "invalid_intent"
         elif len(blocking_guards) > 0 and status != "expired" and status != "invalid_intent":
             status = "guardrail_blocked"

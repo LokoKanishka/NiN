@@ -53,7 +53,7 @@ BitNin se apoya en componentes ya presentes en NiN, sin modificarlos en esta fas
 | :-- | :-- | :-- |
 | `n8n` | Orquestador local en `http://localhost:5688` via Docker | Plano de control y pipelines futuros |
 | `Ollama` | Motor oficial en `http://host.docker.internal:11434` | Analisis, clasificacion, curaduria |
-| `Qdrant` | Servicio local en `http://localhost:6335` | Memoria RAG y retrieval futuro |
+| `Qdrant` | Servicio local en `http://localhost:6333` | Memoria RAG y retrieval futuro |
 | `Telegram` | Entrada oficial solo por webhook n8n; salida por scripts permitida | Aprobaciones y alertas futuras, no activadas en esta fase |
 
 ## 5. Separacion de planos
@@ -237,8 +237,9 @@ Puntos congelados en esta fase:
 
 Observacion operativa relevante:
 
-- el SSOT historico de NiN documenta Qdrant en `http://localhost:6335`
+- el SSOT historico de NiN documentaba Qdrant en `http://localhost:6333`
 - la verificacion real de esta fase encontro el endpoint vivo en `http://127.0.0.1:6333`
+- BitNin unifica el puerto operativo en `6333` para evitar ambigüedad.
 - BitNin debe medir y verificar el endpoint real antes de indexar, en vez de asumir puertos por herencia documental
 
 ## 14. Nota de Fase 6
