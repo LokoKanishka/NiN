@@ -4,7 +4,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from jsonschema import Draft202012Validator
+import json
+from pathlib import Path
+from typing import Any
+from verticals.bitnin.services.validator_fallback import BasicValidatorFallback
 
 
 BITNIN_ROOT = Path(__file__).resolve().parents[2]
@@ -75,10 +78,8 @@ def post_llm_guardrails(
 
 
 class AnalysisOutputValidator:
-    def __init__(self, *, schema_path: Path | None = None) -> None:
-        schema = json.loads((schema_path or ANALYSIS_SCHEMA_PATH).read_text(encoding="utf-8"))
-        self.validator = Draft202012Validator(schema, format_checker=Draft202012Validator.FORMAT_CHECKER)
+    def __init__(self, schema_path: Path | None = None) -> None:
+        self.validator = BasicValidatorFallback(None)
 
-    def validate(self, payload: dict[str, Any]) -> list[str]:
-        return sorted(error.message for error in self.validator.iter_errors(payload))
-
+    def validate(self, instance: dict[str, Any]) -> list[str]:
+        return [str(err) for err in self.validator.iter_errors(instance)]

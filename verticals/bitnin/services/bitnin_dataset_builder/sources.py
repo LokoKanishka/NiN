@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import json
+import urllib.request
+import urllib.parse
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
-
-import requests
 
 
 BLOCKCHAIN_CHARTS_BASE_URL = "https://api.blockchain.info/charts"
@@ -29,10 +30,9 @@ class RawFetchResult:
 
 
 class BlockchainChartsSource:
-    """Client for the official Blockchain.com Charts API."""
+    """Client for the official Blockchain.info Charts API."""
 
-    def __init__(self, session: requests.Session | None = None, timeout: int = DEFAULT_TIMEOUT_SECONDS):
-        self.session = session or requests.Session()
+    def __init__(self, timeout: int = DEFAULT_TIMEOUT_SECONDS):
         self.timeout = timeout
 
     def fetch_market_price(
@@ -53,9 +53,13 @@ class BlockchainChartsSource:
         if start:
             params["start"] = start.split("T", 1)[0]
 
-        response = self.session.get(endpoint, params=params, timeout=self.timeout)
-        response.raise_for_status()
-        payload = response.json()
+        query_string = urllib.parse.urlencode(params)
+        url = f"{endpoint}?{query_string}"
+        try:
+            with urllib.request.urlopen(url, timeout=self.timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except Exception as e:
+            raise RuntimeError(f"BlockchainCharts fetch error: {e}") from e
 
         return RawFetchResult(
             source="blockchain_charts_market_price",
@@ -73,11 +77,9 @@ class BinanceMarketDataSource:
 
     def __init__(
         self,
-        session: requests.Session | None = None,
         timeout: int = DEFAULT_TIMEOUT_SECONDS,
         base_url: str = BINANCE_MARKET_DATA_BASE_URL,
     ):
-        self.session = session or requests.Session()
         self.timeout = timeout
         self.base_url = base_url.rstrip("/")
 
@@ -106,9 +108,13 @@ class BinanceMarketDataSource:
             if end_time_ms is not None:
                 params["endTime"] = end_time_ms
 
-            response = self.session.get(endpoint, params=params, timeout=self.timeout)
-            response.raise_for_status()
-            batch = response.json()
+            query_string = urllib.parse.urlencode(params)
+            url = f"{endpoint}?{query_string}"
+            try:
+                with urllib.request.urlopen(url, timeout=self.timeout) as response:
+                    batch = json.loads(response.read().decode("utf-8"))
+            except Exception as e:
+                raise RuntimeError(f"Binance fetch error: {e}") from e
 
             if not batch:
                 break

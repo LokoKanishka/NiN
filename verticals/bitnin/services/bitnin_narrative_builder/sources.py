@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import json
 import time
+import urllib.request
+import urllib.parse
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
-
-import requests
 
 
 GDELT_DOC_API_URL = "https://api.gdeltproject.org/api/v2/doc/doc"
@@ -42,8 +42,7 @@ class RawNarrativeFetchResult:
 class GDELTDocSource:
     _last_request_at: float = 0.0
 
-    def __init__(self, session: requests.Session | None = None, timeout: int = 30, retries: int = 3):
-        self.session = session or requests.Session()
+    def __init__(self, timeout: int = 30, retries: int = 3):
         self.timeout = timeout
         self.retries = retries
 
@@ -76,16 +75,27 @@ class GDELTDocSource:
         last_error = None
         for attempt in range(self.retries):
             self._respect_rate_limit()
-            response = self.session.get(GDELT_DOC_API_URL, params=params, timeout=self.timeout)
-            self.__class__._last_request_at = time.monotonic()
-
-            if response.status_code == 429:
-                last_error = RuntimeError(response.text.strip())
-                time.sleep(GDELT_MIN_INTERVAL_SECONDS * (attempt + 1))
+            query_string = urllib.parse.urlencode(params)
+            url = f"{GDELT_DOC_API_URL}?{query_string}"
+            
+            try:
+                req = urllib.request.Request(url)
+                with urllib.request.urlopen(req, timeout=self.timeout) as response:
+                    self.__class__._last_request_at = time.monotonic()
+                    payload = self._parse_payload(response)
+            except urllib.error.HTTPError as e:
+                self.__class__._last_request_at = time.monotonic()
+                if e.code == 429:
+                    last_error = RuntimeError(e.read().decode('utf-8').strip())
+                    time.sleep(GDELT_MIN_INTERVAL_SECONDS * (attempt + 1))
+                    continue
+                raise
+            except urllib.error.URLError as e:
+                # This handles network errors, timeout errors, etc.
+                last_error = RuntimeError(f"Network or URL error: {e}")
+                time.sleep(GDELT_MIN_INTERVAL_SECONDS * (attempt + 1)) # Wait before retrying
                 continue
 
-            response.raise_for_status()
-            payload = self._parse_json_payload(response)
             if "articles" not in payload:
                 raise RuntimeError(f"Unexpected GDELT payload: {json.dumps(payload)[:400]}")
 
@@ -106,12 +116,11 @@ class GDELTDocSource:
         if wait_seconds > 0:
             time.sleep(wait_seconds)
 
-    def _parse_json_payload(self, response: requests.Response) -> dict[str, Any]:
+    def _parse_payload(self, response: Any) -> dict[str, Any]:
         content_type = response.headers.get("Content-Type", "")
-        if "json" in content_type.lower():
-            return response.json()
-
-        text = response.text.strip()
+        text = response.read().decode("utf-8").strip()
+        if "json" in content_type.lower() or text.startswith("{"):
+            return json.loads(text)
         try:
             return json.loads(text)
         except json.JSONDecodeError as exc:

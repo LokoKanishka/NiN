@@ -1,14 +1,11 @@
 import json
 from pathlib import Path
-
 from verticals.bitnin.services.bitnin_hitl.builder import BitNinHitlRunner
 from verticals.bitnin.services.bitnin_shadow.intent import build_shadow_intent
 from verticals.bitnin.tests.conftest import load_fixture
 
-
 def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-
 
 def test_hitl_pipeline_request_approve_reject_and_expire(tmp_path):
     analysis = load_fixture("shadow_analysis_sample.json")
@@ -29,8 +26,8 @@ def test_hitl_pipeline_request_approve_reject_and_expire(tmp_path):
     assert request_payload["status"] == "awaiting_human_approval"
 
     approved_result = runner.decide(
-        request_path=request_result["request_path"],
-        decision="approve",
+        approval_id=request_result["approval_id"],
+        decision="approved",
         actor="operator_1",
         notes="looks good",
     )
@@ -43,9 +40,10 @@ def test_hitl_pipeline_request_approve_reject_and_expire(tmp_path):
     second_intent_path = tmp_path / "intent_2.json"
     _write_json(second_intent_path, second_intent)
     second_request = runner.request(intent_path=str(second_intent_path))
+    
     rejected_result = runner.decide(
-        request_path=second_request["request_path"],
-        decision="reject",
+        approval_id=second_request["approval_id"],
+        decision="rejected",
         actor="operator_2",
         notes="not enough evidence",
     )
@@ -58,6 +56,7 @@ def test_hitl_pipeline_request_approve_reject_and_expire(tmp_path):
     third_intent_path = tmp_path / "intent_3.json"
     _write_json(third_intent_path, third_intent)
     third_request = runner.request(intent_path=str(third_intent_path))
-    expired_result = runner.expire(request_path=third_request["request_path"])
+    
+    expired_result = runner.expire(approval_id=third_request["approval_id"])
     expired = json.loads(Path(expired_result["decision_path"]).read_text(encoding="utf-8"))
     assert expired["status"] == "expired"

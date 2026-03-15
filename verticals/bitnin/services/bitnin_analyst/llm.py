@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 import os
+import urllib.request
+import urllib.parse
 from dataclasses import dataclass
 from typing import Any
-
-import requests
 
 
 DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
@@ -41,29 +41,37 @@ class OllamaAnalystClient:
         base_url: str | None = None,
         model: str = DEFAULT_ANALYST_MODEL,
         timeout: int = 120,
-        session: requests.Session | None = None,
     ) -> None:
         self.base_url = (base_url or os.getenv("BITNIN_OLLAMA_URL") or DEFAULT_OLLAMA_URL).rstrip("/")
         self.model = model
         self.timeout = timeout
-        self.session = session or requests.Session()
 
     def analyze(self, *, messages: list[dict[str, str]]) -> LLMResult:
-        response = self.session.post(
-            f"{self.base_url}/api/chat",
-            json={
-                "model": self.model,
-                "messages": messages,
-                "format": "json",
-                "stream": False,
-                "options": {
-                    "temperature": 0,
-                },
+        url = f"{self.base_url}/api/chat"
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "format": "json",
+            "stream": False,
+            "options": {
+                "temperature": 0,
             },
-            timeout=self.timeout,
+        }
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST"
         )
-        response.raise_for_status()
-        payload = response.json()
+        
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            raise RuntimeError(f"Ollama HTTP error {e.code}: {e.read().decode('utf-8')}") from e
+        except Exception as e:
+            raise RuntimeError(f"Ollama connection error: {e}") from e
         content = payload.get("message", {}).get("content", "")
         if not content:
             raise RuntimeError(f"Ollama returned empty content: {payload}")

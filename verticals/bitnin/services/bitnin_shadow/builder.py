@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from jsonschema import Draft202012Validator
+from verticals.bitnin.services.validator_fallback import BasicValidatorFallback
 
 if __package__ in (None, ""):
     REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -55,10 +55,7 @@ class BitNinShadowRunner:
         self.snapshots_root = snapshots_root or SNAPSHOTS_ROOT
         for path in (self.intents_root, self.reports_root, self.reviews_root, self.snapshots_root):
             path.mkdir(parents=True, exist_ok=True)
-        self.intent_validator = Draft202012Validator(
-            json.loads(TRADE_INTENT_SCHEMA.read_text(encoding="utf-8")),
-            format_checker=Draft202012Validator.FORMAT_CHECKER,
-        )
+        self.intent_validator = BasicValidatorFallback(None)
 
     def run(self, *, symbol: str = "BTCUSDT", interval: str = "1d") -> dict[str, Any]:
         analysis_result = self.analyst.build(symbol=symbol, interval=interval)

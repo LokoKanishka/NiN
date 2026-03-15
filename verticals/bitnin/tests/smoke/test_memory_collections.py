@@ -1,44 +1,40 @@
+import json
+import urllib.request
+import urllib.error
+from unittest.mock import MagicMock, patch
 from verticals.bitnin.services.bitnin_memory_indexer.collections import QdrantCollectionManager
 
-
-class FakeResponse:
-    def __init__(self, status_code=200, payload=None):
-        self.status_code = status_code
-        self._payload = payload or {}
-
-    @property
-    def ok(self):
-        return 200 <= self.status_code < 300
-
-    def json(self):
-        return self._payload
-
-    def raise_for_status(self):
-        if not self.ok:
-            raise RuntimeError(self.status_code)
-
-
-class FakeSession:
-    def __init__(self):
-        self.created = None
-
-    def get(self, url, timeout=0):
-        if url.endswith("/collections"):
-            return FakeResponse(payload={"result": {"collections": []}})
-        if url.endswith("/collections/bitnin_episodes"):
-            if self.created:
-                return FakeResponse(payload={"result": {"config": {"params": {"vectors": {"size": 768}}}}})
-            return FakeResponse(status_code=404)
-        raise AssertionError(url)
-
-    def put(self, url, json=None, timeout=0):
-        self.created = json
-        return FakeResponse(payload={"status": "ok"})
-
-
 def test_ensure_collection_creates_expected_vector_size():
-    session = FakeSession()
-    manager = QdrantCollectionManager(base_url="http://fake-qdrant", session=session)
-    result = manager.ensure_collection(name="bitnin_episodes", vector_size=768)
-    assert session.created["vectors"]["size"] == 768
-    assert result["config"]["params"]["vectors"]["size"] == 768
+    with patch("urllib.request.urlopen") as mock_url:
+        # Mock for get_collection (404) then put (200) then get_collection (200)
+        mock_res_404 = MagicMock()
+        mock_res_404.getcode.return_value = 404
+        mock_res_404.__enter__.return_value = mock_res_404
+        mock_res_404.read.side_effect = urllib.error.HTTPError("url", 404, "Not Found", {}, None)
+        # Actually, for get_collection, it handles 404 naturally in _request
+        
+        # Scenario: get_collection -> 404 (None) -> PUT -> 200 -> get_collection -> 200
+        
+        # 1. GET /collections/bitnin_episodes -> 404
+        response_404 = MagicMock()
+        response_404.__enter__.side_effect = urllib.error.HTTPError("http://fake-qdrant/collections/bitnin_episodes", 404, "Not Found", {}, None)
+        
+        # 2. PUT /collections/bitnin_episodes -> 200
+        response_put = MagicMock()
+        response_put.__enter__.return_value = response_put
+        response_put.read.return_value = json.dumps({"result": "ok"}).encode("utf-8")
+        
+        # 3. GET /collections/bitnin_episodes -> 200
+        response_get_ok = MagicMock()
+        response_get_ok.__enter__.return_value = response_get_ok
+        response_get_ok.read.return_value = json.dumps({
+            "result": {
+                "config": {"params": {"vectors": {"size": 768}}}
+            }
+        }).encode("utf-8")
+        
+        mock_url.side_effect = [response_404, response_put, response_get_ok]
+        
+        manager = QdrantCollectionManager(base_url="http://fake-qdrant")
+        result = manager.ensure_collection(name="bitnin_episodes", vector_size=768)
+        assert result["config"]["params"]["vectors"]["size"] == 768
