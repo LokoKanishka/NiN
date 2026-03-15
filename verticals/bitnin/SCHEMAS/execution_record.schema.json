@@ -28,19 +28,19 @@
     "status": {
       "type": "string",
       "enum": [
-        "planned",
-        "simulated",
-        "shadow_logged",
-        "blocked",
-        "failed",
-        "cancelled"
+        "accepted_dry_run",
+        "rejected",
+        "invalid_intent",
+        "expired",
+        "guardrail_blocked"
       ]
     },
     "execution_mode": {
       "type": "string",
       "enum": [
         "simulation",
-        "shadow"
+        "shadow",
+        "dry_run"
       ]
     },
     "result_ref": {
@@ -49,6 +49,29 @@
     },
     "notes": {
       "type": "string"
+    },
+    "request_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validated_guards": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rejection_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dry_run": {
+      "type": "boolean"
+    },
+    "executor_version": {
+      "type": "string",
+      "minLength": 1
     }
   }
 }

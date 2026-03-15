@@ -21,8 +21,9 @@ Estado: obligatorio para Fase 0-1
    - La dimension debe declararse por config o metadata del lote.
 8. `no_trade` e `insufficient_evidence` son salidas validas del analista.
    - Nunca deben tratarse como fallas del sistema.
-9. Shadow y simulacion son los unicos modos validos en v1.
-   - Cualquier `execution_record` de v1 debe reflejar `simulation` o `shadow`.
+9. Shadow, simulación y dry_run son los únicos modos válidos en v1.
+   - Cualquier `execution_record` de v1 debe reflejar `simulation`, `shadow` o `dry_run`.
+   - `bitnin-exec-guard` operará exclusivamente en `dry_run` en Fase 10.
 10. Ninguna credencial financiera, seed, wallet o bridge real entra en esta vertical durante Fase 0-1.
 11. Telegram HITL usa webhook canonico, no polling.
    - Una aprobacion humana no implica ejecucion.

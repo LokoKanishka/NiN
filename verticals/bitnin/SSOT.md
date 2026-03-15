@@ -82,7 +82,10 @@ Responsabilidades previstas:
 - registrar `trade_intent`
 - solicitar aprobacion HITL
 - bloquear ejecucion real en v1
-- dejar trazabilidad de shadow o simulacion
+- dejar trazabilidad de shadow, simulacion o dry_run
+
+**Nota Fase 10:** El `bitnin-exec-guard` está implementado como un servicio local y aislado.
+Recibe intenciones, evalúa guardrails y emite `execution_record` exclusivamente en modo `dry_run`. Aún no se conecta con dinero real, wallets ni exchanges. `approved` NO implica ejecución automática.
 
 ### 5.3 Auditoria / Replay
 
