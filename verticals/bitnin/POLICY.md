@@ -28,10 +28,14 @@ Estado: obligatorio para Fase 0-1
 11. Telegram HITL usa webhook canonico, no polling.
     - Una aprobacion humana no implica ejecucion.
     - No se permite `getUpdates` paralelo para BitNin.
-12. La observabilidad es obligatoria para toda misión BitNin.
+12. Todo `run_id` debe ser trazable a un `batch_id` o `mission_id`.
+    - Los `run_id` deben ser UUIDs o hashes criptográficos.
+    - Los `batch_id` deben ser UUIDs o hashes criptográficos.
+    - Los `mission_id` deben ser UUIDs o hashes criptográficos.
+13. La observabilidad es obligatoria para toda misión BitNin.
     - Cada misión debe generar al menos un `snapshot` inicial y un reporte final.
     - Las discrepancias de infraestructura detectadas por `health.py` deben quedar registradas en el reporte.
-13. Aislamiento de comunicaciones HITL.
+14. Aislamiento de comunicaciones HITL.
     - BitNin debe usar la credencial `telegram-bitnin` para interactuar con la API de Telegram.
     - Queda prohibido el uso de credenciales genéricas (e.g. `telegram-nin`) en workflows BitNin para asegurar trazabilidad y límites de permiso.
 

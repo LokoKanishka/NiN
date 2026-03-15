@@ -28,6 +28,7 @@ def mock_runner():
         mock_obs = mock_obs_cls.return_value
         mock_obs.health.check.return_value = {"overall": "UP", "checks": []}
         
+        # Add generate_batch_report to the mock if needed, but here we test the real method
         runner = BitNinRuntimeRunner()
         return runner
 
@@ -65,3 +66,34 @@ def test_run_once_handles_error(mock_runner):
     assert "error" in events
     # Should still register observability
     mock_runner.obs.replay.register_replay.assert_called_once()
+
+def test_run_id_propagation(mock_runner):
+    custom_run_id = "test_run_123"
+    result = mock_runner.run_once(run_id=custom_run_id, auto_approve=True)
+    
+    assert result["replay_id"] == custom_run_id
+    mock_runner.analyst.build.assert_called_with(symbol="BTCUSDT", interval="1d", top_k_episodes=5, run_id=custom_run_id)
+    mock_runner.shadow.run.assert_called_with(symbol="BTCUSDT", interval="1d", run_id=custom_run_id)
+    # hitl.request signature: def request(self, *, intent_path: str, expires_at: str | None = None, run_id: str | None = None)
+    mock_runner.hitl.request.assert_called_once()
+    args, kwargs = mock_runner.hitl.request.call_args
+    assert kwargs["run_id"] == custom_run_id
+
+def test_batch_report_generation(mock_runner):
+    results = [
+        {"replay_id": "run_1", "points": [{"event": "exec_guard", "data": {}}]},
+        {"replay_id": "run_2", "points": [{"event": "hitl_decision", "data": {"decision": "rejected"}}]},
+        {"replay_id": "run_3", "points": [{"event": "error", "data": {"message": "fail"}}]}
+    ]
+    
+    report_path = mock_runner.generate_batch_report("test_batch", results)
+    assert Path(report_path).exists()
+    
+    import json
+    report = json.loads(Path(report_path).read_text())
+    assert report["total_runs"] == 3
+    assert report["statuses"]["executed"] == 1
+    assert report["statuses"]["rejected"] == 1
+    assert report["statuses"]["failed"] == 1
+    
+    Path(report_path).unlink()

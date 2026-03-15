@@ -138,19 +138,23 @@ class BitNinAnalyst:
         top_k_episodes: int = 5,
         top_k_events: int = 5,
         as_of: str | None = None,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
         context = self.context_builder.build(
             symbol=symbol,
             interval=interval,
             as_of=as_of,
         )
-        analysis_id = _stable_analysis_id(
-            symbol=symbol,
-            interval=interval,
-            as_of=context["market_state"]["as_of"],
-            dataset_versions=context["dataset_versions"],
-            prompt_version=PROMPT_VERSION,
-        )
+        if run_id:
+            analysis_id = run_id
+        else:
+            analysis_id = _stable_analysis_id(
+                symbol=symbol,
+                interval=interval,
+                as_of=context["market_state"]["as_of"],
+                dataset_versions=context["dataset_versions"],
+                prompt_version=PROMPT_VERSION,
+            )
         retrieval = self.retriever.retrieve(
             analysis_id=analysis_id,
             context=context,

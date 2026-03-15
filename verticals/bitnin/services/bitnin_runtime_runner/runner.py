@@ -4,6 +4,7 @@ Orchestrates the full BitNin pipeline.
 """
 import uuid
 import logging
+import json
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Dict, Any
@@ -60,9 +61,52 @@ class BitNinRuntimeRunner:
             qdrant_url="http://localhost:6333"
         )
 
-    def run_once(self, symbol: str = "BTCUSDT", interval: str = "1d", top_k: int = 5, auto_approve: bool = False) -> Dict[str, Any]:
+    def generate_batch_report(self, batch_id: str, results: list[Dict[str, Any]]) -> str:
+        """Generates a summary report for a batch of runs."""
+        stats = {
+            "batch_id": batch_id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "total_runs": len(results),
+            "statuses": {},
+            "decisions": {},
+            "detailed_runs": []
+        }
+        
+        for res in results:
+            run_id = res.get("replay_id")
+            points = res.get("points", [])
+            
+            # Extract final status
+            final_status = "unknown"
+            for p in reversed(points):
+                if p["event"] == "exec_guard":
+                    final_status = "executed"
+                    break
+                if p["event"] == "hitl_decision":
+                    final_status = p["data"].get("decision", "decided")
+                    break
+                if p["event"] == "error":
+                    final_status = "failed"
+                    break
+            
+            stats["statuses"][final_status] = stats["statuses"].get(final_status, 0) + 1
+            stats["detailed_runs"].append({
+                "run_id": run_id,
+                "status": final_status,
+                "points_count": len(points)
+            })
+            
+        report_path = self.runtime_base / "observability" / f"batch_report__{batch_id}.json"
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(json.dumps(stats, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        return str(report_path)
+
+    def run_once(self, symbol: str = "BTCUSDT", interval: str = "1d", top_k: int = 5, auto_approve: bool = False, run_id: str | None = None) -> Dict[str, Any]:
         """Runs a single iteration of the pipeline."""
-        replay_id = f"op_{uuid.uuid4().hex[:8]}"
+        if not run_id:
+            run_id = f"op_{uuid.uuid4().hex[:8]}"
+        
+        replay_id = run_id
         points = []
         
         def log_point(event: str, data: Any):
@@ -83,16 +127,17 @@ class BitNinRuntimeRunner:
 
         try:
             # 2. Analyst
-            logger.info(f"Invoking Analyst for {symbol} {interval}")
-            analysis_res = self.analyst.build(symbol=symbol, interval=interval, top_k_episodes=top_k)
+            logger.info(f"Invoking Analyst for {symbol} {interval} with run_id {run_id}")
+            analysis_res = self.analyst.build(symbol=symbol, interval=interval, top_k_episodes=top_k, run_id=run_id)
             log_point("analyst", {"path": analysis_res["normalized_path"]})
             
             # 3. Shadow
             logger.info("Generating Shadow Intent")
-            shadow_res = self.shadow.run(symbol=symbol, interval=interval)
+            shadow_res = self.shadow.run(symbol=symbol, interval=interval, run_id=run_id)
             hitl_res = self.hitl.request(
                 intent_path=str(shadow_res["intent_path"]),
-                expires_at=None
+                expires_at=None,
+                run_id=run_id
             )
             points.append({"timestamp": utc_now_iso(), "event": "hitl_request", "data": {"request_path": hitl_res["request_path"]}})
             
@@ -116,7 +161,8 @@ class BitNinRuntimeRunner:
                 exec_res = self.exec_guard.run(
                     intent_path=str(shadow_res["intent_path"]),
                     approval_path=approval_path,
-                    analysis_path=analysis_res["normalized_path"]
+                    analysis_path=analysis_res["normalized_path"],
+                    run_id=run_id
                 )
                 points.append({"timestamp": utc_now_iso(), "event": "exec_guard", "data": {"record_path": exec_res["record_path"]}})
             

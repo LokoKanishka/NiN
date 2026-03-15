@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -36,7 +36,7 @@ class BitNinHitlRunner:
         if msgs:
             raise ValueError(f"HITL Validation failed: {msgs}")
 
-    def request(self, *, intent_path: str, expires_at: str | None = None) -> dict[str, Any]:
+    def request(self, *, intent_path: str, expires_at: str | None = None, run_id: str | None = None) -> dict[str, Any]:
         intent_file = Path(intent_path)
         if not intent_file.exists():
             raise FileNotFoundError(f"Intent file not found: {intent_path}")
@@ -45,7 +45,6 @@ class BitNinHitlRunner:
         
         # Default expiration: 1 hour if not provided
         if not expires_at:
-            from datetime import datetime, timedelta, timezone
             expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat().replace("+00:00", "Z")
         
         approval = build_approval_request(
@@ -56,8 +55,11 @@ class BitNinHitlRunner:
         )
         approval["status"] = "awaiting_human_approval"
         
-        analysis = json.loads(Path(intent_data["reasoning_ref"]).read_text(encoding="utf-8"))
-        message = build_telegram_approval_message(approval=approval, intent=intent_data, analysis=analysis)
+        if run_id:
+            approval["approval_id"] = run_id
+        
+        analysis_data = json.loads(Path(intent_data["reasoning_ref"]).read_text(encoding="utf-8"))
+        message = build_telegram_approval_message(approval=approval, intent=intent_data, analysis=analysis_data)
         approval["message_ref"] = f"telegram_webhook:{approval['approval_id']}"
         
         request_payload = {

@@ -22,7 +22,7 @@ class BitNinExecGuardRunner:
         self.logs_root = Path(logs_root) if logs_root else None
         self.executor = ExecGuardExecutor()
 
-    def run(self, *, intent_path: str, approval_path: str | None = None, analysis_path: str | None = None) -> dict[str, Any]:
+    def run(self, *, intent_path: str, approval_path: str | None = None, analysis_path: str | None = None, run_id: str | None = None) -> dict[str, Any]:
         with open(intent_path, "r") as f:
             intent = json.load(f)
         
@@ -37,6 +37,9 @@ class BitNinExecGuardRunner:
                 analysis = json.load(f)
         
         record = self.executor.execute(intent=intent, approval=approval, analysis=analysis)
+        if run_id:
+            record["execution_id"] = run_id
+        
         exec_id = record["execution_id"]
         
         # Persistence (using ReceiptManager which defaults to runtime/execution paths if not overridden globally)

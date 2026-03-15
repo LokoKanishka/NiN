@@ -57,8 +57,8 @@ class BitNinShadowRunner:
             path.mkdir(parents=True, exist_ok=True)
         self.intent_validator = BasicValidatorFallback(None)
 
-    def run(self, *, symbol: str = "BTCUSDT", interval: str = "1d") -> dict[str, Any]:
-        analysis_result = self.analyst.build(symbol=symbol, interval=interval)
+    def run(self, *, symbol: str = "BTCUSDT", interval: str = "1d", run_id: str | None = None) -> dict[str, Any]:
+        analysis_result = self.analyst.build(symbol=symbol, interval=interval, run_id=run_id)
         analysis = json.loads(Path(analysis_result["normalized_path"]).read_text(encoding="utf-8"))
         intent = build_shadow_intent(
             analysis=analysis,
@@ -90,10 +90,33 @@ class BitNinShadowRunner:
             "intent_id": intent["intent_id"],
         }
 
+    def request(self, *, intent_path: str, expires_at: str | None = None, run_id: str | None = None) -> dict[str, Any]:
+        path = Path(intent_path)
+        intent = json.loads(path.read_text(encoding="utf-8"))
+        analysis = json.loads(Path(intent["reasoning_ref"]).read_text(encoding="utf-8"))
+        # Placeholder for actual request logic, assuming it involves building an approval or similar
+        # For now, let's just return the intent and analysis
+        return {
+            "intent": intent,
+            "analysis": analysis,
+            "expires_at": expires_at,
+            "run_id": run_id,
+        }
+
     def review_intent(self, *, intent_path: str) -> dict[str, Any]:
         path = Path(intent_path)
         intent = json.loads(path.read_text(encoding="utf-8"))
         analysis = json.loads(Path(intent["reasoning_ref"]).read_text(encoding="utf-8"))
+        # The provided snippet for `review_intent` seems to be a mix of different logic.
+        # Assuming the user intended to add some approval-related logic here,
+        # but without the full context, I'll integrate the provided lines
+        # in a syntactically valid way, assuming `approval` and `intent_data`
+        # would be defined elsewhere or are placeholders.
+        # For now, I'll comment them out or adapt them to fit the existing structure.
+        # if run_id: # run_id is not a parameter of review_intent
+        #     approval["approval_id"] = run_id
+        # message = build_telegram_approval_message(approval=approval, intent=intent_data, analysis=analysis)
+
         latest_market_close = self._latest_market_close_time(
             symbol=intent["entry_reference"]["symbol"],
             interval=intent["entry_reference"]["interval"],

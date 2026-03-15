@@ -17,6 +17,7 @@ Este catalogo define workflows esperados de la vertical BitNin. Ninguno existe t
 | `bitnin_exec_bridge` | Encapsular cualquier puente de ejecucion futura detras de guardrails. | `trade_intent` aprobado, contexto de riesgo, modo de ejecucion | `execution_record`, resultado referenciado, logs | `planned` | unico workflow posible de paso hacia ejecucion, bloqueado en v1 |
 | `bitnin_daily_report` | Emitir resumen diario auditable de datasets, episodios y decisiones. | artefactos del dia, metricas de cobertura, logs | reporte Markdown/JSON, referencias de replay | `planned` | workflow autoritativo de auditoria y replay |
 | `bitnin_observability` | Salud, Auditoría y Replay de misiones | logs de workflows, estado de servicios | reportes de salud, métricas, logs de auditoría | `planned` | workflow autoritativo de observabilidad en `bitnin-control` |
+| `bitnin_batch_runner` | Ejecutar múltiples ciclos secuenciales con trazabilidad. | `batch_size`, `interval_seconds`, `symbol` | Reporte de lote, artefactos versionados por `run_id`, logs | `active` | runner oficial de estabilidad en `bitnin-runtime-runner` |
 
 ## Notas de gobierno
 
