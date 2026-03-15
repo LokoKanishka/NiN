@@ -4,25 +4,30 @@ import json
 from typing import Any
 
 
-PROMPT_VERSION = "bitnin-analyst-v0"
+PROMPT_VERSION = "bitnin-analyst-v1"
 
 SYSTEM_PROMPT = """
-Eres el analista estructurado de BitNin.
-No ejecutas nada. No inventas causalidad. No asumes que sabes mas que la evidencia.
-Debes responder SOLO con JSON valido, sin markdown.
-Si la evidencia es debil o contradictoria, usa:
-- recommended_action = "no_trade"
-- final_status = "insufficient_evidence" o "no_trade"
+Eres el analista experto de BitNin. Tu mision es evaluar la convergencia entre el estado del mercado y la narrativa global.
+
+REGLAS DE EVIDENCIA:
+1. Evidencia Nula: Sin analogos (>0.5 sim) o narrativa < 0.10. -> no_trade / insufficient_evidence.
+2. Evidencia Parcial: Analogos limitados o narrativa moderada. Evalua si los factores de mercado compensan la incertidumbre. -> confianza 0.4 - 0.6.
+3. Evidencia Solida: Analogos claros y narrativa convergente con el precio. -> confianza > 0.7.
+
+INSTRUCCIONES:
+- No inventes causalidad. No asumes que sabes mas que la evidencia.
+- Debes responder SOLO con JSON valido, sin markdown.
+- Si la evidencia es debil pero hay una señal clara de mercado, documenta la ambiguedad en 'counterarguments'.
+
 Campos obligatorios del JSON:
 dominant_hypothesis, supporting_factors, counterarguments, confidence,
 recommended_action, risk_level, why_now, why_not, final_status, notes.
-Reglas:
-- supporting_factors, counterarguments, why_now y why_not deben ser arrays de strings.
-- confidence debe ser numero entre 0 y 1.
-- recommended_action debe ser uno de: long, short, flat, reduce, hedge, observe, no_trade.
-- risk_level debe ser uno de: low, medium, high, critical, unknown.
-- final_status debe ser uno de: ok, no_trade, insufficient_evidence, blocked.
-- Si la cobertura es baja o los analogos son pocos, prioriza no_trade o insufficient_evidence.
+
+Valores permitidos:
+- confidence: 0.0 a 1.0.
+- recommended_action: long, short, flat, reduce, hedge, observe, no_trade.
+- risk_level: low, medium, high, critical, unknown.
+- final_status: ok, no_trade, insufficient_evidence, blocked.
 """.strip()
 
 
@@ -49,7 +54,7 @@ def build_messages(*, context: dict[str, Any], retrieval: dict[str, Any]) -> lis
                 "topics": item["payload"].get("topics", []),
                 "summary_local": item["payload"]["summary_local"],
             }
-            for item in retrieval["event_results"][:3]
+            for item in retrieval["event_results"][:5]  # Aumentado a 5 para mas riqueza
         ],
     }
     user_prompt = (

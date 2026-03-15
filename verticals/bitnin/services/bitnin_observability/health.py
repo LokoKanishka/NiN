@@ -14,29 +14,58 @@ class HealthChecker:
         self.ollama_url = ollama_url
         self.qdrant_url = qdrant_url
 
-    def check_service(self, name: str, url: str) -> dict[str, Any]:
+    def check_service(self, name: str, url: str, endpoint: str = "") -> dict[str, Any]:
+        target_url = f"{url.rstrip('/')}/{endpoint.lstrip('/')}"
         try:
-            with urllib.request.urlopen(url, timeout=2) as response:
+            req = urllib.request.Request(target_url, method="GET")
+            with urllib.request.urlopen(req, timeout=2) as response:
                 status = response.getcode()
-                return {"service": name, "status": "UP", "code": status}
+                return {"service": name, "status": "UP", "code": status, "url": target_url}
         except Exception as e:
-            return {"service": name, "status": "DOWN", "error": str(e)}
+            # If root responds but endpoint doesn't, it might be DEGRADED or just wrong endpoint
+            # But here we just want to know if reachable
+            return {"service": name, "status": "DOWN", "error": str(e), "url": target_url}
 
-    def run_all(self) -> dict[str, Any]:
+    def run_all(self, required: list[str] | None = None) -> dict[str, Any]:
+        if required is None:
+            required = ["ollama", "qdrant"] # Default required for BitNin
+            
         results = [
-            self.check_service("n8n", self.n8n_url),
-            self.check_service("ollama", self.ollama_url),
-            self.check_service("qdrant", self.qdrant_url),
+            self.check_service("n8n", self.n8n_url, endpoint=""),
+            self.check_service("ollama", self.ollama_url, endpoint="/api/tags"),
+            self.check_service("qdrant", self.qdrant_url, endpoint="/readyz"),
         ]
-        overall = "UP" if all(r["status"] == "UP" for r in results) else "DEGRADED"
-        return {"overall": overall, "checks": results}
+        
+        # Determine overall state based on requirements
+        blocking_failed = False
+        degraded = False
+        
+        for r in results:
+            if r["service"] in required and r["status"] == "DOWN":
+                blocking_failed = True
+            elif r["status"] == "DOWN":
+                r["status"] = "UNREACHABLE_BUT_NON_BLOCKING"
+                degraded = True
+            elif r["status"] == "UP" and r.get("code") != 200:
+                # Potentially degraded but responding
+                degraded = True
+                
+        if blocking_failed:
+            overall = "DOWN"
+        elif degraded:
+            overall = "DEGRADED"
+        else:
+            overall = "UP"
+            
+        return {"overall": overall, "checks": results, "required": required}
 
 
 if __name__ == "__main__":
     # Internal defaults based on SSOT (Unified to 6333)
+    # Internal defaults based on SSOT (Unified to 6333)
     checker = HealthChecker(
         n8n_url="http://localhost:5688",
-        ollama_url="http://host.docker.internal:11434",
+        ollama_url="http://localhost:11434",
         qdrant_url="http://localhost:6333",
     )
-    print(json.dumps(checker.run_all(), indent=2))
+    print(json.dumps(checker.run_all(required=["ollama"]), indent=2))

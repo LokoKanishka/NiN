@@ -36,7 +36,7 @@ class AnalystRetriever:
         analysis_id: str,
         context: dict[str, Any],
         top_k_episodes: int = 5,
-        top_k_events: int = 5,
+        top_k_events: int = 8,
     ) -> dict[str, Any]:
         self.raw_root.mkdir(parents=True, exist_ok=True)
         market_state = context["market_state"]

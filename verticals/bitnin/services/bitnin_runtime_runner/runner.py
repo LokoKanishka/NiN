@@ -57,44 +57,104 @@ class BitNinRuntimeRunner:
         self.obs = ObservabilityBuilder(runtime_dir=self.runtime_base / "observability")
         self.health = HealthChecker(
             n8n_url="http://localhost:5688",
-            ollama_url="http://host.docker.internal:11434",
+            ollama_url="http://localhost:11434",
             qdrant_url="http://localhost:6333"
         )
 
     def generate_batch_report(self, batch_id: str, results: list[Dict[str, Any]]) -> str:
-        """Generates a summary report for a batch of runs."""
+        """Generates a summary report for a batch of runs with stability metrics."""
         stats = {
             "batch_id": batch_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "total_runs": len(results),
             "statuses": {},
-            "decisions": {},
+            "outcomes": {
+                "accepted_dry_run": 0,
+                "no_trade": 0,
+                "insufficient_evidence": 0,
+                "error": 0
+            },
+            "durations": {
+                "total": 0.0,
+                "average": 0.0,
+                "per_run": []
+            },
+            "health_summary": {
+                "n8n": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0},
+                "ollama": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0},
+                "qdrant": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0}
+            },
             "detailed_runs": []
         }
         
         for res in results:
             run_id = res.get("replay_id")
             points = res.get("points", [])
+            duration = res.get("duration", 0.0)
             
-            # Extract final status
+            # 1. Durations
+            stats["durations"]["total"] += duration
+            stats["durations"]["per_run"].append({"run_id": run_id, "duration": duration})
+            
+            # 2. Health aggregation
+            for p in points:
+                if p["event"] == "health_check":
+                    for check in p["data"].get("checks", []):
+                        svc = check["service"]
+                        status = check["status"]
+                        if svc in stats["health_summary"]:
+                            if status in stats["health_summary"][svc]:
+                                stats["health_summary"][svc][status] += 1
+                            else:
+                                stats["health_summary"][svc][status] = stats["health_summary"][svc].get(status, 0) + 1
+            
+            # 3. Outcome & Status categorization
             final_status = "unknown"
-            for p in reversed(points):
-                if p["event"] == "exec_guard":
-                    final_status = "executed"
-                    break
-                if p["event"] == "hitl_decision":
-                    final_status = p["data"].get("decision", "decided")
-                    break
-                if p["event"] == "error":
-                    final_status = "failed"
-                    break
+            outcome = "error"
+            
+            # Extract status from analyst or points
+            analyst_status = res.get("analyst_status")
+            analyst_action = res.get("analyst_action")
+            
+            has_exec = any(p["event"] == "exec_guard" for p in points)
+            has_error = any(p["event"] == "error" for p in points)
+            
+            if has_exec:
+                outcome = "accepted_dry_run"
+                final_status = "executed"
+            elif analyst_status == "insufficient_evidence":
+                outcome = "insufficient_evidence"
+                final_status = "insufficient_evidence"
+            elif analyst_action == "no_trade":
+                outcome = "no_trade"
+                final_status = "no_trade"
+            elif has_error:
+                outcome = "error"
+                final_status = "failed"
+            else:
+                # Fallback scan of points
+                for p in reversed(points):
+                    if p["event"] == "hitl_decision":
+                        final_status = p["data"].get("decision", "decided")
+                        break
+                    if p["event"] == "error":
+                        final_status = "failed"
+                        break
+            
+            if outcome in stats["outcomes"]:
+                stats["outcomes"][outcome] += 1
             
             stats["statuses"][final_status] = stats["statuses"].get(final_status, 0) + 1
             stats["detailed_runs"].append({
                 "run_id": run_id,
                 "status": final_status,
+                "outcome": outcome,
+                "duration": duration,
                 "points_count": len(points)
             })
+        
+        if stats["total_runs"] > 0:
+            stats["durations"]["average"] = stats["durations"]["total"] / stats["total_runs"]
             
         report_path = self.runtime_base / "observability" / f"batch_report__{batch_id}.json"
         report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -102,12 +162,17 @@ class BitNinRuntimeRunner:
         return str(report_path)
 
     def run_once(self, symbol: str = "BTCUSDT", interval: str = "1d", top_k: int = 5, auto_approve: bool = False, run_id: str | None = None) -> Dict[str, Any]:
-        """Runs a single iteration of the pipeline."""
+        """Runs a single iteration of the pipeline with instrumentation."""
+        import time
+        start_time = time.time()
+        
         if not run_id:
             run_id = f"op_{uuid.uuid4().hex[:8]}"
         
         replay_id = run_id
         points = []
+        analyst_status = "unknown"
+        analyst_action = "unknown"
         
         def log_point(event: str, data: Any):
             points.append({
@@ -119,17 +184,26 @@ class BitNinRuntimeRunner:
         logger.info(f"Starting BitNin Operational Cycle: {replay_id}")
 
         # 1. Health Check
-        health_status = self.health.run_all()
+        # analyst needs ollama and qdrant
+        required_deps = ["ollama", "qdrant"]
+        health_status = self.health.run_all(required=required_deps)
         log_point("health_check", health_status)
         
+        if health_status["overall"] == "DOWN":
+            logger.error("Required dependencies are DOWN. Aborting cycle.")
+            log_point("error", {"message": "Critical health failure", "details": health_status})
+            return {"replay_id": replay_id, "points": points, "duration": 0.0, "analyst_status": "error", "analyst_action": "abort"}
+
         if health_status["overall"] == "DEGRADED":
-            logger.warning("System degraded. Proceeding with caution.")
+            logger.warning("System degraded (non-blocking). Proceeding.")
 
         try:
             # 2. Analyst
             logger.info(f"Invoking Analyst for {symbol} {interval} with run_id {run_id}")
             analysis_res = self.analyst.build(symbol=symbol, interval=interval, top_k_episodes=top_k, run_id=run_id)
-            log_point("analyst", {"path": analysis_res["normalized_path"]})
+            analyst_status = analysis_res.get("final_status", "unknown")
+            analyst_action = analysis_res.get("recommended_action", "unknown")
+            log_point("analyst", {"path": analysis_res["normalized_path"], "status": analyst_status})
             
             # 3. Shadow
             logger.info("Generating Shadow Intent")
@@ -175,4 +249,11 @@ class BitNinRuntimeRunner:
             logger.info("Registering Observability Replay")
             self.obs.replay.register_replay(replay_id=replay_id, points=points)
             
-        return {"replay_id": replay_id, "points": points}
+        duration = time.time() - start_time
+        return {
+            "replay_id": replay_id, 
+            "points": points, 
+            "duration": duration,
+            "analyst_status": analyst_status,
+            "analyst_action": analyst_action
+        }

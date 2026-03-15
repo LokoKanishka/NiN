@@ -38,8 +38,10 @@ def pre_llm_guardrail(context: dict[str, Any], retrieval: dict[str, Any]) -> lis
         reasons.append("too_few_episode_analogues")
     elif float(episode_results[0]["score"]) < 0.5:
         reasons.append("top_episode_similarity_too_low")
-    if context["narrative_coverage_score"] < 0.2:
-        reasons.append("narrative_coverage_below_threshold")
+    
+    # Refinado v1: Reducir umbral de narrativa para advertencia
+    if context["narrative_coverage_score"] < 0.15:
+        reasons.append("narrative_coverage_critically_low")
     return reasons
 
 
@@ -54,21 +56,23 @@ def post_llm_guardrails(
         notes = [str(notes)]
 
     if analysis["recommended_action"] in {"long", "short", "hedge", "reduce"}:
-        if analysis["confidence"] < 0.6:
+        # Refinado v1: Suelo de confianza direccional reducido a 0.55
+        if analysis["confidence"] < 0.55:
             analysis["recommended_action"] = "no_trade"
             analysis["final_status"] = "no_trade"
             analysis["why_not"] = sorted(set(analysis["why_not"] + ["confidence_too_low_for_directional_action"]))
-            notes.append("recommended_action downgraded to no_trade because confidence < 0.6")
-        elif context["narrative_coverage_score"] < 0.2:
+            notes.append("recommended_action downgraded to no_trade because confidence < 0.55")
+        elif context["narrative_coverage_score"] < 0.15:
             analysis["recommended_action"] = "no_trade"
             analysis["final_status"] = "no_trade"
             analysis["why_not"] = sorted(set(analysis["why_not"] + ["narrative_coverage_too_low_for_directional_action"]))
-            notes.append("recommended_action downgraded to no_trade because narrative coverage is low")
-        elif len(retrieval["episode_results"]) < 3:
+            notes.append("recommended_action downgraded to no_trade because narrative coverage is critically low")
+        # Refinado v1: Permitir accion con 2 analogos si la confianza es alta (>0.7)
+        elif len(retrieval["episode_results"]) < 2 or (len(retrieval["episode_results"]) < 3 and analysis["confidence"] < 0.7):
             analysis["recommended_action"] = "no_trade"
             analysis["final_status"] = "no_trade"
             analysis["why_not"] = sorted(set(analysis["why_not"] + ["too_few_analogues_for_directional_action"]))
-            notes.append("recommended_action downgraded to no_trade because retrieved analogues are too few")
+            notes.append(f"recommended_action downgraded because analogues={len(retrieval['episode_results'])} and confidence={analysis['confidence']}")
 
     if analysis["recommended_action"] == "no_trade" and analysis["final_status"] == "ok":
         analysis["final_status"] = "no_trade"
