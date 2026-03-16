@@ -97,6 +97,7 @@ def _build_insufficient_analysis(
         "dataset_versions": context["dataset_versions"],
         "query_refs": retrieval["query_refs"],
         "composite_signal": retrieval.get("composite_signal", {}),
+        "active_memory": retrieval.get("active_memories", []),
         "notes": ["Pre-LLM guardrail activado."],
     }
 
@@ -316,6 +317,7 @@ class BitNinAnalyst:
             "dataset_versions": context["dataset_versions"],
             "query_refs": retrieval["query_refs"],
             "composite_signal": retrieval.get("composite_signal", {}),
+            "active_memory": retrieval.get("active_memories", []),
             "notes": _coerce_string_list(llm_output.get("notes", [])),
         }
         return analysis
