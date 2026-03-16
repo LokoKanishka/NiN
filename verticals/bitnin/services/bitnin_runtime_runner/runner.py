@@ -84,6 +84,12 @@ class BitNinRuntimeRunner:
                 "ollama": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0},
                 "qdrant": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0}
             },
+            "metrics_summary": {
+                "composite_states": {"HIGH": 0, "DIVERGENT": 0, "LOW": 0},
+                "causal_typologies": {},
+                "average_narrative_coverage": 0.0,
+                "runs_with_active_memory": 0
+            },
             "detailed_runs": []
         }
         
@@ -144,24 +150,40 @@ class BitNinRuntimeRunner:
             if outcome in stats["outcomes"]:
                 stats["outcomes"][outcome] += 1
             
+            # Additional detailed metrics extraction
+            composite_state = res.get("composite_signal", {}).get("state", "UNKNOWN")
+            if composite_state in stats["metrics_summary"]["composite_states"]:
+                stats["metrics_summary"]["composite_states"][composite_state] += 1
+            
+            typology = res.get("composite_signal", {}).get("causal_typology", "UNKNOWN")
+            stats["metrics_summary"]["causal_typologies"][typology] = stats["metrics_summary"]["causal_typologies"].get(typology, 0) + 1
+            
+            stats["metrics_summary"]["average_narrative_coverage"] += res.get("narrative_coverage_score", 0.0)
+            if res.get("active_memory_count", 0) > 0:
+                stats["metrics_summary"]["runs_with_active_memory"] += 1
+
             stats["statuses"][final_status] = stats["statuses"].get(final_status, 0) + 1
             stats["detailed_runs"].append({
                 "run_id": run_id,
                 "status": final_status,
                 "outcome": outcome,
                 "duration": duration,
-                "points_count": len(points)
+                "points_count": len(points),
+                "composite_state": composite_state,
+                "causal_typology": typology,
+                "narrative_coverage": res.get("narrative_coverage_score", 0.0)
             })
         
         if stats["total_runs"] > 0:
             stats["durations"]["average"] = stats["durations"]["total"] / stats["total_runs"]
+            stats["metrics_summary"]["average_narrative_coverage"] /= stats["total_runs"]
             
         report_path = self.runtime_base / "observability" / f"batch_report__{batch_id}.json"
         report_path.parent.mkdir(parents=True, exist_ok=True)
         report_path.write_text(json.dumps(stats, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         return str(report_path)
 
-    def run_once(self, symbol: str = "BTCUSDT", interval: str = "1d", top_k: int = 5, auto_approve: bool = False, run_id: str | None = None) -> Dict[str, Any]:
+    def run_once(self, symbol: str = "BTCUSDT", interval: str = "1d", top_k: int = 5, auto_approve: bool = False, run_id: str | None = None, as_of: str | None = None) -> Dict[str, Any]:
         """Runs a single iteration of the pipeline with instrumentation."""
         import time
         start_time = time.time()
@@ -173,6 +195,7 @@ class BitNinRuntimeRunner:
         points = []
         analyst_status = "unknown"
         analyst_action = "unknown"
+        analysis_res = {}
         
         def log_point(event: str, data: Any):
             points.append({
@@ -199,8 +222,8 @@ class BitNinRuntimeRunner:
 
         try:
             # 2. Analyst
-            logger.info(f"Invoking Analyst for {symbol} {interval} with run_id {run_id}")
-            analysis_res = self.analyst.build(symbol=symbol, interval=interval, top_k_episodes=top_k, run_id=run_id)
+            logger.info(f"Invoking Analyst for {symbol} {interval} with run_id {run_id} as_of {as_of}")
+            analysis_res = self.analyst.build(symbol=symbol, interval=interval, top_k_episodes=top_k, run_id=run_id, as_of=as_of)
             analyst_status = analysis_res.get("final_status", "unknown")
             analyst_action = analysis_res.get("recommended_action", "unknown")
             log_point("analyst", {"path": analysis_res["normalized_path"], "status": analyst_status})
@@ -255,5 +278,8 @@ class BitNinRuntimeRunner:
             "points": points, 
             "duration": duration,
             "analyst_status": analyst_status,
-            "analyst_action": analyst_action
+            "analyst_action": analyst_action,
+            "composite_signal": analysis_res.get("composite_signal", {}),
+            "narrative_coverage_score": analysis_res.get("narrative_coverage_score", 0.0),
+            "active_memory_count": len(analysis_res.get("active_memory", [])),
         }

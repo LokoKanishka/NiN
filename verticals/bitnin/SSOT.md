@@ -294,3 +294,14 @@ Principios congelados:
 - `approved` o `rejected` cambian estado formal, no disparan ejecucion
 - toda decision humana queda auditada con actor, timestamp y canal
 - expiracion es un estado terminal valido si no llega decision a tiempo
+
+## 18. Nota de Fase 10
+
+Fase 10 agrega observabilidad longitudinal y pruebas de estabilidad en shadow mode continuo (pipeline script y scorecards en `verticals/bitnin/services/bitnin_observability/`).
+
+Principios congelados:
+
+- el pipeline continuo corre el analista secuencialmente simulando cron diario real
+- el scorecard condensa distribuciones de tipologías, estados compuestos y abstención
+- están activadas reglas estrictas de detección de **degradación silenciosa** que revientan logs (ej. memoria inútil, 100% de un fallo, narrativa perennemente < 0.2)
+- el éxito de esta fase no es operar, sino diagnosticar correctamente cuán bien sostiene el criterio su desempeño en el tiempo.
