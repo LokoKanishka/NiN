@@ -13,7 +13,7 @@ DEFAULT_MARKET_PATH = (
     BITNIN_ROOT / "runtime" / "datasets" / "market" / "normalized" / "binance_klines__BTCUSDT__1d__market-v0-binance-1d.jsonl"
 )
 DEFAULT_NARRATIVE_PATH = (
-    BITNIN_ROOT / "runtime" / "datasets" / "narrative" / "normalized" / "gdelt_doc_artlist__bitcoin__narrative-v0-gdelt.jsonl"
+    BITNIN_ROOT / "runtime" / "datasets" / "narrative" / "normalized" / "gdelt_doc_artlist__bitcoin__narrative-v1-robust.jsonl"
 )
 DEFAULT_EPISODES_PATH = (
     BITNIN_ROOT / "runtime" / "datasets" / "episodes" / "normalized" / "episodes__BTCUSDT__1d__episodes-v0-real.jsonl"
