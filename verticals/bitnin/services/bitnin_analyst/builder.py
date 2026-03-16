@@ -96,6 +96,7 @@ def _build_insufficient_analysis(
         "prompt_version": PROMPT_VERSION,
         "dataset_versions": context["dataset_versions"],
         "query_refs": retrieval["query_refs"],
+        "composite_signal": retrieval.get("composite_signal", {}),
         "notes": ["Pre-LLM guardrail activado."],
     }
 
@@ -171,6 +172,9 @@ class BitNinAnalyst:
             print(f"Warning: Active memory retrieval failed: {e}")
             retrieval["active_memories"] = []
 
+        # Calculate composite signal
+        retrieval["composite_signal"] = self._calculate_composite_signal(context=context, retrieval=retrieval)
+
         pre_guardrail_reasons = pre_llm_guardrail(context, retrieval)
         llm_result = None
         messages = None
@@ -237,6 +241,37 @@ class BitNinAnalyst:
             "prompt_version": analysis["prompt_version"],
             "final_status": analysis["final_status"],
             "recommended_action": analysis["recommended_action"],
+            "composite_signal": analysis.get("composite_signal", {}),
+        }
+
+    def _calculate_composite_signal(
+        self,
+        *,
+        context: dict[str, Any],
+        retrieval: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Calculates a structured convergence signal."""
+        # Market Strength (0.3)
+        m_state = context.get("market_state", {})
+        m_score = 0.5 if m_state.get("breakout") else 0.3
+        m_score += min(abs(m_state.get("return_1d", 0)) * 5, 0.5)
+        
+        # Narrative Support (0.4)
+        n_score = context.get("narrative_coverage_score", 0)
+        
+        # Memory Relevance (0.3)
+        memories = retrieval.get("active_memories", [])
+        mem_score = max([m.get("score", 0) for m in memories]) if memories else 0
+        
+        # Final convergence
+        convergence = (m_score * 0.3) + (n_score * 0.4) + (mem_score * 0.3)
+        
+        return {
+            "market_strength": round(float(m_score), 4),
+            "narrative_support": round(float(n_score), 4),
+            "memory_relevance": round(float(mem_score), 4),
+            "convergence_score": round(float(convergence), 4),
+            "state": "HIGH" if convergence > 0.7 else ("DIVERGENT" if convergence > 0.4 else "LOW")
         }
 
     def _merge_llm_output(
@@ -268,6 +303,7 @@ class BitNinAnalyst:
             "prompt_version": PROMPT_VERSION,
             "dataset_versions": context["dataset_versions"],
             "query_refs": retrieval["query_refs"],
+            "composite_signal": retrieval.get("composite_signal", {}),
             "notes": _coerce_string_list(llm_output.get("notes", [])),
         }
         return analysis
@@ -279,6 +315,8 @@ def build_cli_parser() -> argparse.ArgumentParser:
     parser.add_argument("--interval", default="1d")
     parser.add_argument("--top-k-episodes", type=int, default=5)
     parser.add_argument("--top-k-events", type=int, default=5)
+    parser.add_argument("--run-id", type=str, default=None)
+    parser.add_argument("--as-of", type=str, default=None)
     return parser
 
 
@@ -290,6 +328,8 @@ def main(argv: list[str] | None = None) -> int:
         interval=args.interval,
         top_k_episodes=args.top_k_episodes,
         top_k_events=args.top_k_events,
+        run_id=args.run_id,
+        as_of=args.as_of,
     )
     print(json.dumps(result, indent=2, ensure_ascii=False))
     return 0

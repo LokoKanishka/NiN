@@ -9,6 +9,7 @@ BitNin es la vertical formal de NiN para:
 
 - inteligencia historica de mercado
 - memoria RAG sobre episodios y eventos
+- Señal Compuesta como metrica de convergencia
 - analisis estructurado
 - simulacion de decisiones futuras
 - shadow mode como paso previo a cualquier automatizacion posterior

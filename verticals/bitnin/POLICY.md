@@ -38,6 +38,9 @@ Estado: obligatorio para Fase 0-1
 14. Aislamiento de comunicaciones HITL.
     - BitNin debe usar la credencial `telegram-bitnin` para interactuar con la API de Telegram.
     - Queda prohibido el uso de credenciales genéricas (e.g. `telegram-nin`) en workflows BitNin para asegurar trazabilidad y límites de permiso.
+15. La Señal Compuesta (`CompositeSignal`) es el ancla de convergencia.
+    - El analista debe priorizar el estado de convergencia sobre intuiciones aisladas del mercado.
+    - Estados de `DIVERGENT` o `LOW` deben motivar por defecto a `insufficient_evidence` o `no_trade`.
 
 ## Regla operativa
 
