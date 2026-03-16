@@ -202,7 +202,7 @@ Lo que sigue fuera de alcance en esa fase:
 - analista
 - shadow o HITL
 
-## 11. Nota de Fase 3
+## 11. Nota de Fase 3 y Baseline Narrativo
 
 Fase 3 agrega discovery narrativo estructurado en `verticals/bitnin/services/bitnin_narrative_builder/`.
 
@@ -212,6 +212,13 @@ Principio de esta capa:
 - los eventos normalizados son hipotesis estructuradas con confianza, no verdad causal absoluta
 - se persisten solo metadata, links, resumen local y tags
 - no se persiste texto completo externo como dataset normalizado
+
+### 11.1 Baseline Narrativo Efectivo (`v1-robust`)
+Durante la estabilización de la Fase 8, el dataset narrativo se migró al baseline `v1-robust` para permitir la validación histórica multi-régimen.
+Reglas operativas de este baseline:
+- **Rango temporal verificado:** Cubre desde el **`2026-01-07`** en adelante.
+- **Hueco conocido:** El periodo de `2026-01-01` a `2026-01-06` se considera un límite material de recuperación inicial desde GDELT; no se asumen convergencias narrativas precisas en esa ventana (el analista mostrará `narrativa_ausente` o forzará un estado "ciego").
+- **Parametrización:** Por defecto, el analista apunta al baseline interno normalizado `v1-robust`. Sin embargo, esto es parametrizable dinámicamente vía variable de entorno `BITNIN_NARRATIVE_DATASET_PATH` o parámetro de CLI explícito.
 
 ## 12. Nota de Fase 4
 

@@ -10,7 +10,7 @@ def test_pre_llm_guardrail_triggers_on_sparse_retrieval():
     retrieval = {"episode_results": [{"score": 0.49}]}
     reasons = pre_llm_guardrail(context, retrieval)
     assert "top_episode_similarity_too_low" in reasons or "too_few_episode_analogues" in reasons
-    assert "narrative_coverage_below_threshold" in reasons
+    assert "narrative_coverage_critically_low" in reasons
 
 
 def test_post_llm_guardrails_downgrade_directional_action():

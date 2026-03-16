@@ -9,7 +9,7 @@ class FakeEmbedder:
 
 
 class FakeQdrant:
-    def search(self, *, collection, vector, limit, query_filter):
+    def search(self, *, collection, vector, limit, query_filter=None, **kwargs):
         if collection == "bitnin_episodes":
             return [
                 {
