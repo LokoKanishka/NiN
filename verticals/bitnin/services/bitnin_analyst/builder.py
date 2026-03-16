@@ -141,8 +141,13 @@ class BitNinAnalyst:
         top_k_events: int = 5,
         as_of: str | None = None,
         run_id: str | None = None,
+        narrative_path: Path | None = None,
     ) -> dict[str, Any]:
-        context = self.context_builder.build(
+        context_builder = self.context_builder
+        if narrative_path:
+            context_builder = CurrentContextBuilder(narrative_path=narrative_path)
+
+        context = context_builder.build(
             symbol=symbol,
             interval=interval,
             as_of=as_of,
@@ -243,6 +248,8 @@ class BitNinAnalyst:
             "final_status": analysis["final_status"],
             "recommended_action": analysis["recommended_action"],
             "composite_signal": analysis.get("composite_signal", {}),
+            "narrative_coverage_score": analysis.get("narrative_coverage_score", 0.0),
+            "active_memory": analysis.get("active_memory", []),
         }
 
     def _calculate_composite_signal(
@@ -331,6 +338,7 @@ def build_cli_parser() -> argparse.ArgumentParser:
     parser.add_argument("--top-k-events", type=int, default=5)
     parser.add_argument("--run-id", type=str, default=None)
     parser.add_argument("--as-of", type=str, default=None)
+    parser.add_argument("--narrative-path", type=str, default=None, help="Override internal narrative dataset path")
     return parser
 
 
@@ -344,6 +352,7 @@ def main(argv: list[str] | None = None) -> int:
         top_k_events=args.top_k_events,
         run_id=args.run_id,
         as_of=args.as_of,
+        narrative_path=Path(args.narrative_path) if args.narrative_path else None,
     )
     print(json.dumps(result, indent=2, ensure_ascii=False))
     return 0
