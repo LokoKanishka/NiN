@@ -266,12 +266,24 @@ class BitNinAnalyst:
         # Final convergence
         convergence = (m_score * 0.3) + (n_score * 0.4) + (mem_score * 0.3)
         
+        # Causal Typology
+        typology = "evidencia_insuficiente"
+        if n_score < 0.15:
+            typology = "narrativa_ausente"
+        elif n_score < 0.4 and m_score > 0.6:
+            typology = "mercado_fuerte_narrativa_debil"
+        elif n_score > 0.5 and m_score < 0.4:
+            typology = "narrativa_fuerte_mercado_debil"
+        elif convergence < 0.4:
+            typology = "ruido_predominante"
+        
         return {
             "market_strength": round(float(m_score), 4),
             "narrative_support": round(float(n_score), 4),
             "memory_relevance": round(float(mem_score), 4),
             "convergence_score": round(float(convergence), 4),
-            "state": "HIGH" if convergence > 0.7 else ("DIVERGENT" if convergence > 0.4 else "LOW")
+            "state": "HIGH" if convergence > 0.7 else ("DIVERGENT" if convergence > 0.4 else "LOW"),
+            "causal_typology": typology
         }
 
     def _merge_llm_output(
