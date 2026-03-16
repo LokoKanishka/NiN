@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+import os
 from pathlib import Path
 from statistics import pstdev
 from typing import Any
@@ -12,8 +13,11 @@ BITNIN_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MARKET_PATH = (
     BITNIN_ROOT / "runtime" / "datasets" / "market" / "normalized" / "binance_klines__BTCUSDT__1d__market-v0-binance-1d.jsonl"
 )
-DEFAULT_NARRATIVE_PATH = (
-    BITNIN_ROOT / "runtime" / "datasets" / "narrative" / "normalized" / "gdelt_doc_artlist__bitcoin__narrative-v1-robust.jsonl"
+DEFAULT_NARRATIVE_PATH = Path(
+    os.getenv(
+        "BITNIN_NARRATIVE_DATASET_PATH",
+        str(BITNIN_ROOT / "runtime" / "datasets" / "narrative" / "normalized" / "gdelt_doc_artlist__bitcoin__narrative-v1-robust.jsonl")
+    )
 )
 DEFAULT_EPISODES_PATH = (
     BITNIN_ROOT / "runtime" / "datasets" / "episodes" / "normalized" / "episodes__BTCUSDT__1d__episodes-v0-real.jsonl"
