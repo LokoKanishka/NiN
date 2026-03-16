@@ -4,8 +4,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from verticals.bitnin.services.bitnin_memory_indexer.collections import QdrantCollectionManager
+from verticals.bitnin.services.bitnin_active_memory.retrieve import ActiveMemoryRetriever
 from verticals.bitnin.services.bitnin_memory_indexer.embeddings import OllamaEmbeddingClient
+from verticals.bitnin.services.bitnin_memory_indexer.collections import QdrantCollectionManager
 
 
 def _safe_slug(value: str) -> str:
@@ -29,6 +30,7 @@ class AnalystRetriever:
         self.embedder = embedder or OllamaEmbeddingClient()
         self.qdrant = qdrant or QdrantCollectionManager()
         self.raw_root = raw_root
+        self.active_memory = ActiveMemoryRetriever(qdrant=self.qdrant, embedder=self.embedder)
 
     def retrieve(
         self,
@@ -72,13 +74,13 @@ class AnalystRetriever:
         raw_episode_results = self.qdrant.search(
             collection="bitnin_episodes",
             vector=episode_vector,
-            limit=max(top_k_episodes * 10, 50),
+            limit=int(max(int(top_k_episodes) * 10, 50)),
             query_filter=episode_filter,
         )
         raw_event_results = self.qdrant.search(
             collection="bitnin_events",
             vector=event_vector,
-            limit=max(top_k_events * 10, 50),
+            limit=int(max(int(top_k_events) * 10, 50)),
             query_filter=event_filter,
         )
         cutoff = context.get("retrieval_cutoff")
@@ -133,5 +135,6 @@ class AnalystRetriever:
             },
             "episode_results": episode_results,
             "event_results": event_results,
+            "active_memories": self.active_memory.retrieve(context, top_k=5),
             "query_refs": [str(episode_query_path), str(event_query_path)],
         }

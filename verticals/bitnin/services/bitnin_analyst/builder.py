@@ -162,6 +162,15 @@ class BitNinAnalyst:
             top_k_events=top_k_events,
         )
 
+        try:
+            from verticals.bitnin.services.bitnin_active_memory.retrieve import ActiveMemoryRetriever
+            active_mem_retriever = ActiveMemoryRetriever()
+            retrieval["active_memories"] = active_mem_retriever.retrieve(context, top_k=3)
+        except Exception as e:
+            # We don't want to break the analyst if active memory fails
+            print(f"Warning: Active memory retrieval failed: {e}")
+            retrieval["active_memories"] = []
+
         pre_guardrail_reasons = pre_llm_guardrail(context, retrieval)
         llm_result = None
         messages = None

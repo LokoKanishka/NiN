@@ -4,7 +4,7 @@ import json
 from typing import Any
 
 
-PROMPT_VERSION = "bitnin-analyst-v1"
+PROMPT_VERSION = "bitnin-analyst-v2-memoria"
 
 SYSTEM_PROMPT = """
 Eres el analista experto de BitNin. Tu mision es evaluar la convergencia entre el estado del mercado y la narrativa global.
@@ -28,6 +28,9 @@ Valores permitidos:
 - recommended_action: long, short, flat, reduce, hedge, observe, no_trade.
 - risk_level: low, medium, high, critical, unknown.
 - final_status: ok, no_trade, insufficient_evidence, blocked.
+
+### MEMORIA OPERATIVA (HISTORIAL DEL ANALISTA)
+Usa tus recuerdos de corridas previas para mantener consistencia. No repitas errores pasados de falta de evidencia si la narrativa ya ha convergido.
 """.strip()
 
 
@@ -54,8 +57,9 @@ def build_messages(*, context: dict[str, Any], retrieval: dict[str, Any]) -> lis
                 "topics": item["payload"].get("topics", []),
                 "summary_local": item["payload"]["summary_local"],
             }
-            for item in retrieval["event_results"][:5]  # Aumentado a 5 para mas riqueza
+            for item in retrieval["event_results"][:5]
         ],
+        "active_memories": retrieval.get("active_memories", []),
     }
     user_prompt = (
         "Analiza el contexto actual de BitNin y entrega un JSON operativo estricto. "

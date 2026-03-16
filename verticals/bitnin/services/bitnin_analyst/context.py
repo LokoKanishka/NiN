@@ -205,4 +205,5 @@ class CurrentContextBuilder:
                 "narrative": str(self.narrative_path),
                 "episodes": str(self.episodes_path),
             },
+            "active_memory": [],  # Filled by retriever later
         }
