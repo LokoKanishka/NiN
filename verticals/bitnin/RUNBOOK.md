@@ -48,6 +48,19 @@ systemctl --user start bitnin-shadow.service
 Inspect the human-readable snapshot for a quick status overview:
 `verticals/bitnin/runtime/observability/history/health_snapshot.md`
 
+### 🕹️ Ciclo de Revisión Diaria (Consola Unificada)
+A partir de la Fase 23, toda la operación de BitNin se centraliza en la herramienta `./bitnin_ctl.py` ubicada en la raíz.
+
+1. **Chequeo de Salud**: `./bitnin_ctl.py status`. Verificar que el sistema esté `HEALTHY` y el scheduler `Active`.
+2. **Lectura del Briefing**: `./bitnin_ctl.py briefing`. Revisar casos críticos y acciones recomendadas.
+3. **Gestión de Casos (HITL)**:
+   - `./bitnin_ctl.py cases list`: Listar expedientes pendientes.
+   - `./bitnin_ctl.py cases show <case_id>`: Ver evidencia y timeline.
+   - `./bitnin_ctl.py cases review <case_id> --note "..."`: Cerrar y archivar el caso.
+
+---
+
+### Internal State
 The internal state is kept in `operational_state.json` (ignored by git) to ensure no runtime noise contaminates the repository.
 
 ## 3. Interpreting Alerts

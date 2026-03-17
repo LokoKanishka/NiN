@@ -2,15 +2,24 @@
 
 Este documento describe cómo interactuar con la bandeja de revisión humana de BitNin en su fase shadow.
 
-## 1. Gestión vía Consola HITL (`hitl_ctl.py`)
-A partir de la Fase 22, la interacción humana con BitNin se realiza exclusivamente a través de la CLI operativa. Las vistas Markdown son ahora de **solo lectura**.
+## Control Operativo: bitnin_ctl.py
+A partir de la Fase 23, toda la operación de BitNin se centraliza en la herramienta `bitnin_ctl.py` ubicada en la raíz del proyecto.
 
-### Comandos Principales:
-- `python3 hitl_ctl.py list`: Muestra los casos pendientes en el inbox.
-- `python3 hitl_ctl.py show <run_id>`: Ver detalles, links de evidencia y **timeline** completo de un caso.
-- `python3 hitl_ctl.py review <run_id> --note "..."`: Valida una señal y archiva el caso.
-- `python3 hitl_ctl.py dismiss <run_id> --note "..."`: Descarta un ítem y lo archiva.
-- `python3 hitl_ctl.py escalate <run_id> --note "..."`: Marca un caso para revisión técnica profunda.
+### Comandos de Supervisión
+- `./bitnin_ctl.py status`: Vista 360° de salud, scheduler y backlog.
+- `./bitnin_ctl.py briefing`: Resumen ejecutivo del día y acciones recomendadas.
+- `./bitnin_ctl.py scheduler`: (Próximamente unificado) Estado del timer systemd.
+
+### Gestión de Casos (HITL)
+- `./bitnin_ctl.py cases list`: Lista casos filtrados por estado (PENDING por defecto).
+- `./bitnin_ctl.py cases show <case_id>`: Inspección profunda de un expediente incluyendo su **timeline**.
+- `./bitnin_ctl.py cases review <case_id> --note "..."`: Valida y archiva un caso.
+- `./bitnin_ctl.py cases dismiss <case_id> --note "..."`: Descarta y archiva un caso.
+
+## Identificadores Canónicos
+- **Case ID** (e.g., `CASE-20260317-001`): Identidad humana única del expediente. Es el ID principal para la CLI.
+- **Run ID**: Referencia técnica a la corrida analítica.
+- **Batch ID**: Identificador del lote de procesamiento.
 
 ## 2. Línea de Tiempo (Timeline) y Trazabilidad
 Cada expediente mantiene un historial cronológico de todas las interacciones:

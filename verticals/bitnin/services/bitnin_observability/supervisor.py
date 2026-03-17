@@ -69,19 +69,38 @@ class BitNinSupervisor:
 
     def _generate_health_snapshot(self, state: dict):
         """Generates a human-readable markdown snapshot of the system health."""
-        snapshot_path = self.obs_dir / "history" / "health_snapshot.md"
-        logger.info(f"Generating health snapshot at: {snapshot_path}")
+        history_dir = self.obs_dir / "history" # Use history_dir for clarity
+        snapshot_file = history_dir / "health_snapshot.md"
+        json_snapshot_file = history_dir / "health_snapshot.json"
         
-        # Freshness Check
+        now = datetime.now(timezone.utc) # Use timezone-aware datetime
+        
+        # Structure for JSON export
+        json_data = {
+            "timestamp": now.isoformat(),
+            "status": "HEALTHY", # Default status
+            "components": {},
+            "freshness": {
+                "last_run": state.get("last_processed_date", "Never"),
+                "is_stale": False
+            },
+            "alerts": []
+        }
+        logger.info(f"Generating health snapshot at: {snapshot_file}")
+        
+        # Freshness Check for MD and JSON
         is_stale = False
         last_update_str = state.get("last_update")
         if last_update_str:
             last_update = datetime.fromisoformat(last_update_str)
-            if datetime.now(timezone.utc) - last_update > timedelta(hours=25):
+            if now - last_update > timedelta(hours=25):
                 is_stale = True
+                json_data["freshness"]["is_stale"] = True
+                json_data["status"] = "STALE"
+                json_data["alerts"].append("STALE DATA: System hasn't processed successfully in > 25 hours.")
         
         md = f"# BitNin System Health Snapshot\n\n"
-        md += f"**Last Update:** {last_update_str}\n"
+        md += f"**Last Update:** {last_update_str if last_update_str else 'N/A'}\n"
         
         status = state.get('system_status', 'UNKNOWN')
         if is_stale:
@@ -90,9 +109,20 @@ class BitNinSupervisor:
         else:
             status_icon = "🟢" if status == "HEALTHY" else "🔴" if status == "DEGRADED" else "🟡"
             md += f"**System Status:** {status_icon} {status}\n"
+            json_data["status"] = status # Update JSON status based on system_status
             
         md += f"**Last Processed Date:** {state.get('last_processed_date', 'N/A')}\n"
         md += f"**Last Healthy Window:** {state.get('last_healthy_window', 'N/A')}\n\n"
+        
+        # Placeholder for 'last_batch' and 'metrics_summary' if they were to be added to state
+        # For now, we'll use existing state info for components/metrics
+        # If 'last_batch' was part of the state, it would be accessed like:
+        # last_batch = state.get("last_batch_report", {})
+        # metrics = last_batch.get("metrics_summary", {})
+        # h_sum = last_batch.get("health_summary", {})
+        
+        # For now, let's just reflect the system_status in components for JSON
+        json_data["components"]["overall_system"] = {"status": status}
         
         md += "## Active Alerts\n"
         alerts = state.get("active_alerts", [])
@@ -104,9 +134,25 @@ class BitNinSupervisor:
         else:
             for alert in alerts:
                 md += f"- {alert}\n"
+                json_data["alerts"].append(alert) # Add alerts to JSON
         
-        md += "\n---\n*This file is ephemeral and reflects current operational state.*"
-        snapshot_path.write_text(md, encoding="utf-8")
+        # Stale Check based on last_processed_date for MD (similar to original logic)
+        last_date_str = state.get("last_processed_date")
+        if last_date_str:
+            last_date = datetime.strptime(last_date_str, "%Y-%m-%d")
+            if (now.date() - last_date.date()).days > 2: # Compare dates only
+                # This condition is already covered by the 25-hour check, but keeping it if it's a separate requirement
+                if not json_data["freshness"]["is_stale"]: # Avoid duplicate stale status
+                    json_data["freshness"]["is_stale"] = True
+                    json_data["status"] = "STALE"
+                    json_data["alerts"].append("WARNING: Last successful run was more than 48 hours ago.")
+                md += "\n> [!WARNING]\n> **SISTEMA STALE**: Última corrida hace más de 48h.\n"
+        
+        md += "\n---\n*This file is ephemeral and reflects current operational state.*" # Reverted to original footer
+        
+        snapshot_file.write_text(md, encoding="utf-8")
+        json_snapshot_file.write_text(json.dumps(json_data, indent=2))
+        logger.info(f"Health snapshot updated (MD & JSON) at {now.isoformat()}")
 
     def run_sustained(self, start_date_str: str, days: int = 1):
         """Runs the pipeline for 'days' starting from start_date_str or the day after last_processed_date."""
