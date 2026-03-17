@@ -62,6 +62,38 @@ Para asegurar una bitácora profesional y auditable, el operador debe ejecutar e
 
 ---
 
+---
+
+## 🛠️ Mantenimiento Institucional & Resiliencia
+A partir de la Fase 25, BitNin cuenta con herramientas de infraestructura profesional.
+
+### 1. Diagnóstico de Salud Técnica (Doctor)
+Si algo no parece funcionar bien, corra el diagnóstico:
+```bash
+./bin/bitnin-ctl doctor
+```
+
+### 2. Gestión del Scheduler
+Evite la configuración manual de systemd. Use el controlador oficial:
+```bash
+./scripts/scheduler_ctl.sh status      # Ver estado
+./scripts/scheduler_ctl.sh restart     # Forzar reinicio
+./scripts/scheduler_ctl.sh install     # Reinstalar units
+```
+
+### 3. Continuidad Operativa (Backup/Restore)
+Para migrar o respaldar el plano de gestión humana (casos y estados):
+- **Backup**: `./scripts/ops_backup.sh` (Genera un tarball en `backups/`)
+- **Restore**: `./scripts/ops_restore.sh <archivo>`
+
+### 4. Bootstrap (Reinstalación)
+En un entorno nuevo o tras una limpieza de runtime:
+```bash
+./scripts/bootstrap.sh
+```
+
+---
+
 ### Internal State
 The internal state is kept in `operational_state.json` (ignored by git) to ensure no runtime noise contaminates the repository.
 

@@ -305,7 +305,16 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 28. Nota de Fase 24
+## 29. Nota de Fase 25
+
+Fase 25 consolida la **resiliencia e instalación reproducible** de BitNin.
+
+Hitos de la infraestructura:
+- **Bootstrap Reproducible (`bootstrap.sh`)**: Script de configuración determinista que prepara el venv, las dependencias y la estructura de runtime en cualquier host.
+- **Entrypoint Formal (`bin/bitnin-ctl`)**: Wrapper estable que garantiza la correcta resolución de rutas y `PYTHONPATH`, profesionalizando la superficie de mando.
+- **Scheduler Automático (`scheduler_ctl.sh`)**: Herramienta para instalar, actualizar y monitorear los units de `systemd --user` sin intervención manual frágil.
+- **BitNin Doctor**: Diagnóstico técnico integrado que verifica permisos, archivos críticos, linger status y salud del scheduler.
+- **Continuidad Operativa (Backup/Restore)**: Utilidades de respaldo del plano de gestión humana, asegurando que el estado de casos HITL y la historia operativa sean portables y recuperables.
 
 Fase 24 profesionaliza la rutina humana mediante el **Ritual de Cierre de Jornada** y la **Bitácora Ejecutiva**.
 
@@ -325,9 +334,24 @@ Hitos de la madurez operativa:
 - [x] Actualizar `RUNBOOK.md` y `HITL_PROTOCOL.md` con el ritual de cierre
 - [x] Sincronizar SSOT y CATALOG con las nuevas capacidades de reporte diario
 
+## Phase 25: Instalación reproducible, entrypoints formales y backup/restore operativo
+- [x] Formalizar entrypoint de consola (wrapper estable `bitnin-ctl`)
+- [x] Desarrollar script de `bootstrap.sh` (dependencias, venv, runtime setup)
+- [x] Automatizar instalación y actualización del scheduler (`systemd --user`)
+- [x] Implementar herramienta `bitnin-doctor` para chequeo operativo integral
+- [x] Crear utilidades de `backup` y `restore` para continuidad operativa
+- [x] Definir layout oficial de archivos para migración y recovery
+- [x] Validar la reinstalación del sistema en un entorno limpio simulado
+- [x] Actualizar `RUNBOOK.md` con guías de instalación y recuperación
+- [x] Sincronizar SSOT y CATALOG con las nuevas herramientas de infraestructura
+
 | Componente | Descripción | Tipo | Artefactos | Estado | Notas |
 |---|---|---|---|---|---|
-| `bitnin_ctl.py` | Consola maestra de mando con soporte para `day-close` y bitácora. | Comandos CLI | `daily_bundles/`, `operator_journal.md` | `active` | Centro de mando unificado |
+| `bitnin-ctl` | Wrapper oficial de consola (entrypoint formal). | Shell Wrapper | `/bin/bitnin-ctl` | `active` | Entrypoint principal |
+| `bootstrap.sh` | Script de instalación y preparación de entorno. | Bash Script | Directorios de runtime, permisos | `active` | Instalación reproducible |
+| `scheduler_ctl.sh` | Automatización de `systemd --user`. | Bash Script | Unit files, timer status | `active` | Gestión del scheduler |
+| `ops_backup.sh` | Respaldo del plano operativo humano. | Bash Script | `backups/*.tar.gz` | `active` | Resiliencia de datos |
+| `bitnin_ctl doctor` | Diagnóstico técnico de la instalación. | Comando CLI | Reporte de salud técnica | `active` | Mantenimiento preventivo |
 
 Fase 22 elimina la fragilidad del control vía Markdown mediante la introducción de la **Consola del Operador (CLI)** y el **Timeline de Casos**.
 

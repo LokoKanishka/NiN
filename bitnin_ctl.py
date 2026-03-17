@@ -3,6 +3,7 @@ import argparse
 import sys
 import json
 import subprocess
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -24,20 +25,21 @@ HISTORY_DIR = OBS_DIR / "history"
 HEALTH_FILE = HISTORY_DIR / "health_snapshot.json"
 BRIEFING_FILE = HISTORY_DIR / "hitl_briefing.md"
 JOURNAL_FILE = HISTORY_DIR / "operator_journal.md"
+STATE_FILE = HISTORY_DIR / "hitl_state.json"
 
 def get_scheduler_status():
     try:
         # Check timer
-        timer_out = subprocess.check_output(["systemctl", "--user", "status", "bitnin.timer"], stderr=subprocess.STDOUT, text=True)
+        timer_out = subprocess.check_output(["systemctl", "--user", "status", "bitnin-shadow.timer"], stderr=subprocess.STDOUT, text=True)
         is_active = "active (waiting)" in timer_out or "active (running)" in timer_out
         
         # Check next run
-        list_timers = subprocess.check_output(["systemctl", "--user", "list-timers", "bitnin.timer"], text=True)
+        list_timers = subprocess.check_output(["systemctl", "--user", "list-timers", "bitnin-shadow.timer"], text=True)
         next_run = "Unknown"
         lines = list_timers.splitlines()
         if len(lines) > 1:
             for line in lines:
-                if "bitnin.timer" in line:
+                if "bitnin-shadow.timer" in line:
                     parts = line.split()
                     if len(parts) >= 2:
                         next_run = f"{parts[0]} {parts[1]}"
@@ -55,6 +57,45 @@ def color_status(status):
     if status == "STALE": return f"\033[91m{status}\033[0m"
     return status
 
+def run_doctor():
+    print("\n=== 🧑‍⚕️ BITNIN DOCTOR (Diagnostic Report) ===")
+    
+    def check(label, condition, fix=None):
+        status = "✅ OK" if condition else "❌ FAIL"
+        color = "\033[92m" if condition else "\033[91m"
+        print(f"[{color}{status}\033[0m] {label}")
+        if not condition and fix:
+            print(f"      💡 Fix: {fix}")
+
+    # 1. Paths & Files
+    check("Project Root Access", ROOT_DIR.exists())
+    check("Runtime Directory Structure", OBS_DIR.exists(), "run ./scripts/bootstrap.sh")
+    check("HITL State File present", STATE_FILE.exists(), "system will auto-create on first batch")
+    
+    # 2. Permissions
+    check("bitnin_ctl.py executable", os.access(ROOT_DIR / "bitnin_ctl.py", os.X_OK), "chmod +x bitnin_ctl.py")
+    check("bin/bitnin-ctl wrapper present", (ROOT_DIR / "bin/bitnin-ctl").exists(), "run ./scripts/bootstrap.sh")
+
+    # 3. Environment
+    check("PYTHONPATH set (internal)", str(ROOT_DIR) in sys.path)
+    
+    # 4. Infrastructure
+    sched = get_scheduler_status()
+    check("Systemd --user accessible", "error" not in sched, "ensure 'systemd --user' is supported/active")
+    if "error" not in sched:
+        check("BitNin Timer Active", sched["is_timer_active"], "./scripts/scheduler_ctl.sh install")
+    
+    # 5. User Linger
+    try:
+        user = os.environ.get("USER", "unknown")
+        linger_out = subprocess.check_output(["loginctl", "show-user", user], text=True)
+        is_linger = "Linger=yes" in linger_out
+        check(f"User Linger Enabled ({user})", is_linger, f"loginctl enable-linger {user}")
+    except:
+        print("[⚠️] Could not verify Linger status.")
+
+    print("==========================================\n")
+
 def main():
     parser = argparse.ArgumentParser(description="BitNin Unified Command Console (Mando Maestro)")
     subparsers = parser.add_subparsers(dest="command", help="Comandos Principales")
@@ -67,6 +108,9 @@ def main():
 
     # day-close
     subparsers.add_parser("day-close", help="Ejecutar ritual de cierre de jornada y bitácora")
+
+    # doctor
+    subparsers.add_parser("doctor", help="Diagnóstico técnico de la instalación")
 
     # cases
     case_parser = subparsers.add_parser("cases", help="Gestión de expedientes HITL")
@@ -94,6 +138,10 @@ def main():
 
     manager = HITLManager(str(OBS_DIR))
     state = manager.load_state()
+
+    if args.command == "doctor":
+        run_doctor()
+        return
 
     if args.command == "status":
         print("\n=== 🎯 BITNIN STATUS 360° ===")
