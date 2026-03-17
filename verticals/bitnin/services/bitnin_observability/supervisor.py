@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import sys
+import subprocess
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -19,7 +20,9 @@ class BitNinSupervisor:
 
     def __init__(self, root_dir: Path):
         self.root_dir = root_dir
-        self.obs_dir = root_dir / "runtime" / "observability"
+        # Standard BitNin runtime path
+        self.bitnin_dir = root_dir / "verticals" / "bitnin"
+        self.obs_dir = self.bitnin_dir / "runtime" / "observability"
         self.state_path = self.obs_dir / "history" / "operational_state.json"
         self.lock_path = self.obs_dir / "history" / "bitnin_supervisor.lock"
         
@@ -62,6 +65,29 @@ class BitNinSupervisor:
     def save_state(self, state: dict):
         state["last_update"] = datetime.now(timezone.utc).isoformat()
         self.state_path.write_text(json.dumps(state, indent=2))
+        self._generate_health_snapshot(state)
+
+    def _generate_health_snapshot(self, state: dict):
+        """Generates a human-readable markdown snapshot of the system health."""
+        snapshot_path = self.obs_dir / "history" / "health_snapshot.md"
+        logger.info(f"Generating health snapshot at: {snapshot_path}")
+        
+        md = f"# BitNin System Health Snapshot\n\n"
+        md += f"**Last Update:** {state.get('last_update')}\n"
+        md += f"**System Status:** {state.get('system_status', 'UNKNOWN')}\n"
+        md += f"**Last Processed Date:** {state.get('last_processed_date', 'N/A')}\n"
+        md += f"**Last Healthy Window:** {state.get('last_healthy_window', 'N/A')}\n\n"
+        
+        md += "## Active Alerts\n"
+        alerts = state.get("active_alerts", [])
+        if not alerts:
+            md += "- 🟢 All systems operational. No active alerts.\n"
+        else:
+            for alert in alerts:
+                md += f"- {alert}\n"
+        
+        md += "\n---\n*This file is ephemeral and reflects current operational state.*"
+        snapshot_path.write_text(md, encoding="utf-8")
 
     def run_sustained(self, start_date_str: str, days: int = 1):
         """Runs the pipeline for 'days' starting from start_date_str or the day after last_processed_date."""
@@ -91,8 +117,6 @@ class BitNinSupervisor:
             
             logger.info(f"Target Window: {start_str} to {end_str}")
             
-            # In a real environment, we would call run_pipeline as a subprocess or function
-            import subprocess
             # Executing the script with absolute path
             script_path = self.root_dir / "scripts" / "run_shadow_pipeline.py"
             cmd = [
@@ -108,11 +132,14 @@ class BitNinSupervisor:
             
             if result.returncode == 0:
                 state["last_processed_date"] = end_str
-                # We could parse the latest scorecard to update system_status here
-                # For now, we mark as PROCESSED
+                # Update status based on window success
+                state["system_status"] = "HEALTHY" 
                 logger.info(f"Window {start_str} to {end_str} completed successfully.")
                 self.save_state(state)
             else:
+                state["system_status"] = "DEGRADED"
+                state["active_alerts"] = [f"Pipeline failed at {end_str} with code {result.returncode}"]
+                self.save_state(state)
                 logger.error(f"Pipeline failed with return code {result.returncode}")
 
         finally:

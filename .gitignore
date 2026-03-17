@@ -106,3 +106,7 @@ verticals/bitnin/runtime/**
 !verticals/bitnin/runtime/logs/
 !verticals/bitnin/runtime/logs/.gitkeep
 Memorias/
+verticals/bitnin/runtime/observability/history/operational_state.json
+verticals/bitnin/runtime/observability/history/*.lock
+verticals/bitnin/runtime/observability/batches/*.json
+verticals/bitnin/runtime/observability/history/health_snapshot.md

@@ -6,23 +6,33 @@ This document describes the operations for BitNin in `shadow + dry_run` mode. Bi
 ## 2. Daily Operations
 The system is designed to run periodically via the supervisor.
 
-### Starting the Supervisor
-To process the next available window:
+### Starting the Supervisor (Automated)
+BitNin runs automatically via systemd. To manage the service:
 ```bash
-PYTHONPATH=. .venv/bin/python3 verticals/bitnin/services/bitnin_observability/supervisor.py --days 1
+# View status
+systemctl --user status bitnin-shadow.timer
+systemctl --user status bitnin-shadow.service
+
+# View real-time logs
+journalctl --user -u bitnin-shadow.service -f
+
+# Force immediate execution
+systemctl --user start bitnin-shadow.service
 ```
 
 ### Checking System Health
-Inspect the central state file for a quick status overview:
-`verticals/bitnin/runtime/observability/history/operational_state.json`
+Inspect the human-readable snapshot for a quick status overview:
+`verticals/bitnin/runtime/observability/history/health_snapshot.md`
 
-Possible Statuses:
-- `HEALTHY`: System is operating within normal parameters.
-- `DEGRADED`: Narrative coverage or memory retrieval is critically low.
-- `DRIFT`: Significant change detected between processing windows.
-- `UNKNOWN`: No recent data or initial state.
+The internal state is kept in `operational_state.json` (ignored by git) to ensure no runtime noise contaminates the repository.
 
 ## 3. Interpreting Alerts
+... (keeping previous alerts) ...
+
+## 5. Maintenance & Clean Runtime
+- **Git Hygiene:** Never force-add `operational_state.json` or `*.lock` files to git.
+- **Housekeeping:** Batch reports in `runtime/observability/batches/` can be archived or deleted periodically. Scorecards in `scorecards/` should be kept for audit.
+- **Snapshot Monitoring:** `health_snapshot.md` is the primary source of truth for humans; if it reports `DEGRADED`, check the scorecards for details.
 
 ### 🔴 DEGRADATION (Narrative)
 **Meaning:** The analyst has access to very few narrative events (< 0.2 score).
