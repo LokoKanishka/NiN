@@ -133,6 +133,7 @@ class BitNinSupervisor:
             # Convert back to strings for the pipeline CLI
             start_str = start_dt.strftime("%Y-%m-%d")
             end_str = end_dt.strftime("%Y-%m-%d")
+            batch_id = f"batch_{start_dt.strftime('%Y%m%d')}_{end_dt.strftime('%Y%m%d')}"
             
             logger.info(f"Target Window: {start_str} to {end_str}")
             
@@ -155,6 +156,15 @@ class BitNinSupervisor:
                 state["system_status"] = "HEALTHY" 
                 state["active_alerts"] = []  # Clear previous alerts on success
                 logger.info(f"Window {start_str} to {end_str} completed successfully.")
+                
+                # Update HITL Inbox
+                try:
+                    batch_path = self.obs_dir / "batches" / f"batch_report__{batch_id}.json"
+                    hitl = HITLManager(self.obs_dir)
+                    hitl.evaluate_batch(str(batch_path))
+                except Exception as e:
+                    logger.error(f"Failed to update HITL Inbox: {e}")
+
                 self.save_state(state)
             else:
                 state["system_status"] = "DEGRADED"
@@ -167,6 +177,7 @@ class BitNinSupervisor:
 
 if __name__ == "__main__":
     import argparse
+    from verticals.bitnin.services.bitnin_hitl.hitl_manager import HITLManager
     parser = argparse.ArgumentParser(description="BitNin Shadow Supervisor")
     parser.add_argument("--start", type=str, help="Start date if no state exists")
     parser.add_argument("--days", type=int, default=1, help="Number of days to process")

@@ -305,15 +305,15 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 23. Nota de Fase 17
+## 24. Nota de Fase 19
 
-Fase 17 consolida el **periodo de burn-in** y el **congelamiento definitivo del baseline** operativo y analítico.
+Fase 19 introduce la **capa HITL (Human-in-the-Loop)**, transformando la observabilidad pasiva en una herramienta de supervisión humana activa.
 
-Resultados de la auditoría de estabilidad:
-- **Operación Sostenida**: BitNin ha superado un periodo de 7 ejecuciones consecutivas diarias (simuladas y reales) sin fallos técnicos ni saturación de recursos.
-- **Congelamiento de Baseline**: Se declara el estado de "Freeze" para el analista `v3-compuesta` y el dataset `v1-robust`. No se permiten cambios estructurales sin un proceso formal de descongelamiento.
-- **Higiene de Repositorio**: Se confirma que el 100% de la operación ocurre fuera de git, manteniendo el repositorio exclusivamente para código y documentación autoritativa.
-- **Madurez Shadow**: El sistema es considerado apto para monitoreo longitudinal a largo plazo como un servicio autónomo del host.
+Hitos de la capacidad HITL:
+- **Bandeja de Entrada Priorizada**: Se implementó `hitl_inbox.md`, un punto central que destaca corridas con señales de alta confianza, drift fuerte o degradación narrativa.
+- **Gestión de Estados**: Las ejecuciones en el Inbox se rastrean como `PENDING`, permitiendo al operador actuar sobre los hallazgos sin navegar logs técnicos.
+- **Protocolo HITL**: Se formalizó una guía de interpretación (`HITL_PROTOCOL.md`) que vincula el juicio humano con la evidencia de los scorecards.
+- **Integración Nativa**: El `supervisor.py` ahora orquesta automáticamente la clasificación de cada ventana procesada, manteniendo el ciclo operativo 100% autónomo pero útil para el humano.
 
 ## 18. Nota de Fase 10
 
