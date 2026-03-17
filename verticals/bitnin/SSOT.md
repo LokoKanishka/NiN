@@ -305,15 +305,15 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 22. Nota de Fase 16
+## 23. Nota de Fase 17
 
-Fase 16 consolida la **resiliencia operativa** y la **persistencia** de BitNin como servicio shadow de largo plazo.
+Fase 17 consolida el **periodo de burn-in** y el **congelamiento definitivo del baseline** operativo y analítico.
 
-Hitos de resiliencia:
-- **Persistencia Host-Level**: Se habilitó `linger` para que el scheduler de `systemd --user` sea inmune a reinicios y cierres de sesión de Lucy en el host.
-- **Chequeo de Freshness**: El supervisor ahora autodetecta si la operación se ha congelado (datos stale > 25h) y genera alertas visuales en el snapshot de salud.
-- **Recuperación de Locks**: Se implementó una lógica de resolución de locks obsoletos (basada en verificación de PID real) para evitar bloqueos manuales tras fallos críticos del host.
-- **Alertado Operativo**: El `health_snapshot.md` ahora integra alertas de "Staleness" y fallos de pipeline, proporcionando una interfaz de monitoreo pasivo pero efectiva.
+Resultados de la auditoría de estabilidad:
+- **Operación Sostenida**: BitNin ha superado un periodo de 7 ejecuciones consecutivas diarias (simuladas y reales) sin fallos técnicos ni saturación de recursos.
+- **Congelamiento de Baseline**: Se declara el estado de "Freeze" para el analista `v3-compuesta` y el dataset `v1-robust`. No se permiten cambios estructurales sin un proceso formal de descongelamiento.
+- **Higiene de Repositorio**: Se confirma que el 100% de la operación ocurre fuera de git, manteniendo el repositorio exclusivamente para código y documentación autoritativa.
+- **Madurez Shadow**: El sistema es considerado apto para monitoreo longitudinal a largo plazo como un servicio autónomo del host.
 
 ## 18. Nota de Fase 10
 
