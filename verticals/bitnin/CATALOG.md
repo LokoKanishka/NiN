@@ -23,7 +23,8 @@ Este catalogo define workflows esperados de la vertical BitNin. Ninguno existe t
 | `bitnin_run_shadow_pipeline` | Orquestar barrido histórico continuo y evaluar scorecards de estabilidad. | `start_date`, `end_date`, `symbol` | Batch report, Scorecard y Múltiples ejecuciones puras shadow | `active` | script `run_shadow_pipeline.py` |
 | `bitnin_supervisor` | Orquestador resiliente con persistencia host-level (linger) y chequeo de freshness. | `operational_state`, `health_snapshot` | Snapshot humano, alertas de staleness, logs unificados | `active` | supervisor en `bitnin-control` (Phase 16 verified) |
 | `hitl_ctl.py` | Consola del operador HITL para gestión de casos (list/show/review). | Comandos CLI | Actualización de `hitl_state.json` y regeneración de vistas | `active` | CLI operativa en `bitnin-hitl` |
-| `bitnin_hitl_manager` | Analizador de scorecards, gestión de expedientes y generador de vistas. | `batch_report` JSON | `hitl_inbox` Markdown, `hitl_archive` Markdown, `hitl_digest` Markdown | `active` | componente de revisión en `bitnin-hitl` |
+| `bitnin_ctl.py` | Consola maestra de mando (status, briefing, cases). |
+| `bitnin_hitl_manager` | Motor de gestión de expedientes y generador de vistas. | `batch_report` JSON | `hitl_inbox` Markdown, `hitl_archive` Markdown, `hitl_digest` Markdown | `active` | componente de revisión en `bitnin-hitl` |
 | `hitl_state.json` | Registro canónico de casos HITL, decisiones y trazabilidad. | JSON de estados | N/A | `active` | runtime/observability/history (SSOT técnico) |
 | `hitl_archive.md` | Archivo histórico de casos revisados o descartados. | MD de casos cerrados | N/A | `active` | runtime/observability/history |
 | `RUNBOOK.md` | Guía operacional para humanos. | N/A | N/A | `active` | Documento de referencia |
