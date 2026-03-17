@@ -2,26 +2,29 @@
 
 Este documento describe cómo interactuar con la bandeja de revisión humana de BitNin en su fase shadow.
 
-## 1. La Gestión de Casos (Expedientes)
-BitNin ya no genera simples alertas, sino **Casos** estructurados. Cada caso es una unidad de revisión auditable que agrupa evidencia técnica y decisiones humanas.
+## 1. Gestión vía Consola HITL (`hitl_ctl.py`)
+A partir de la Fase 22, la interacción humana con BitNin se realiza exclusivamente a través de la CLI operativa. Las vistas Markdown son ahora de **solo lectura**.
 
-### Ubicaciones Clave:
-- **Bandeja de Entrada Activa (`hitl_inbox.md`)**: Solo contiene casos en estado `PENDING` o `ESCALATED`. Es tu espacio de trabajo diario.
-- **Archivo Histórico (`hitl_archive.md`)**: Registro de todos los casos cerrados (`REVIEWED`, `DISMISSED`). Es tu historial de auditoría.
-- **Fuente de Verdad (`hitl_state.json`)**: Registro canónico estructurado que garantiza la integridad de los datos.
+### Comandos Principales:
+- `python3 hitl_ctl.py list`: Muestra los casos pendientes en el inbox.
+- `python3 hitl_ctl.py show <run_id>`: Ver detalles, links de evidencia y **timeline** completo de un caso.
+- `python3 hitl_ctl.py review <run_id> --note "..."`: Valida una señal y archiva el caso.
+- `python3 hitl_ctl.py dismiss <run_id> --note "..."`: Descarta un ítem y lo archiva.
+- `python3 hitl_ctl.py escalate <run_id> --note "..."`: Marca un caso para revisión técnica profunda.
 
-## 2. Flujo de Trabajo del Operador (Workflow)
-El sistema utiliza estados para gestionar el ciclo de vida de cada expediente:
-- **PENDING**: Caso nuevo detectado por el supervisor. Requiere inspección.
-- **REVIEWED**: El operador ha validado la señal y adjuntado sus notas. El caso se mueve al archivo.
-- **DISMISSED**: El operador considera el ítem irrelevante. Se archiva con motivo de descarte.
-- **ESCALATED**: El caso requiere revisión técnica profunda. Permanece en el inbox.
+## 2. Línea de Tiempo (Timeline) y Trazabilidad
+Cada expediente mantiene un historial cronológico de todas las interacciones:
+- **detección**: Cuándo el supervisor identificó el caso.
+- **review/dismiss/escalate**: Quién y con qué nota cerró el ciclo.
+- **reopen**: Si un caso archivado requiere atención nueva.
 
-### Protocolo de Cierre Documental:
-1. **Inspección**: Abrir el link al `Scorecard` desde el inbox.
-2. **Juicio**: Evaluar si la señal de BitNin es consistente con el baseline y el mercado.
-3. **Registro**: Editar la columna `Status` (cambiar `PENDING` por `REVIEWED` o `DISMISSED`) y añadir una nota breve en `Operator Notes`.
-4. **Sincronización**: En la siguiente corrida del sistema (o vía manual), BitNin detectará tu cambio, actualizará el JSON y moverá el expediente al archivo histórico.
+## 3. Vistas Proyectadas (Solo Lectura)
+- **Inbox (`hitl_inbox.md`)**: Refleja casos `PENDING` o `ESCALATED`. No editar manualmente.
+- **Archive (`hitl_archive.md`)**: Refleja casos `REVIEWED` o `DISMISSED`.
+- **Digest (`hitl_digest.md`)**: Resumen analítico de la salud y el backlog.
+
+> [!IMPORTANT]
+> El sistema regenera estas vistas automáticamente tras cada comando de la CLI o ejecución del supervisor. Cualquier edición manual en el Markdown será sobrescrita por el estado canónico de `hitl_state.json`.
 
 ## 3. Resumen Ejecutivo (`hitl_digest.md`)
 Cada ejecución exitosa genera o actualiza el `hitl_digest.md`. Este archivo es la primera parada para el supervisor:

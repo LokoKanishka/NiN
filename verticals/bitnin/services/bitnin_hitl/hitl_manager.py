@@ -22,77 +22,30 @@ class HITLManager:
 
     def _init_files(self):
         if not self.state_file.exists():
-            self.state_file.write_text(json.dumps({
+            self.save_state({
                 "cases": [],
                 "last_digest": None
-            }, indent=2))
-        
-        self._write_md_headers()
-
-    def _write_md_headers(self):
-        # We only write if they don't exist or are empty
-        header_inbox = "# BitNin — HITL Inbox (Active Cases)\n\n"
-        header_inbox += "Casos pendientes de revisión o escalados.\n\n"
-        header_inbox += "| Date | Case/Run ID | Priority | Reason | Status | Operator Notes | Evidence |\n"
-        header_inbox += "|------|-------------|----------|--------|--------|----------------|----------|\n"
-        
-        header_archive = "# BitNin — HITL Archive (Closed Cases)\n\n"
-        header_archive += "Casos revisados o descartados.\n\n"
-        header_archive += "| Date | Case/Run ID | Priority | Reason | Status | Operator Notes | Evidence |\n"
-        header_archive += "|------|-------------|----------|--------|--------|----------------|----------|\n"
-        
-        if not self.inbox_file.exists():
-            self.inbox_file.write_text(header_inbox)
-        if not self.archive_file.exists():
-            self.archive_file.write_text(header_archive)
+            })
+        self.rebuild_views()
 
     def load_state(self):
         try:
-            return json.loads(self.state_file.read_text())
+            state = json.loads(self.state_file.read_text())
+            # Ensure all cases have a timeline (migration)
+            for case in state.get("cases", []):
+                if "timeline" not in case:
+                    case["timeline"] = [{
+                        "event": "migration_created",
+                        "timestamp": case.get("created_at", datetime.now(timezone.utc).isoformat()),
+                        "note": "Case migrated to Phase 22 structured format."
+                    }]
+            return state
         except Exception as e:
             logger.error(f"Failed to load state: {e}")
             return {"cases": []}
 
     def save_state(self, state):
         self.state_file.write_text(json.dumps(state, indent=2))
-
-    def _sync_from_md(self, state):
-        """Attempts to read statuses and notes from the inbox.md to update JSON state."""
-        if not self.inbox_file.exists():
-            return
-            
-        content = self.inbox_file.read_text()
-        # More robust regex for table rows
-        # Expects: | col1 | col2 | col3 | col4 | col5 | col6 | col7 |
-        lines = content.splitlines()
-        case_map = {c["run_id"]: c for c in state["cases"]}
-        
-        updated = False
-        for line in lines:
-            if "|" in line and "--|--" not in line and "Case/Run ID" not in line:
-                parts = [p.strip() for p in line.split("|")]
-                # [0] is empty (before first |), [1] is date, [2] is run_id, [3] is priority, [4] is reason, [5] is status, [6] is notes, [7] is link, [8] is empty
-                if len(parts) >= 8:
-                    run_id = parts[2]
-                    status = parts[5].upper()
-                    notes = parts[6]
-                    
-                    if run_id in case_map:
-                        # Status Check
-                        if status in ["PENDING", "REVIEWED", "DISMISSED", "ESCALATED"]:
-                            if case_map[run_id]["status"] != status:
-                                logger.info(f"Syncing status for {run_id}: {case_map[run_id]['status']} -> {status}")
-                                case_map[run_id]["status"] = status
-                                case_map[run_id]["last_updated"] = datetime.now(timezone.utc).isoformat()
-                                updated = True
-                        
-                        # Notes Check
-                        if notes != "-" and notes != case_map[run_id].get("operator_notes", "-"):
-                            logger.info(f"Syncing notes for {run_id}")
-                            case_map[run_id]["operator_notes"] = notes
-                            case_map[run_id]["last_updated"] = datetime.now(timezone.utc).isoformat()
-                            updated = True
-        return updated
 
     def evaluate_batch(self, batch_report_path: str):
         logger.info(f"Evaluating batch for HITL: {batch_report_path}")
@@ -104,8 +57,6 @@ class HITLManager:
             return
         
         state = self.load_state()
-        self._sync_from_md(state)
-        
         batch_id = batch.get("batch_id", "Unknown")
         processed_run_ids = {c["run_id"] for c in state["cases"]}
         
@@ -116,6 +67,7 @@ class HITLManager:
             
             priority, reason = self._determine_priority(run)
             if priority != "LOW":
+                now = datetime.now(timezone.utc).isoformat()
                 case = {
                     "run_id": run_id,
                     "date": run.get("as_of", datetime.now().strftime("%Y-%m-%d")),
@@ -129,13 +81,18 @@ class HITLManager:
                         "composite_state": run.get("composite_state"),
                         "narrative_coverage": run.get("narrative_coverage")
                     },
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                    "last_updated": datetime.now(timezone.utc).isoformat()
+                    "created_at": now,
+                    "last_updated": now,
+                    "timeline": [{
+                        "event": "created",
+                        "timestamp": now,
+                        "note": f"System detected {priority} priority event. Reason: {reason}"
+                    }]
                 }
                 state["cases"].append(case)
         
         self.save_state(state)
-        self._generate_views(state)
+        self.rebuild_views()
         self.generate_digest(batch, state)
 
     def _determine_priority(self, run):
@@ -145,11 +102,15 @@ class HITLManager:
              return "🟡 MEDIUM", "Narrative Crash"
         if run.get("causal_typology") == "divergencia_critica":
             return "🔴 HIGH", "Critical Causal Divergence"
+            
+        # Optional: other rules
         if run.get("status") == "accepted_dry_run":
             return "🟢 LOW", "Healthy execution"
         return "LOW", "Routine"
 
-    def _generate_views(self, state):
+    def rebuild_views(self):
+        """Regenerates hitl_inbox.md and hitl_archive.md from JSON state (Source of Truth)."""
+        state = self.load_state()
         inbox_rows = []
         archive_rows = []
         sorted_cases = sorted(state["cases"], key=lambda x: x["date"], reverse=True)
@@ -162,11 +123,14 @@ class HITLManager:
             else:
                 archive_rows.append(row)
 
-        header_inbox = "# BitNin — HITL Inbox (Active Cases)\n\nCasos pendientes de revisión o escalados.\n\n| Date | Case/Run ID | Priority | Reason | Status | Operator Notes | Evidence |\n|------|-------------|----------|--------|--------|----------------|----------|\n"
+        warning_note = "> [!WARNING]\n> **NO EDITAR ESTE ARCHIVO MANUALMENTE.**\n> La sincronización desde Markdown ha sido deshabilitada en la Fase 22.\n> Use `python3 hitl_ctl.py` para gestionar los casos.\n\n"
+
+        header_inbox = "# BitNin — HITL Inbox (Active Cases)\n\n" + warning_note + "Casos pendientes de revisión o escalados.\n\n| Date | Case/Run ID | Priority | Reason | Status | Operator Notes | Evidence |\n|------|-------------|----------|--------|--------|----------------|----------|\n"
         self.inbox_file.write_text(header_inbox + "".join(inbox_rows))
         
-        header_archive = "# BitNin — HITL Archive (Closed Cases)\n\nCasos revisados o descartados.\n\n| Date | Case/Run ID | Priority | Reason | Status | Operator Notes | Evidence |\n|------|-------------|----------|--------|--------|----------------|----------|\n"
+        header_archive = "# BitNin — HITL Archive (Closed Cases)\n\n" + warning_note + "Casos revisados o descartados.\n\n| Date | Case/Run ID | Priority | Reason | Status | Operator Notes | Evidence |\n|------|-------------|----------|--------|--------|----------------|----------|\n"
         self.archive_file.write_text(header_archive + "".join(archive_rows))
+        logger.info("Markdown views rebuilt successfully.")
 
     def generate_digest(self, last_batch, state):
         batch_id = last_batch.get("batch_id", "Unknown")
@@ -174,32 +138,27 @@ class HITLManager:
         active_cases = [c for c in state["cases"] if c["status"] in ["PENDING", "ESCALATED"]]
         closed_cases = [c for c in state["cases"] if c["status"] in ["REVIEWED", "DISMISSED"]]
         
-        md = f"# BitNin — Executive Digest (HITL)\n\n**Batch ID:** `{batch_id}` | **Generated:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}\n\n"
+        md = f"# BitNin — Executive Digest (HITL)\n\n"
+        md += "> [!NOTE] Vista generada desde el estado estructurado.\n\n"
+        md += f"**Batch ID:** `{batch_id}` | **Generated:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}\n\n"
         md += "## 📈 Backlog Status\n"
-        md += f"- **Casos Abiertos**: {len(active_cases)} (Items en Inbox)\n"
+        md += f"- **Casos Abiertos**: {len(active_cases)} (Items en Inbox/CLI)\n"
         md += f"- **Casos Cerrados**: {len(closed_cases)} (Items en Archivo)\n\n"
         
         if active_cases:
-            md += "### ⚠️ Casos Pendientes / Escalados\n"
+            md += "### ⚠️ Casos Pendientes / Escalados (Top 5)\n"
             for c in active_cases[:5]:
                 md += f"- **{c['priority']}** [{c['run_id']}](hitl_inbox.md): {c['reason']} ({c['date']})\n"
         
-        md += "\n---\n*Referencia: [HITL Inbox](hitl_inbox.md) | [HITL Archive](hitl_archive.md)*"
+        md += "\n---\n*Referencia: [HITL Inbox](hitl_inbox.md) | [HITL Archive](hitl_archive.md) | Use `hitl_ctl.py` para operar.*"
         self.digest_file.write_text(md)
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--batch", required=False) # Optional for sync-only
+    parser.add_argument("--batch", required=True)
     parser.add_argument("--obs-dir", required=True)
-    parser.add_argument("--sync-only", action="store_true")
     args = parser.parse_args()
     
     manager = HITLManager(args.obs_dir)
-    if args.sync_only:
-        state = manager.load_state()
-        if manager._sync_from_md(state):
-            manager.save_state(state)
-        manager._generate_views(state)
-    else:
-        manager.evaluate_batch(args.batch)
+    manager.evaluate_batch(args.batch)

@@ -305,15 +305,15 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 26. Nota de Fase 21
+## 27. Nota de Fase 22
 
-Fase 21 profesionaliza el workflow HITL mediante la **gestión de expedientes (Casos)** y el **cierre documental**.
+Fase 22 elimina la fragilidad del control vía Markdown mediante la introducción de la **Consola del Operador (CLI)** y el **Timeline de Casos**.
 
-Hitos de la madurez documental:
-- **Entidad "Caso"**: BitNin evoluciona de emitir alertas a gestionar expedientes auditables que agrupan evidencia técnica y juicios humanos.
-- **Segregación Operativa**: Separación física entre la bandeja activa (`hitl_inbox.md`) y el archivo histórico (`hitl_archive.md`), manteniendo el foco del operador en lo pendiente.
-- **Sincronización Bi-direccional**: El sistema permite la edición manual del Markdown como interfaz de usuario, sincronizando los estados y notas de vuelta al registro canónico estructurado (`hitl_state.json`).
-- **Bundle de Evidencia**: Cada caso queda vinculado permanentemente a su contexto analítico (scorecards, batches) para auditorías futuras sin reconstrucción manual.
+Hitos de la robustez operativa:
+- **Consola HITL (`hitl_ctl.py`)**: Centralización de todas las acciones humanas (revisión, descarte, escalado) en una interfaz de comandos explícita, eliminando errores de parsing en tablas MD.
+- **Timeline de Eventos**: Cada expediente mantiene un registro cronológico inmutable de interacciones humanas y detecciones del sistema, facilitando auditorías de criterio.
+- **Vistas Proyectadas de Solo Lectura**: El `hitl_inbox.md` y `hitl_archive.md` pasan a ser proyecciones dinámicas del estado JSON, garantizando que el operador siempre vea la verdad canónica.
+- **Flujo Estructurado**: La verdad operativa reside exclusivamente en `hitl_state.json`. Las notas humanas son ahora campos estructurados con timestamp y autoría.
 
 ## 18. Nota de Fase 10
 
