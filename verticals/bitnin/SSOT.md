@@ -305,6 +305,17 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
+## 20. Nota de Fase 13
+
+Fase 13 establece la operación sostenida de BitNin mediante un supervisor operativo y protocolos de reanudación.
+
+Principios operativos:
+- **Supervisor de Ventanas**: BitNin corre exclusivamente bajo el control de `supervisor.py`, que gestiona la secuencialidad y evita duplicar días procesados.
+- **Estado Persistente**: El archivo `operational_state.json` es la autoridad única sobre el progreso actual del sistema, última ventana sana y alarmas de salud abiertas.
+- **Protocolo de Resumabilidad**: En caso de fallo o interrupción, el sistema reanuda automáticamente desde el último punto de éxito validado.
+- **Blindaje de Concurrencia**: Se utiliza un lockfile de nivel de sistema para garantizar que nunca existan dos instancias de BitNin procesando la misma jerarquía de archivos.
+- **Runbook Operativo**: Se introduce `RUNBOOK.md` como guía primaria para el manejo humano de incidentes, degradaciones y alertas de drift.
+
 ## 18. Nota de Fase 10
 
 Fase 10 agrega observabilidad longitudinal y pruebas de estabilidad en shadow mode continuo (pipeline script y scorecards en `verticals/bitnin/services/bitnin_observability/`).

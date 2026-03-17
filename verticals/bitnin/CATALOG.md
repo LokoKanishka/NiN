@@ -21,6 +21,8 @@ Este catalogo define workflows esperados de la vertical BitNin. Ninguno existe t
 | `bitnin_batch_runner` | Ejecutar múltiples ciclos secuenciales con trazabilidad. | `batch_size`, `interval_seconds`, `symbol` | Reporte de lote, artefactos versionados por `run_id`, logs | `active` | runner oficial de estabilidad en `bitnin-runtime-runner` |
 | `bitnin_observability_scorecard` | Generar alertas y scorecard longitudinal de métricas de calidad y degradación. | `batch_report` JSON | `scorecard` Markdown y Alertas de stdout | `active` | validador en `bitnin-observability` |
 | `bitnin_run_shadow_pipeline` | Orquestar barrido histórico continuo y evaluar scorecards de estabilidad. | `start_date`, `end_date`, `symbol` | Batch report, Scorecard y Múltiples ejecuciones puras shadow | `active` | script `run_shadow_pipeline.py` |
+| `bitnin_supervisor` | Orquestador de operaciones sostenidas con soporte de bloqueo y reanudación. | `operational_state`, `workflow_config` | `operational_state` actualizado, logs | `planned` | workflow autoritativo de supervisor en `bitnin-control` |
+| `RUNBOOK.md` | Guía operacional para humanos. | N/A | N/A | `active` | Documento de referencia |
 ## Notas de gobierno
 
 - `bitnin_exec_bridge` no habilita trading real en v1. Su existencia en este catalogo solo reserva el nombre y el limite de autoridad.
