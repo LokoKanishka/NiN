@@ -72,15 +72,34 @@ class BitNinSupervisor:
         snapshot_path = self.obs_dir / "history" / "health_snapshot.md"
         logger.info(f"Generating health snapshot at: {snapshot_path}")
         
+        # Freshness Check
+        is_stale = False
+        last_update_str = state.get("last_update")
+        if last_update_str:
+            last_update = datetime.fromisoformat(last_update_str)
+            if datetime.now(timezone.utc) - last_update > timedelta(hours=25):
+                is_stale = True
+        
         md = f"# BitNin System Health Snapshot\n\n"
-        md += f"**Last Update:** {state.get('last_update')}\n"
-        md += f"**System Status:** {state.get('system_status', 'UNKNOWN')}\n"
+        md += f"**Last Update:** {last_update_str}\n"
+        
+        status = state.get('system_status', 'UNKNOWN')
+        if is_stale:
+            status = "STALE (Possible Freeze)"
+            md += f"**System Status:** ⚠️ {status}\n"
+        else:
+            status_icon = "🟢" if status == "HEALTHY" else "🔴" if status == "DEGRADED" else "🟡"
+            md += f"**System Status:** {status_icon} {status}\n"
+            
         md += f"**Last Processed Date:** {state.get('last_processed_date', 'N/A')}\n"
         md += f"**Last Healthy Window:** {state.get('last_healthy_window', 'N/A')}\n\n"
         
         md += "## Active Alerts\n"
         alerts = state.get("active_alerts", [])
-        if not alerts:
+        if is_stale:
+            md += f"- ⚠️ **STALE DATA**: System hasn't processed successfully in > 25 hours.\n"
+        
+        if not alerts and not is_stale:
             md += "- 🟢 All systems operational. No active alerts.\n"
         else:
             for alert in alerts:
@@ -134,6 +153,7 @@ class BitNinSupervisor:
                 state["last_processed_date"] = end_str
                 # Update status based on window success
                 state["system_status"] = "HEALTHY" 
+                state["active_alerts"] = []  # Clear previous alerts on success
                 logger.info(f"Window {start_str} to {end_str} completed successfully.")
                 self.save_state(state)
             else:

@@ -19,7 +19,13 @@ cp verticals/bitnin/services/bitnin_observability/systemd/bitnin-shadow.timer ~/
 # 3. Reload and enable
 systemctl --user daemon-reload
 systemctl --user enable --now bitnin-shadow.timer
+
+# 4. Enable Linger (to survive logout/reboot)
+loginctl enable-linger lucy-ubuntu
 ```
+
+### Persistence & Session Management
+BitNin is configured to run as a user service. To ensure it survives server reboots and user logouts, we use `loginctl enable-linger`. This allows the user's `systemd` manager to start at boot and stay running after the user logs out.
 
 ### Starting the Supervisor (Automated)
 BitNin runs automatically via systemd. To manage the service:
@@ -71,6 +77,15 @@ The supervisor uses a lockfile (`bitnin_supervisor.lock`) to prevent concurrent 
 1. Check logs for the specific `as_of` date that crashed.
 2. The supervisor will automatically attempt to resume from the last successful date on the next invocation.
 3. If a stale lock exists after a crash, the supervisor will remove it automatically.
+
+### Incident Response (Stale Process)
+If BitNin fails to process or stays "STALE":
+1. **Check Freshness**: If `health_snapshot.md` shows `STALE`, the timer might be dead or the process hung.
+2. **Check Dead Locks**: If the service fails to start with "Execution blocked", check for stale locks. The supervisor handles most cases, but manual cleanup can be done:
+   ```bash
+   rm verticals/bitnin/runtime/observability/history/bitnin_supervisor.lock
+   ```
+3. **Journal Audit**: Use `journalctl --user -u bitnin-shadow.service -n 100`.
 
 ## 5. Safety Guardrails
 - **NEVER** disable `shadow_mode` or `dry_run` flags.

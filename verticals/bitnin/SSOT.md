@@ -305,15 +305,15 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 21. Nota de Fase 15
+## 22. Nota de Fase 16
 
-Fase 15 marca la transición de "capacidad operativa" a "operación autónoma verificada" en el host.
+Fase 16 consolida la **resiliencia operativa** y la **persistencia** de BitNin como servicio shadow de largo plazo.
 
-Resultados de la validación:
-- **Scheduler Activo**: El sistema corre vía `systemd --user` (timer), desacoplado de sesiones manuales.
-- **Logs Unificados**: Toda la trazabilidad operativa (supervisor y pipeline) fluye hacia el `journalctl` del host.
-- **Autonomía Probada**: Se verificó el disparo por timer, la persistencia de estado post-reinicio y el bloqueo de concurrencia real.
-- **Clean Repo Sostenido**: La operación real no genera ruidos en git, respetando la separación estricta entre código y estado mutable.
+Hitos de resiliencia:
+- **Persistencia Host-Level**: Se habilitó `linger` para que el scheduler de `systemd --user` sea inmune a reinicios y cierres de sesión de Lucy en el host.
+- **Chequeo de Freshness**: El supervisor ahora autodetecta si la operación se ha congelado (datos stale > 25h) y genera alertas visuales en el snapshot de salud.
+- **Recuperación de Locks**: Se implementó una lógica de resolución de locks obsoletos (basada en verificación de PID real) para evitar bloqueos manuales tras fallos críticos del host.
+- **Alertado Operativo**: El `health_snapshot.md` ahora integra alertas de "Staleness" y fallos de pipeline, proporcionando una interfaz de monitoreo pasivo pero efectiva.
 
 ## 18. Nota de Fase 10
 
