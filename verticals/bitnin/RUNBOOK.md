@@ -48,15 +48,17 @@ systemctl --user start bitnin-shadow.service
 Inspect the human-readable snapshot for a quick status overview:
 `verticals/bitnin/runtime/observability/history/health_snapshot.md`
 
-### 🕹️ Ciclo de Revisión Diaria (Consola Unificada)
-A partir de la Fase 23, toda la operación de BitNin se centraliza en la herramienta `./bitnin_ctl.py` ubicada en la raíz.
+## 🕹️ Ritual de Cierre de Jornada
+Para asegurar una bitácora profesional y auditable, el operador debe ejecutar el comando de cierre al finalizar su turno:
 
-1. **Chequeo de Salud**: `./bitnin_ctl.py status`. Verificar que el sistema esté `HEALTHY` y el scheduler `Active`.
-2. **Lectura del Briefing**: `./bitnin_ctl.py briefing`. Revisar casos críticos y acciones recomendadas.
-3. **Gestión de Casos (HITL)**:
-   - `./bitnin_ctl.py cases list`: Listar expedientes pendientes.
-   - `./bitnin_ctl.py cases show <case_id>`: Ver evidencia y timeline.
-   - `./bitnin_ctl.py cases review <case_id> --note "..."`: Cerrar y archivar el caso.
+```bash
+./bitnin_ctl.py day-close
+```
+
+**Este comando realiza:**
+1. **Generación de Bitácora**: Crea `operator_journal.md` con todas las decisiones tomadas en las últimas 24h.
+2. **Archivado de Bundle**: Mueve el briefing, la bitácora y el estado de salud a `runtime/observability/history/daily_bundles/YYYY-MM-DD/`.
+3. **Resumen de Actividad**: Muestra en consola qué expedientes se cerraron y qué queda pendiente.
 
 ---
 

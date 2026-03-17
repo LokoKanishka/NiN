@@ -2,7 +2,8 @@ import json
 import os
 import logging
 import re
-from datetime import datetime, timezone
+import shutil
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 logger = logging.getLogger("bitnin_hitl")
@@ -17,8 +18,11 @@ class HITLManager:
         self.state_file = self.history_dir / "hitl_state.json"
         self.digest_file = self.history_dir / "hitl_digest.md"
         self.briefing_file = self.history_dir / "hitl_briefing.md"
+        self.journal_file = self.history_dir / "operator_journal.md"
+        self.bundles_dir = self.history_dir / "daily_bundles"
         
         self.history_dir.mkdir(parents=True, exist_ok=True)
+        self.bundles_dir.mkdir(parents=True, exist_ok=True)
         self._init_files()
 
     def _init_files(self):
@@ -33,12 +37,10 @@ class HITLManager:
     def load_state(self):
         try:
             state = json.loads(self.state_file.read_text())
-            # Migration/Robustness checks
             if "case_counter" not in state:
                 state["case_counter"] = len(state.get("cases", []))
             
             for case in state.get("cases", []):
-                # Ensure case_id exists
                 if "case_id" not in case:
                     state["case_counter"] += 1
                     case["case_id"] = f"CASE-{datetime.now().strftime('%Y%m%d')}-{state['case_counter']:03d}"
@@ -129,7 +131,6 @@ class HITLManager:
         
         for c in sorted_cases:
             evidence_str = f"[Scorecard]({c['evidence']['scorecard']})"
-            # We show CASE_ID first, then run_id in parenthesis
             id_str = f"**{c['case_id']}**<br>({c['run_id']})"
             row = f"| {c['date']} | {id_str} | {c['priority']} | {c['reason']} | {c['status']} | {c['operator_notes']} | {evidence_str} |\n"
             if c["status"] in ["PENDING", "ESCALATED"]:
@@ -137,7 +138,7 @@ class HITLManager:
             else:
                 archive_rows.append(row)
 
-        warning_note = "> [!IMPORTANT]\n> **VISTA DE SOLO LECTURA.**\n> Use `python3 bitnin_ctl.py cases` para gestionar estos expedientes.\n\n"
+        warning_note = "> [!IMPORTANT]\n> **VISTA DE SOLO LECTURA.**\n> Use `./bitnin_ctl.py cases` para gestionar estos expedientes.\n\n"
 
         header_inbox = "# BitNin — HITL Inbox (Active Cases)\n\n" + warning_note + "Casos pendientes de revisión o escalados.\n\n| Date | Case ID (Run) | Priority | Reason | Status | Operator Notes | Evidence |\n|------|---------------|----------|--------|--------|----------------|----------|\n"
         self.inbox_file.write_text(header_inbox + "".join(inbox_rows))
@@ -147,7 +148,6 @@ class HITLManager:
 
     def generate_digest(self, last_batch, state):
         batch_id = last_batch.get("batch_id", "Unknown")
-        stats = last_batch.get("health_summary", {})
         active_cases = [c for c in state["cases"] if c["status"] in ["PENDING", "ESCALATED"]]
         closed_cases = [c for c in state["cases"] if c["status"] in ["REVIEWED", "DISMISSED"]]
         
@@ -185,15 +185,69 @@ class HITLManager:
         else:
             md += "✅ No hay casos pendientes de revisión inmediata.\n\n"
         
-        md += "\n---\n*Referencia: use `python3 bitnin_ctl.py briefing` para ver el estado de salud completo.*"
+        md += "\n---\n*Referencia: use `./bitnin_ctl.py briefing` para ver el estado de salud completo.*"
         self.briefing_file.write_text(md)
+
+    def close_day(self):
+        """Generates the daily bundle and operator journal."""
+        state = self.load_state()
+        now = datetime.now(timezone.utc)
+        today_str = now.strftime("%Y-%m-%d")
+        
+        # 1. Generate Journal of Human Decisions (Last 24h)
+        journal_md = f"# 📔 Bitácora de Decisiones Humanas — {today_str}\n\n"
+        cutoff = now - timedelta(hours=24)
+        
+        decisions = []
+        for case in state["cases"]:
+            for event in case["timeline"]:
+                event_time = datetime.fromisoformat(event["timestamp"])
+                if event_time > cutoff and event["event"] in ["review", "dismiss", "escalate", "reopen"]:
+                    decisions.append({
+                        "case_id": case["case_id"],
+                        "event": event["event"].upper(),
+                        "time": event["timestamp"],
+                        "note": event["note"]
+                    })
+        
+        if decisions:
+            journal_md += "## 🏛️ Actividad del Día\n"
+            for d in sorted(decisions, key=lambda x: x["time"]):
+                journal_md += f"- **{d['case_id']}** ({d['event']}): {d['note']} *({d['time']})*\n"
+        else:
+            journal_md += "⚠️ No se registraron decisiones humanas en las últimas 24 horas.\n"
+        
+        journal_md += f"\n## 📊 Estado Final del Backlog\n"
+        active = [c for c in state["cases"] if c["status"] in ["PENDING", "ESCALATED"]]
+        journal_md += f"- **Pendientes**: {len(active)}\n"
+        
+        self.journal_file.write_text(journal_md)
+        
+        # 2. Create Daily Bundle Folder
+        bundle_path = self.bundles_dir / today_str
+        bundle_path.mkdir(parents=True, exist_ok=True)
+        
+        # Copy key artifacts to bundle
+        shutil.copy2(self.briefing_file, bundle_path / "hitl_briefing.md")
+        shutil.copy2(self.journal_file, bundle_path / "operator_journal.md")
+        
+        health_json = self.history_dir / "health_snapshot.json"
+        if health_json.exists():
+            shutil.copy2(health_json, bundle_path / "health_snapshot.json")
+            
+        logger.info(f"Daily bundle for {today_str} created successfully in {bundle_path}")
+        return bundle_path
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--batch", required=True)
+    parser.add_argument("--batch", required=False)
     parser.add_argument("--obs-dir", required=True)
+    parser.add_argument("--day-close", action="store_true")
     args = parser.parse_args()
     
     manager = HITLManager(args.obs_dir)
-    manager.evaluate_batch(args.batch)
+    if args.day_close:
+        manager.close_day()
+    elif args.batch:
+        manager.evaluate_batch(args.batch)

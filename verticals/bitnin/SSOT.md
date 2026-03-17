@@ -305,7 +305,29 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 27. Nota de Fase 22
+## 28. Nota de Fase 24
+
+Fase 24 profesionaliza la rutina humana mediante el **Ritual de Cierre de Jornada** y la **Bitácora Ejecutiva**.
+
+Hitos de la madurez operativa:
+- **Cierre de Jornada (`day-close`)**: Comando único que resume y archiva la actividad del día, asegurando un ciclo operativo cerrado y ordenado.
+- **Bitácora de Decisiones (`operator_journal.md`)**: Registro formal y auditable de todas las intervenciones humanas de las últimas 24h, integrado en el bundle diario.
+- **Bundles Diarios Automáticos**: Estructura de archivado longitudinal en `daily_bundles/` que agrupa salud, briefing y decisiones para auditoría histórica simplificada.
+- **Entrypoint Robusto**: Consolidación de `bitnin_ctl.py` como la herramienta oficial de mando con lógica de rutas absoluta y paquetización operativa.
+
+## Phase 24: Paquetización operativa, bundle diario y bitácora ejecutiva
+- [x] Paquetizar consola operativa (entrypoint oficial y estable)
+- [x] Implementar comando `day-close` para cierre estructurado de jornada
+- [x] Desarrollar generador de Bitácora Ejecutiva Diaria (Dossier de decisiones)
+- [x] Crear Bundle Diario automático (Agrupado por jornada en historico)
+- [x] Implementar resumen de actividad humana del día (Decisiones/Backlog)
+- [x] Definir estructura de archivado operativo diario (`/history/daily_bundles/`)
+- [x] Actualizar `RUNBOOK.md` y `HITL_PROTOCOL.md` con el ritual de cierre
+- [x] Sincronizar SSOT y CATALOG con las nuevas capacidades de reporte diario
+
+| Componente | Descripción | Tipo | Artefactos | Estado | Notas |
+|---|---|---|---|---|---|
+| `bitnin_ctl.py` | Consola maestra de mando con soporte para `day-close` y bitácora. | Comandos CLI | `daily_bundles/`, `operator_journal.md` | `active` | Centro de mando unificado |
 
 Fase 22 elimina la fragilidad del control vía Markdown mediante la introducción de la **Consola del Operador (CLI)** y el **Timeline de Casos**.
 

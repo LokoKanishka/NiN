@@ -5,12 +5,25 @@ import json
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from verticals.bitnin.services.bitnin_hitl.hitl_manager import HITLManager
+
+# --- Entrypoint & Path Logic ---
+# Find project root (where bitnin_ctl.py lives)
+ROOT_DIR = Path(__file__).parent.resolve()
+sys.path.append(str(ROOT_DIR))
+
+# Import logic from verticals (with absolute imports from root)
+try:
+    from verticals.bitnin.services.bitnin_hitl.hitl_manager import HITLManager
+except ImportError:
+    print("[CRITICAL] Could not import HITLManager. Ensure you are running from project root.")
+    sys.exit(1)
 
 # Configuration
-OBS_DIR = Path("verticals/bitnin/runtime/observability/")
-HEALTH_FILE = OBS_DIR / "history" / "health_snapshot.json"
-BRIEFING_FILE = OBS_DIR / "history" / "hitl_briefing.md"
+OBS_DIR = ROOT_DIR / "verticals/bitnin/runtime/observability"
+HISTORY_DIR = OBS_DIR / "history"
+HEALTH_FILE = HISTORY_DIR / "health_snapshot.json"
+BRIEFING_FILE = HISTORY_DIR / "hitl_briefing.md"
+JOURNAL_FILE = HISTORY_DIR / "operator_journal.md"
 
 def get_scheduler_status():
     try:
@@ -20,20 +33,21 @@ def get_scheduler_status():
         
         # Check next run
         list_timers = subprocess.check_output(["systemctl", "--user", "list-timers", "bitnin.timer"], text=True)
-        # Parse next run date if possible
         next_run = "Unknown"
         lines = list_timers.splitlines()
         if len(lines) > 1:
             for line in lines:
                 if "bitnin.timer" in line:
-                    next_run = line.split()[0] + " " + line.split()[1]
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        next_run = f"{parts[0]} {parts[1]}"
         
         return {
             "is_timer_active": is_active,
             "next_run": next_run
         }
     except Exception as e:
-        return {"error": f"Failed to get scheduler status: {e}"}
+        return {"error": str(e)}
 
 def color_status(status):
     if status == "HEALTHY": return f"\033[92m{status}\033[0m"
@@ -42,30 +56,33 @@ def color_status(status):
     return status
 
 def main():
-    parser = argparse.ArgumentParser(description="BitNin Unified Command Console")
-    subparsers = parser.add_subparsers(dest="command", help="Commands")
+    parser = argparse.ArgumentParser(description="BitNin Unified Command Console (Mando Maestro)")
+    subparsers = parser.add_subparsers(dest="command", help="Comandos Principales")
 
     # status
-    subparsers.add_parser("status", help="Unified system health and backlog status")
+    subparsers.add_parser("status", help="Vista 360° de salud y backlog")
     
     # briefing
-    subparsers.add_parser("briefing", help="Show daily operator briefing")
+    subparsers.add_parser("briefing", help="Resumen ejecutivo diario")
 
-    # cases (sub-sub-commands)
-    case_parser = subparsers.add_parser("cases", help="Manage HITL cases")
+    # day-close
+    subparsers.add_parser("day-close", help="Ejecutar ritual de cierre de jornada y bitácora")
+
+    # cases
+    case_parser = subparsers.add_parser("cases", help="Gestión de expedientes HITL")
     case_subparsers = case_parser.add_subparsers(dest="case_command")
     
-    list_p = case_subparsers.add_parser("list", help="List cases")
+    list_p = case_subparsers.add_parser("list", help="Listado de casos")
     list_p.add_argument("--status", choices=["PENDING", "REVIEWED", "DISMISSED", "ESCALATED", "ALL"], default="PENDING")
     
-    show_p = case_subparsers.add_parser("show", help="Show case details")
+    show_p = case_subparsers.add_parser("show", help="Inspección de un caso")
     show_p.add_argument("case_id", help="Case ID (e.g., CASE-20260317-001)")
     
-    review_p = case_subparsers.add_parser("review", help="Mark as REVIEWED")
+    review_p = case_subparsers.add_parser("review", help="Marcar como REVIEWED")
     review_p.add_argument("case_id")
     review_p.add_argument("--note", required=True)
     
-    dismiss_p = case_subparsers.add_parser("dismiss", help="Mark as DISMISSED")
+    dismiss_p = case_subparsers.add_parser("dismiss", help="Marcar como DISMISSED")
     dismiss_p.add_argument("case_id")
     dismiss_p.add_argument("--note", required=True)
 
@@ -87,12 +104,12 @@ def main():
             print(f"Timestamp:     {health.get('timestamp')}")
             print(f"Last Processed: {health.get('freshness', {}).get('last_run')}")
         else:
-            print("System Health: UNKNOWN (health_snapshot.json missing)")
+            print("System Health: \033[91mUNKNOWN\033[0m (Snapshot faltante)")
 
         # 2. Scheduler
         sched = get_scheduler_status()
         if "error" in sched:
-            print(f"Scheduler:     \033[91mERROR\033[0m ({sched['error']})")
+            print(f"Scheduler:     \033[93mDEGRADED\033[0m (systemd inaccessible o sin configurar)")
         else:
             icon = "🟢" if sched["is_timer_active"] else "🔴"
             print(f"Scheduler:     {icon} {'Active' if sched['is_timer_active'] else 'Inactive'}")
@@ -102,14 +119,24 @@ def main():
         cases = state.get("cases", [])
         pending = [c for c in cases if c["status"] == "PENDING"]
         escalated = [c for c in cases if c["status"] == "ESCALATED"]
-        print(f"HITL Backlog:  {len(pending)} Pending, {len(escalated)} Escalated")
+        print(f"HITL Backlog:  \033[96m{len(pending)} Pendientes\033[0m, {len(escalated)} Escalados")
         print("==============================\n")
 
     elif args.command == "briefing":
         if BRIEFING_FILE.exists():
             print(BRIEFING_FILE.read_text())
         else:
-            print("[ERROR] Briefing file not found. Run supervisor or hitl_manager first.")
+            print("[ERROR] Briefing no generado aún.")
+
+    elif args.command == "day-close":
+        print("\n--- 🏁 RITUAL DE CIERRE DE JORNADA ---")
+        bundle_path = manager.close_day()
+        print(f"[OK] Bundle diario generado en: \n     {bundle_path.relative_to(ROOT_DIR)}")
+        
+        if JOURNAL_FILE.exists():
+            print("\n--- BITÁCORA DE ACTIVIDAD ---")
+            print(JOURNAL_FILE.read_text())
+        print("Cierre de jornada completado con éxito.\n")
 
     elif args.command == "cases":
         if not args.case_command:
@@ -121,15 +148,15 @@ def main():
             if args.status != "ALL":
                 cases = [c for c in cases if c["status"] == args.status]
             print(f"\n--- {args.status} CASES ({len(cases)}) ---")
-            print(f"{'Case ID':<20} | {'Run ID':<25} | {'Priority':<10} | {'Status':<10}")
+            print(f"{'Case ID':<20} | {'Priority':<10} | {'Status':<10} | {'Updated':<20}")
             print("-" * 75)
-            for c in cases[:15]:
-                print(f"{c['case_id']:<20} | {c['run_id']:<25} | {c['priority']:<10} | {c['status']:<10}")
+            for c in sorted(cases, key=lambda x: x["last_updated"], reverse=True)[:15]:
+                print(f"{c['case_id']:<20} | {c['priority']:<10} | {c['status']:<10} | {c['last_updated'][:19]}")
         
         elif args.case_command == "show":
             case = next((c for c in state["cases"] if c["case_id"] == args.case_id or c["run_id"] == args.case_id), None)
             if not case:
-                print(f"[ERROR] Case {args.case_id} not found.")
+                print(f"[ERROR] Caso {args.case_id} no encontrado.")
                 return
             print(f"\n--- CASE FILE: {case['case_id']} ---")
             print(f"Run ID:   {case['run_id']}")
@@ -139,12 +166,12 @@ def main():
             print(f"Evidence: {case['evidence']['scorecard']}")
             print("\nTimeline:")
             for e in case["timeline"]:
-                print(f" [{e['timestamp']}] {e['event'].upper()}: {e['note']}")
+                print(f" [{e['timestamp'][:19]}] {e['event'].upper()}: {e['note']}")
 
         elif args.case_command in ["review", "dismiss"]:
             case = next((c for c in state["cases"] if c["case_id"] == args.case_id), None)
             if not case:
-                print(f"[ERROR] Case {args.case_id} not found.")
+                print(f"[ERROR] Caso {args.case_id} no encontrado.")
                 return
             
             case["status"] = "REVIEWED" if args.case_command == "review" else "DISMISSED"
@@ -158,7 +185,7 @@ def main():
             })
             manager.save_state(state)
             manager.rebuild_views()
-            print(f"[OK] Case {case['case_id']} archived as {case['status']}.")
+            print(f"[OK] Caso {case['case_id']} archivado como {case['status']}.")
 
 if __name__ == "__main__":
     main()
