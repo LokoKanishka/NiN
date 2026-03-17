@@ -1,6 +1,7 @@
-# BitNin SSOT
+# BitNin Catalog
 
-Estado: vigente para Fase 0-1
+Estado general: `RELEASE CANDIDATE SHADOW`
+Fecha: 2026-03-17
 Fecha de congelamiento: 2026-03-13
 
 ## 1. Definicion oficial
@@ -305,7 +306,15 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 29. Nota de Fase 25
+## 30. Nota de Fase 26: Certificación Release Candidate (RC) Shadow
+
+Fase 26 marca el hito de la **Certificación de Continuidad Operativa** y la elevación a **Release Candidate Shadow**.
+
+Logros de la certificación:
+- **Simulacro de Desastre (DR Drill)**: Verificación exitosa de recuperación end-to-end tras pérdida total del runtime operativo.
+- **Resiliencia HITL**: Confirmación de que el 100% de los casos, notas y timelines sobreviven al proceso de restore.
+- **Determinismo**: La combinación de `bootstrap`, `backup` y `restore` garantiza que BitNin pueda volver a operar en un host nuevo o tras corrupción sin pasos manuales frágiles.
+- **Estatus RC Shadow**: El sistema se declara listo para una operación shadow estable de largo plazo bajo este estándar de infraestructura.
 
 Fase 25 consolida la **resiliencia e instalación reproducible** de BitNin.
 
@@ -344,6 +353,19 @@ Hitos de la madurez operativa:
 - [x] Validar la reinstalación del sistema en un entorno limpio simulado
 - [x] Actualizar `RUNBOOK.md` con guías de instalación y recuperación
 - [x] Sincronizar SSOT y CATALOG con las nuevas herramientas de infraestructura
+
+## Phase 26: Simulacro de desastre, recuperación end-to-end y Release Candidate shadow
+- [x] Definir protocolo de simulacro de desastre (daño controlado)
+- [x] Ejecutar Backup operativo final (Pre-simulacro)
+- [x] Simular pérdida total de Runtime (Corrupción controlada)
+- [x] Validar detección de falla mediante `bitnin-ctl doctor`
+- [x] Ejecutar ciclo completo de recuperación (Bootstrap + Restore)
+- [x] Reinstalar y verificar scheduler tras restauración
+- [x] Validar integridad del plano HITL (Casos, Timeline, Bitácora)
+- [x] Realizar corrida de verificación post-restore
+- [x] Emitir veredicto de Release Candidate (RC) Shadow
+- [x] Documentar el simulacro en `docs/disaster_recovery_drill.md`
+- [x] Sincronizar SSOT y CATALOG con el estado RC
 
 | Componente | Descripción | Tipo | Artefactos | Estado | Notas |
 |---|---|---|---|---|---|
