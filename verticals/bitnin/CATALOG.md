@@ -1,6 +1,6 @@
 # BitNin Catalog
 
-Estado general: `GA SHADOW CERTIFIED`
+Estado general: `GA SHADOW CERTIFIED` (Evidence Pending)
 Fecha: 2026-03-17
 
 Este catalogo define workflows esperados de la vertical BitNin. Ninguno existe todavia como workflow oficial en runtime.
@@ -25,10 +25,7 @@ Este catalogo define workflows esperados de la vertical BitNin. Ninguno existe t
 | `scheduler_ctl.sh` | Automatización de `systemd --user`. | Bash Script | Unit files, timer status | `active` | Gestión del scheduler |
 | `ops_backup.sh` | Respaldo del plano operativo humano. | Bash Script | `backups/*.tar.gz` | `active` | Resiliencia de datos |
 | `bitnin_ctl doctor` | Diagnóstico técnico de la instalación. | Comando CLI | Reporte de salud técnica | `active` | Mantenimiento preventivo |
-| `bitnin_hitl_manager` | Motor de gestión de expedientes y generador de vistas. | `batch_report` JSON | `hitl_inbox` Markdown, `hitl_archive` Markdown, `hitl_digest` Markdown | `active` | componente de revisión en `bitnin-hitl` |
-| `hitl_state.json` | Registro canónico de casos HITL, decisiones y trazabilidad. | JSON de estados | N/A | `active` | runtime/observability/history (SSOT técnico) |
-| `hitl_archive.md` | Archivo histórico de casos revisados o descartados. | MD de casos cerrados | N/A | `active` | runtime/observability/history |
-| `RUNBOOK.md` | Guía operacional para humanos (mantenimiento institucional). | N/A | N/A | `active` | Documento de referencia |
+| `bitnin_ctl weekly-scorecard` | Consolidado de gobernanza y KPIs analíticos. | Comando CLI | Reporte Ejecutivo Semanal | `active` | Governance tool |
 
 ## Notas de gobierno
 

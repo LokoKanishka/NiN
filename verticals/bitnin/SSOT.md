@@ -1,6 +1,6 @@
 # BitNin SSOT
 
-Estado general: `READY FOR PILOT REVIEW`
+Estado general: `GA SHADOW CERTIFIED` (Evidence Pending)
 Fecha: 2026-03-17
 Fecha de congelamiento: 2026-03-13
 
@@ -306,16 +306,15 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 33. Nota de Fase 29: Evidencia de Estabilidad y Readiness a Pilot
+## 33. Nota de Fase 29R: Ventana Real de Gobernanza (En curso)
 
-Fase 29 cierra el ciclo institucional mediante la generación de **Evidencia Real de Estabilidad**.
+Fase 29R reemplaza la simulación previa por un ciclo de **Estabilidad Real**.
 
-Hitos de la ventana de gobierno:
-- **Prueba Cronológica**: Evaluación sostenida durante una ventana operativa de 30 días (4 scorecards semanales).
-- **Consolidación de KPIs**: Confirmación de cumplimiento de umbrales (>98% uptime, backlog controlado, cero incidentes críticos).
-- **Veredicto de Readiness**: El sistema se declara oficialmente `READY FOR REVIEW` hacia la fase Pilot.
-- **Evidencia Acumulada**: Documentación del historial de KPIs y taxonomía de incidentes en `docs/pilot_readiness_review.md`.
-- **Estatus Final**: BitNin es un sistema Shadow maduro, gobernado y con estabilidad probada bajo disciplina semanal.
+Estado del Proceso:
+- **Marco de Gobernanza**: Validado (Scorecard, KPIs, Taxonomía).
+- **Evidencia**: Pendiente de acumulación cronológica (0/4 semanas).
+- **Estatus**: BitNin se mantiene en `GA Shadow Certified` hasta que la ventana real de 4 semanas sea completada satisfactoriamente.
+- **Compromiso**: No se presentará veredicto de `Readiness` sin evidencia técnica y humana auténtica.
 
 Fase 28 eleva a BitNin de un sistema técnico a un sistema **gobernado y profesional**.
 
@@ -404,15 +403,14 @@ Hitos de la madurez operativa:
 - [x] Documentar el simulacro en `docs/disaster_recovery_drill.md`
 - [x] Sincronizar SSOT y CATALOG con el estado RC
 
-## Phase 29: Ventana de gobernanza real y evaluación formal de readiness a Pilot
-- [x] Ejecutar 4 ciclos semanales reales (Scorecards archivados)
-- [x] Consolidar KPIs comparativos (Métrica vs Tiempo)
-- [x] Registrar y clasificar incidentes reales en bitácora de gobernanza
-- [x] Monitorear estabilidad del backlog humano y ritmos de revisión
-- [x] Ejecutar el Ritual de Revisión Semanal formalmente (4 sesiones)
-- [x] Evaluar cumplimiento del 'Gate a Pilot' con evidencia acumulada
-- [x] Generar Reporte de Evaluación Final (Pilot Readiness Review)
-- [x] Sincronizar SSOT y CATALOG con los resultados de la ventana de gobierno
+## Phase 29R: Ventana real de gobernanza semanal y readiness no simulado
+- [/] Corregir estatus documental (remover claim prematuro de Readiness)
+- [ ] Ejecutar 4 ciclos semanales reales (Scorecards auténticos)
+- [ ] Consolidar KPIs no simulados (Métrica basada en corridas reales)
+- [ ] Registrar incidentes auténticos en bitácora de gobernanza
+- [ ] Mantener disciplina del Ritual de Revisión Semanal
+- [ ] Evaluar Gate a Pilot basado exclusivamente en evidencia cronológica
+- [ ] Emitir Veredicto Final real: Pilot Readiness Evaluation
 
 | Componente | Descripción | Tipo | Artefactos | Estado | Notas |
 |---|---|---|---|---|---|
