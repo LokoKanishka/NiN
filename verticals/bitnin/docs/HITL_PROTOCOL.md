@@ -2,19 +2,26 @@
 
 Este documento describe cómo interactuar con la bandeja de revisión humana de BitNin en su fase shadow.
 
-## 1. La Bandeja de Revisión (`hitl_inbox.md`)
-La bandeja se encuentra en: `verticals/bitnin/runtime/observability/history/hitl_inbox.md`.
-Es una tabla priorizada de eventos que el sistema considera "dignos de inspección".
+## 1. La Gestión de Casos (Expedientes)
+BitNin ya no genera simples alertas, sino **Casos** estructurados. Cada caso es una unidad de revisión auditable que agrupa evidencia técnica y decisiones humanas.
+
+### Ubicaciones Clave:
+- **Bandeja de Entrada Activa (`hitl_inbox.md`)**: Solo contiene casos en estado `PENDING` o `ESCALATED`. Es tu espacio de trabajo diario.
+- **Archivo Histórico (`hitl_archive.md`)**: Registro de todos los casos cerrados (`REVIEWED`, `DISMISSED`). Es tu historial de auditoría.
+- **Fuente de Verdad (`hitl_state.json`)**: Registro canónico estructurado que garantiza la integridad de los datos.
 
 ## 2. Flujo de Trabajo del Operador (Workflow)
-El sistema utiliza estados para gestionar el ciclo de vida de cada alerta:
-- **PENDING**: Ítem nuevo. Requiere atención.
-- **REVIEWED**: El humano ha inspeccionado el ítem y validado la señal.
-- **DISMISSED**: El ítem se considera ruido o no relevante (ej. degradación técnica conocida).
-- **ESCALATED**: El ítem requiere una investigación profunda o ajuste del sistema.
+El sistema utiliza estados para gestionar el ciclo de vida de cada expediente:
+- **PENDING**: Caso nuevo detectado por el supervisor. Requiere inspección.
+- **REVIEWED**: El operador ha validado la señal y adjuntado sus notas. El caso se mueve al archivo.
+- **DISMISSED**: El operador considera el ítem irrelevante. Se archiva con motivo de descarte.
+- **ESCALATED**: El caso requiere revisión técnica profunda. Permanece en el inbox.
 
-### ¿Cómo actualizar estados?
-Actualmente, el operador puede editar manualmente el archivo `hitl_inbox.md`, cambiando la columna `Status` y agregando una nota en `Decision/Note`. El sistema respeta los cambios realizados manualmente.
+### Protocolo de Cierre Documental:
+1. **Inspección**: Abrir el link al `Scorecard` desde el inbox.
+2. **Juicio**: Evaluar si la señal de BitNin es consistente con el baseline y el mercado.
+3. **Registro**: Editar la columna `Status` (cambiar `PENDING` por `REVIEWED` o `DISMISSED`) y añadir una nota breve en `Operator Notes`.
+4. **Sincronización**: En la siguiente corrida del sistema (o vía manual), BitNin detectará tu cambio, actualizará el JSON y moverá el expediente al archivo histórico.
 
 ## 3. Resumen Ejecutivo (`hitl_digest.md`)
 Cada ejecución exitosa genera o actualiza el `hitl_digest.md`. Este archivo es la primera parada para el supervisor:
