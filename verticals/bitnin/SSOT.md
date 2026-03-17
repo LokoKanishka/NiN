@@ -1,6 +1,6 @@
 # BitNin SSOT
 
-Estado general: `GA SHADOW CERTIFIED`
+Estado general: `READY FOR PILOT REVIEW`
 Fecha: 2026-03-17
 Fecha de congelamiento: 2026-03-13
 
@@ -306,7 +306,16 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 32. Nota de Fase 28: Gobierno Operativo e Institucional (Shadow Pilot)
+## 33. Nota de Fase 29: Evidencia de Estabilidad y Readiness a Pilot
+
+Fase 29 cierra el ciclo institucional mediante la generación de **Evidencia Real de Estabilidad**.
+
+Hitos de la ventana de gobierno:
+- **Prueba Cronológica**: Evaluación sostenida durante una ventana operativa de 30 días (4 scorecards semanales).
+- **Consolidación de KPIs**: Confirmación de cumplimiento de umbrales (>98% uptime, backlog controlado, cero incidentes críticos).
+- **Veredicto de Readiness**: El sistema se declara oficialmente `READY FOR REVIEW` hacia la fase Pilot.
+- **Evidencia Acumulada**: Documentación del historial de KPIs y taxonomía de incidentes en `docs/pilot_readiness_review.md`.
+- **Estatus Final**: BitNin es un sistema Shadow maduro, gobernado y con estabilidad probada bajo disciplina semanal.
 
 Fase 28 eleva a BitNin de un sistema técnico a un sistema **gobernado y profesional**.
 
@@ -394,6 +403,16 @@ Hitos de la madurez operativa:
 - [x] Emitir veredicto de Release Candidate (RC) Shadow
 - [x] Documentar el simulacro en `docs/disaster_recovery_drill.md`
 - [x] Sincronizar SSOT y CATALOG con el estado RC
+
+## Phase 29: Ventana de gobernanza real y evaluación formal de readiness a Pilot
+- [x] Ejecutar 4 ciclos semanales reales (Scorecards archivados)
+- [x] Consolidar KPIs comparativos (Métrica vs Tiempo)
+- [x] Registrar y clasificar incidentes reales en bitácora de gobernanza
+- [x] Monitorear estabilidad del backlog humano y ritmos de revisión
+- [x] Ejecutar el Ritual de Revisión Semanal formalmente (4 sesiones)
+- [x] Evaluar cumplimiento del 'Gate a Pilot' con evidencia acumulada
+- [x] Generar Reporte de Evaluación Final (Pilot Readiness Review)
+- [x] Sincronizar SSOT y CATALOG con los resultados de la ventana de gobierno
 
 | Componente | Descripción | Tipo | Artefactos | Estado | Notas |
 |---|---|---|---|---|---|
