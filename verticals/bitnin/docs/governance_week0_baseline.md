@@ -7,7 +7,7 @@
 ## Estado de Salud y Riesgos (Hoy)
 - **Incidentes Reales Hoy:** `none`
 - **Backlog HITL Hoy:** 1 Pendientes (CASE-20260317-002)
-- **Riesgos Abiertos Hoy:** `bitnin_ctl.py` no ejecutable (Diagnostic FAIL)
+- **Riesgos Abiertos Hoy:** `none` (Corregido: `bitnin_ctl.py` ahora es ejecutable)
 
 ## Evidencia Disponible Hoy
 
@@ -26,12 +26,12 @@ HITL Backlog:  [96m1 Pendientes[0m
 ```text
 
 === 🧑‍⚕️ BITNIN DOCTOR (Diagnostic Report) ===
-[[92m✅ OK[0m] Project Root Access
-[[92m✅ OK[0m] Runtime Directory Structure
-[[92m✅ OK[0m] HITL State File present
-[[91m❌ FAIL[0m] bitnin_ctl.py executable
-[[92m✅ OK[0m] bin/bitnin-ctl wrapper present
-[[92m✅ OK[0m] BitNin Timer Active
+[✅ OK] Project Root Access
+[✅ OK] Runtime Directory Structure
+[✅ OK] HITL State File present
+[✅ OK] bitnin_ctl.py executable
+[✅ OK] bin/bitnin-ctl wrapper present
+[✅ OK] BitNin Timer Active
 ==========================================
 
 ```
