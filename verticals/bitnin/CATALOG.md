@@ -1,6 +1,6 @@
 # BitNin Catalog
 
-Estado general: `planned`
+Estado general: `GA SHADOW CERTIFIED`
 Fecha: 2026-03-17
 
 Este catalogo define workflows esperados de la vertical BitNin. Ninguno existe todavia como workflow oficial en runtime.

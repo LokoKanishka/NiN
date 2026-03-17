@@ -1,6 +1,6 @@
 # BitNin Catalog
 
-Estado general: `RELEASE CANDIDATE SHADOW`
+Estado general: `GA SHADOW CERTIFIED`
 Fecha: 2026-03-17
 Fecha de congelamiento: 2026-03-13
 
@@ -306,7 +306,15 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 30. Nota de Fase 26: Certificación Release Candidate (RC) Shadow
+## 31. Nota de Fase 27: Certificación General Availability (GA) Shadow
+
+Fase 27 marca la **Certificación de Portabilidad Absoluta** y la elevación a **General Availability (GA) Shadow**.
+
+Logros de la certificación:
+- **Clean-Room Deployment**: Verificación exitosa de instalación desde cero en un entorno aislado usando únicamente herramientas formales (`bootstrap`, `scheduler_ctl`, `restore`).
+- **Independencia del Host**: Demostración de que BitNin no tiene dependencias implícitas de su entorno de nacimiento.
+- **Memoria Operativa Portable**: El 100% de la historia HITL, bitácora y bundles diarios fueron migrados con éxito.
+- **Estatus GA Shadow**: El sistema se declara oficialmente maduro, portable y listo para operación shadow estable y escalable.
 
 Fase 26 marca el hito de la **Certificación de Continuidad Operativa** y la elevación a **Release Candidate Shadow**.
 
