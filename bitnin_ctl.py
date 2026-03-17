@@ -105,6 +105,82 @@ def run_weekly_scorecard():
     print(f"Weekly Verdict:        {color_status(verdict)}")
     print("============================================\n")
 
+def run_week_review():
+    print("\n=== 📅 BITNIN WEEKLY REVIEW PACKET GENERATION ===")
+    today = datetime.now(timezone.utc)
+    # Using ISO week number for consistent directory naming
+    year, week, _ = today.isocalendar()
+    yyyy_ww = f"{year}-W{week:02d}"
+    week_dir = HISTORY_DIR / "weekly_reviews" / yyyy_ww
+    week_dir.mkdir(parents=True, exist_ok=True)
+    
+    def capture_cmd(args):
+        try:
+            return subprocess.check_output(args, stderr=subprocess.STDOUT, text=True)
+        except subprocess.CalledProcessError as e:
+            return e.output
+        except Exception as e:
+            return str(e)
+
+    ctl_script = ROOT_DIR / "bitnin_ctl.py"
+    print(f"Archiving to {week_dir.relative_to(ROOT_DIR)}...")
+    
+    # 1. weekly_scorecard.md
+    scorecard_out = capture_cmd([sys.executable, str(ctl_script), "weekly-scorecard"])
+    (week_dir / "weekly_scorecard.md").write_text(f"# Weekly Scorecard\n\n```text\n{scorecard_out}\n```\n")
+    
+    # 2. system_status.md
+    status_out = capture_cmd([sys.executable, str(ctl_script), "status"])
+    doctor_out = capture_cmd([sys.executable, str(ctl_script), "doctor"])
+    timer_out = capture_cmd(["systemctl", "--user", "status", "bitnin-shadow.timer"])
+    timers_out = capture_cmd(["systemctl", "--user", "list-timers", "bitnin-shadow.timer"])
+    journal_out = capture_cmd(["journalctl", "--user", "-u", "bitnin-shadow.service", "-n", "50", "--no-pager"])
+    
+    system_status = f"# System Status\n\n## Status\n```text\n{status_out}\n```\n## Doctor\n```text\n{doctor_out}\n```\n## Timer Status\n```text\n{timer_out}\n```\n## Timers List\n```text\n{timers_out}\n```\n## Journal (Last 50)\n```text\n{journal_out}\n```\n"
+    (week_dir / "system_status.md").write_text(system_status)
+    
+    # 3. hitl_backlog.md
+    cases_out = capture_cmd([sys.executable, str(ctl_script), "cases", "list", "--status", "PENDING"])
+    if not cases_out.strip():
+        cases_out = "No pending cases at snapshot time."
+    (week_dir / "hitl_backlog.md").write_text(f"# PENDING HITL Backlog\n\n```text\n{cases_out}\n```\n")
+    
+    # 4. incident_summary.md
+    brief_out = capture_cmd([sys.executable, str(ctl_script), "briefing"])
+    (week_dir / "incident_summary.md").write_text(f"# Incident/Briefing Summary\n\n```text\n{brief_out}\n```\n")
+    
+    # 5. pilot_readiness_week_note.md
+    # extracting pending count from manager state directly
+    manager = HITLManager(str(OBS_DIR))
+    state = manager.load_state()
+    pending_count = len([c for c in state.get("cases", []) if c["status"] == "PENDING"])
+    
+    note_content = f"""# Pilot Readiness - Week Note
+
+**Week:** {yyyy_ww}
+**Capture Date:** {today.isoformat()}
+
+## Weekly Decision 
+- [ ] `stable`
+- [ ] `watch`
+- [ ] `investigate`
+*(Operator must check one based on the weekly scorecard verdict)*
+
+## Real Incidents this Week
+*(See incident_summary.md for the snapshot)*
+
+## Real HITL Backlog
+Currently **{pending_count}** pending cases. *(See hitl_backlog.md)*
+
+## Operator Notes
+*(Add any qualitative observations here. Do not invent metrics.)*
+
+---
+*Reference: [Pilot Readiness Review](../../../../docs/pilot_readiness_review.md)*
+"""
+    (week_dir / "pilot_readiness_week_note.md").write_text(note_content)
+    print(f"[OK] Weekly review packet generated successfully.")
+
 def main():
     parser = argparse.ArgumentParser(description="BitNin Unified Command Console")
     subparsers = parser.add_subparsers(dest="command", help="Comandos Principales")
@@ -113,6 +189,7 @@ def main():
     subparsers.add_parser("day-close", help="Ejecutar ritual de cierre de jornada")
     subparsers.add_parser("doctor", help="Diagnóstico técnico de la instalación")
     subparsers.add_parser("weekly-scorecard", help="Consolidado de gobernanza semanal")
+    subparsers.add_parser("week-review", help="Generar el paquete real de revisión semanal S1 (Fase 29R)")
 
     case_parser = subparsers.add_parser("cases", help="Gestión de expedientes HITL")
     case_subparsers = case_parser.add_subparsers(dest="case_command")
@@ -136,6 +213,10 @@ def main():
     
     if args.command == "weekly-scorecard":
         run_weekly_scorecard()
+        return
+        
+    if args.command == "week-review":
+        run_week_review()
         return
 
     manager = HITLManager(str(OBS_DIR))
