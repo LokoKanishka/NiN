@@ -295,6 +295,16 @@ Principios congelados:
 - toda decision humana queda auditada con actor, timestamp y canal
 - expiracion es un estado terminal valido si no llega decision a tiempo
 
+## 19. Nota de Fase 12
+
+Fase 12 agrega monitoreo sostenido, archivado longitudinal y detección de drift en `verticals/bitnin/runtime/observability/`.
+
+Principios operativos:
+- **Archivado Estructurado**: Los reportes se organizan en `batches/`, los scorecards en `scorecards/` y los metadatos acumulativos en `history/`.
+- **Detección de Drift**: El sistema compara automáticamente la ventana actual contra el histórico reciente para detectar desvíos significativos en la cobertura narrativa o en la confianza del analista.
+- **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
+- **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
+
 ## 18. Nota de Fase 10
 
 Fase 10 agrega observabilidad longitudinal y pruebas de estabilidad en shadow mode continuo (pipeline script y scorecards en `verticals/bitnin/services/bitnin_observability/`).
