@@ -1,4 +1,4 @@
-# BitNin Catalog
+# BitNin SSOT
 
 Estado general: `GA SHADOW CERTIFIED`
 Fecha: 2026-03-17
@@ -306,7 +306,16 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 31. Nota de Fase 27: Certificación General Availability (GA) Shadow
+## 32. Nota de Fase 28: Gobierno Operativo e Institucional (Shadow Pilot)
+
+Fase 28 eleva a BitNin de un sistema técnico a un sistema **gobernado y profesional**.
+
+Hitos de la gobernanza:
+- **Marco de KPIs**: Definición oficial de pilares de medición Operativa (estabilidad), Analítica (calidad de señal) y Humana (eficiencia HITL).
+- **Control Semanal (`weekly-scorecard`)**: Herramienta que consolida los bundles diarios para ofrecer una lectura ejecutiva y detectar patrones de degradación.
+- **Taxonomía de Incidentes**: Clasificación formal de fallos (`INFRA`, `RUNTIME`, `FEED`, `DRIFT`, `HITL`) para un reporte disciplinado.
+- **Promotion Gate a Pilot**: Definición de condiciones estrictas (4 semanas de salud estable) para considerar el paso a una etapa superior.
+- **Estado de Gobierno**: El sistema opera bajo un estándar de supervisión semanal institucionalizada.
 
 Fase 27 marca la **Certificación de Portabilidad Absoluta** y la elevación a **General Availability (GA) Shadow**.
 
@@ -351,6 +360,17 @@ Hitos de la madurez operativa:
 - [x] Actualizar `RUNBOOK.md` y `HITL_PROTOCOL.md` con el ritual de cierre
 - [x] Sincronizar SSOT y CATALOG con las nuevas capacidades de reporte diario
 
+## Phase 28: Shadow Pilot Governance, KPIs y gate formal hacia Pilot
+- [x] Definir KPIs oficiales (Operativos, Analíticos, Humanos)
+- [x] Implementar generador de Scorecard Semanal Ejecutivo
+- [x] Establecer taxonomía oficial de incidentes (Infra, Feed, Drift, etc.)
+- [x] Definir condiciones de promoción (Gate formal) a Fase Pilot
+- [x] Documentar el "Ritual de Revisión Semanal" en `RUNBOOK.md`
+- [x] Crear el registro institucional de gobernanza en `docs/shadow_governance.md`
+- [x] Integrar comando `governance` o `weekly-scorecard` en `bitnin-ctl`
+- [x] Validar la consolidación de KPIs desde bundles históricos
+- [x] Sincronizar SSOT y CATALOG con el estado de Gobierno Operativo
+
 ## Phase 25: Instalación reproducible, entrypoints formales y backup/restore operativo
 - [x] Formalizar entrypoint de consola (wrapper estable `bitnin-ctl`)
 - [x] Desarrollar script de `bootstrap.sh` (dependencias, venv, runtime setup)
@@ -382,6 +402,7 @@ Hitos de la madurez operativa:
 | `scheduler_ctl.sh` | Automatización de `systemd --user`. | Bash Script | Unit files, timer status | `active` | Gestión del scheduler |
 | `ops_backup.sh` | Respaldo del plano operativo humano. | Bash Script | `backups/*.tar.gz` | `active` | Resiliencia de datos |
 | `bitnin_ctl doctor` | Diagnóstico técnico de la instalación. | Comando CLI | Reporte de salud técnica | `active` | Mantenimiento preventivo |
+| `bitnin_ctl weekly-scorecard` | Consolidado de gobernanza y KPIs analíticos. | Comando CLI | Reporte Ejecutivo Semanal | `active` | Governance tool |
 
 Fase 22 elimina la fragilidad del control vía Markdown mediante la introducción de la **Consola del Operador (CLI)** y el **Timeline de Casos**.
 

@@ -94,6 +94,25 @@ En un entorno nuevo o tras una limpieza de runtime:
 
 ---
 
+## 🏛️ Gobernanza & Supervisión Semanal
+BitNin opera bajo un marco de gobierno institucional que asegura la calidad y estabilidad del modo Shadow.
+
+### 1. KPIs Oficiales
+- **Operativos**: Uptime del scheduler (>98%) y éxito del backup.
+- **Analíticos**: Cobertura narrativa y estabilidad de la señal compuesta.
+- **Humanos**: Control del backlog HITL (< 5 casos).
+
+### 2. Ritual de Revisión Semanal
+Cada lunes (o al inicio de la semana operativa), el operador debe:
+1. **Generar Scorecard**: Ejecutar `./bin/bitnin-ctl weekly-scorecard`.
+2. **Revisar Incidentes**: Clasificar las alertas de la semana (Infra, Feed, Drift).
+3. **Emitir Veredicto**: Registrar si el sistema está `STABLE` o requiere investigación.
+
+### 3. Promotion Gate (Hacia Pilot)
+La promoción a fase Pilot requiere 4 semanas consecutivas de "Salud Verde" y cumplimiento total de KPIs operativos.
+
+---
+
 ### Internal State
 The internal state is kept in `operational_state.json` (ignored by git) to ensure no runtime noise contaminates the repository.
 
