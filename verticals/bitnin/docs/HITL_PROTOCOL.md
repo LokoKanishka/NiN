@@ -6,24 +6,25 @@ Este documento describe cómo interactuar con la bandeja de revisión humana de 
 La bandeja se encuentra en: `verticals/bitnin/runtime/observability/history/hitl_inbox.md`.
 Es una tabla priorizada de eventos que el sistema considera "dignos de inspección".
 
-## 2. Tipos de Prioridad
-- **🔴 HIGH**: Eventos críticos.
-  - Señales de alta confianza (`composite_state: HIGH`).
-  - Divergencias causales críticas detectadas por el analista.
-  - **Acción sugerida**: Revisar el scorecard completo inmediatamente.
-- **🟡 MEDIUM**: Eventos de interés analítico o degradación técnica.
-  - Caída brusca en cobertura narrativa (`narrative_crash`).
-  - Patrón de abstención inusual.
-  - **Acción sugerida**: Verificar la salud de los feeds de datos (GDELT/Qdrant).
-- **🟢 LOW / Routine**: Ejecuciones nominales.
-  - Comportamiento esperado dentro de los márgenes de salud.
-  - **Acción sugerida**: Revisión opcional o de muestreo.
+## 2. Flujo de Trabajo del Operador (Workflow)
+El sistema utiliza estados para gestionar el ciclo de vida de cada alerta:
+- **PENDING**: Ítem nuevo. Requiere atención.
+- **REVIEWED**: El humano ha inspeccionado el ítem y validado la señal.
+- **DISMISSED**: El ítem se considera ruido o no relevante (ej. degradación técnica conocida).
+- **ESCALATED**: El ítem requiere una investigación profunda o ajuste del sistema.
 
-## 3. Flujo de Trabajo del Operador
-1. **Abrir Inbox**: Revisar las entradas con estado `PENDING`.
-2. **Inspección**: Seguir el enlace al `scorecard` correspondiente para entender el contexto analítico.
-3. **Validación**: Comparar la señal de BitNin con la realidad del mercado (en modo observación).
-4. **Actualización de Estado**: Una vez revisado, el operador puede cambiar manualmente el estado en el `.md` a `REVIEWED`.
+### ¿Cómo actualizar estados?
+Actualmente, el operador puede editar manualmente el archivo `hitl_inbox.md`, cambiando la columna `Status` y agregando una nota en `Decision/Note`. El sistema respeta los cambios realizados manualmente.
+
+## 3. Resumen Ejecutivo (`hitl_digest.md`)
+Cada ejecución exitosa genera o actualiza el `hitl_digest.md`. Este archivo es la primera parada para el supervisor:
+- **Resumen de Salud**: Estado de infra y métricas críticas.
+- **Alertas Rojas**: Enlace directo a los ítems `HIGH PRIORITY`.
+- **Patrones**: Detecta anomalías acumuladas.
+
+## 4. Deduplicación y Aging
+- **Agrupación**: Si el sistema detecta alertas repetitivas de la misma tipología, el digest las presentará de forma consolidada para evitar la fatiga de alertas.
+- **Limpieza**: Ítems en estado `PENDING` con más de 7 días se marcarán visualmente como obsoletos o se archivarán automáticamente.
 
 ## 4. Restricciones Críticas
 - **HITL no es trading**: Este protocolo es para **auditoría analítica**.

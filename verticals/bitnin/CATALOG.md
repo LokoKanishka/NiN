@@ -22,7 +22,8 @@ Este catalogo define workflows esperados de la vertical BitNin. Ninguno existe t
 | `bitnin_observability_scorecard` | Generar alertas y scorecard longitudinal de métricas de calidad y degradación. | `batch_report` JSON | `scorecard` Markdown y Alertas de stdout | `active` | validador en `bitnin-observability` |
 | `bitnin_run_shadow_pipeline` | Orquestar barrido histórico continuo y evaluar scorecards de estabilidad. | `start_date`, `end_date`, `symbol` | Batch report, Scorecard y Múltiples ejecuciones puras shadow | `active` | script `run_shadow_pipeline.py` |
 | `bitnin_supervisor` | Orquestador resiliente con persistencia host-level (linger) y chequeo de freshness. | `operational_state`, `health_snapshot` | Snapshot humano, alertas de staleness, logs unificados | `active` | supervisor en `bitnin-control` (Phase 16 verified) |
-| `bitnin_hitl_manager` | Analizador de scorecards para priorización humana y bandeja de entrada. | `batch_report` JSON | `hitl_inbox` Markdown, alertas de prioridad | `active` | componente de revisión en `bitnin-hitl` |
+| `bitnin_hitl_manager` | Analizador de scorecards para priorización humana y bandeja de entrada. | `batch_report` JSON | `hitl_inbox` Markdown, `hitl_digest` Markdown, alertas de prioridad | `active` | componente de revisión en `bitnin-hitl` |
+| `hitl_state.json` | Persistencia de decisiones humanas y trazabilidad de estados. | JSON de estados | N/A | `active` | runtime/observability/history |
 | `RUNBOOK.md` | Guía operacional para humanos. | N/A | N/A | `active` | Documento de referencia |
 ## Notas de gobierno
 

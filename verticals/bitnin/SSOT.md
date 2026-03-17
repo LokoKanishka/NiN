@@ -305,15 +305,15 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 24. Nota de Fase 19
+## 25. Nota de Fase 20
 
-Fase 19 introduce la **capa HITL (Human-in-the-Loop)**, transformando la observabilidad pasiva en una herramienta de supervisión humana activa.
+Fase 20 consolida la **capa HITL** transformándola de una simple bandeja de entrada en un **workflow humano completo** y auditable.
 
-Hitos de la capacidad HITL:
-- **Bandeja de Entrada Priorizada**: Se implementó `hitl_inbox.md`, un punto central que destaca corridas con señales de alta confianza, drift fuerte o degradación narrativa.
-- **Gestión de Estados**: Las ejecuciones en el Inbox se rastrean como `PENDING`, permitiendo al operador actuar sobre los hallazgos sin navegar logs técnicos.
-- **Protocolo HITL**: Se formalizó una guía de interpretación (`HITL_PROTOCOL.md`) que vincula el juicio humano con la evidencia de los scorecards.
-- **Integración Nativa**: El `supervisor.py` ahora orquesta automáticamente la clasificación de cada ventana procesada, manteniendo el ciclo operativo 100% autónomo pero útil para el humano.
+Hitos del flujo de trabajo HITL:
+- **Gestión de Estados**: Soporte nativo para estados `PENDING`, `REVIEWED`, `DISMISSED` y `ESCALATED`, permitiendo el cierre de ciclo de cada alerta.
+- **Trazabilidad Humana**: Las decisiones y notas del operador se persisten fuera de Git, asegurando que el criterio humano quede registrado como parte del historial operativo.
+- **Digest Ejecutivo**: Generación automática de `hitl_digest.md`, proporcionando una vista de 30,000 pies sobre la salud del sistema y hallazgos críticos de cada ventana.
+- **Deduplicación**: El sistema agrupa inteligentemente eventos repetitivos, reduciendo la fatiga de alertas y permitiendo el enfoque en anomalías únicas.
 
 ## 18. Nota de Fase 10
 
