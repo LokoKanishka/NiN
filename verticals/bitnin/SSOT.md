@@ -305,16 +305,15 @@ Principios operativos:
 - **Modo Append**: El pipeline está diseñado para crecer longitudinalmente, integrando nuevas ventanas de sombra en un registro temporal continuo.
 - **Alertas de Salud de Feed**: Se formaliza la auditoría del dataset narrativo y la memoria activa, distinguiendo entre "ausencia por contexto" y "ausencia por falla técnica".
 
-## 20. Nota de Fase 13
+## 21. Nota de Fase 15
 
-Fase 13 establece la operación sostenida de BitNin mediante un supervisor operativo y protocolos de reanudación.
+Fase 15 marca la transición de "capacidad operativa" a "operación autónoma verificada" en el host.
 
-Principios operativos:
-- **Supervisor de Ventanas**: BitNin corre exclusivamente bajo el control de `supervisor.py`, que gestiona la secuencialidad y evita duplicar días procesados.
-- **Estado Persistente**: El archivo `operational_state.json` es la autoridad única sobre el progreso actual del sistema, última ventana sana y alarmas de salud abiertas.
-- **Protocolo de Resumabilidad**: En caso de fallo o interrupción, el sistema reanuda automáticamente desde el último punto de éxito validado.
-- **Blindaje de Concurrencia**: Se utiliza un lockfile de nivel de sistema para garantizar que nunca existan dos instancias de BitNin procesando la misma jerarquía de archivos.
-- **Runbook Operativo**: Se introduce `RUNBOOK.md` como guía primaria para el manejo humano de incidentes, degradaciones y alertas de drift.
+Resultados de la validación:
+- **Scheduler Activo**: El sistema corre vía `systemd --user` (timer), desacoplado de sesiones manuales.
+- **Logs Unificados**: Toda la trazabilidad operativa (supervisor y pipeline) fluye hacia el `journalctl` del host.
+- **Autonomía Probada**: Se verificó el disparo por timer, la persistencia de estado post-reinicio y el bloqueo de concurrencia real.
+- **Clean Repo Sostenido**: La operación real no genera ruidos en git, respetando la separación estricta entre código y estado mutable.
 
 ## 18. Nota de Fase 10
 

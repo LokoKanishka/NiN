@@ -4,7 +4,6 @@ After=network.target
 
 [Service]
 Type=oneshot
-User=lucy-ubuntu
 WorkingDirectory=/home/lucy-ubuntu/Escritorio/NIN
 Environment=PYTHONPATH=/home/lucy-ubuntu/Escritorio/NIN
 ExecStart=/home/lucy-ubuntu/Escritorio/NIN/.venv/bin/python3 verticals/bitnin/services/bitnin_observability/supervisor.py --days 1

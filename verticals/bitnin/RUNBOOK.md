@@ -6,14 +6,32 @@ This document describes the operations for BitNin in `shadow + dry_run` mode. Bi
 ## 2. Daily Operations
 The system is designed to run periodically via the supervisor.
 
+### Installation (First Time setup)
+To register BitNin as a background service on this host:
+```bash
+# 1. Create systemd user directory if it doesn't exist
+mkdir -p ~/.config/systemd/user/
+
+# 2. Copy unit files from the repository
+cp verticals/bitnin/services/bitnin_observability/systemd/bitnin-shadow.service ~/.config/systemd/user/
+cp verticals/bitnin/services/bitnin_observability/systemd/bitnin-shadow.timer ~/.config/systemd/user/
+
+# 3. Reload and enable
+systemctl --user daemon-reload
+systemctl --user enable --now bitnin-shadow.timer
+```
+
 ### Starting the Supervisor (Automated)
 BitNin runs automatically via systemd. To manage the service:
 ```bash
-# View status
+# View if the timer is scheduled
+systemctl --user list-timers bitnin-shadow.timer
+
+# View service/timer status
 systemctl --user status bitnin-shadow.timer
 systemctl --user status bitnin-shadow.service
 
-# View real-time logs
+# View real-time logs (very useful for diagnostics)
 journalctl --user -u bitnin-shadow.service -f
 
 # Force immediate execution
