@@ -181,6 +181,71 @@ Currently **{pending_count}** pending cases. *(See hitl_backlog.md)*
     (week_dir / "pilot_readiness_week_note.md").write_text(note_content)
     print(f"[OK] Weekly review packet generated successfully.")
 
+def run_week_close(args):
+    ledger_path = HISTORY_DIR / "weekly_review_state.json"
+    view_path = HISTORY_DIR / "weekly_review_history.md"
+    
+    if ledger_path.exists():
+        ledger = json.loads(ledger_path.read_text())
+    else:
+        ledger = {"weeks": []}
+        
+    week_id = args.week
+    existing = next((w for w in ledger["weeks"] if w["week_id"] == week_id), None)
+    
+    if existing and not args.force:
+        print(f"[ERROR] La semana {week_id} ya fue cerrada el {existing['closed_at']}.")
+        print("Use --force para sobrescribir la decisión (dejará traza de la corrección).")
+        return
+        
+    week_dir = HISTORY_DIR / "weekly_reviews" / week_id
+    if not week_dir.exists():
+        print(f"[WARNING] No hay paquete generado para {week_id} (`week-review` no se corrió).")
+        
+    manager = HITLManager(str(OBS_DIR))
+    state = manager.load_state()
+    pending_count = len([c for c in state.get("cases", []) if c["status"] == "PENDING"])
+    
+    now_iso = datetime.now(timezone.utc).isoformat()
+    entry = {
+        "week_id": week_id,
+        "closed_at": now_iso,
+        "decision": args.decision,
+        "note": args.note,
+        "hitl_backlog_at_close": pending_count,
+        "incidents_recorded": "See packet",
+        "packet_ref": str(week_dir.relative_to(ROOT_DIR)) if week_dir.exists() else "None",
+        "is_correction": existing is not None
+    }
+    
+    if existing:
+        ledger["weeks"].remove(existing)
+        entry["original_decision"] = existing["decision"]
+        
+    ledger["weeks"].append(entry)
+    ledger["weeks"].sort(key=lambda x: x["week_id"])
+    
+    ledger_path.write_text(json.dumps(ledger, indent=2))
+    
+    md_lines = [
+        "# 🏛️ BitNin Weekly Review Ledger",
+        "",
+        "Historial canónico de decisiones semanales de gobernanza (Fase 29R).",
+        "",
+        "| Semana | Decisión | Backlog | Fecha Cierre | Nota Operador | Ref |",
+        "|--------|----------|---------|--------------|---------------|-----|"
+    ]
+    for w in ledger["weeks"]:
+        dec_str = "🟢 stable" if w['decision'] == 'stable' else ("🟡 watch" if w['decision'] == 'watch' else "🔴 investigate")
+        corr_mark = " *(Corrección)*" if w.get("is_correction") else ""
+        md_lines.append(f"| {w['week_id']} | {dec_str} | {w['hitl_backlog_at_close']} | {w['closed_at'][:19]} | {w['note']}{corr_mark} | `{w['packet_ref']}` |")
+        
+    view_path.write_text("\n".join(md_lines) + "\n")
+    
+    print(f"\n[OK] Semana {week_id} cerrada con decisión: {args.decision.upper()}")
+    print(f"     Ledger guardado en: {ledger_path.relative_to(ROOT_DIR)}")
+    print(f"     Vista actualizada:  {view_path.relative_to(ROOT_DIR)}\n")
+
 def main():
     parser = argparse.ArgumentParser(description="BitNin Unified Command Console")
     subparsers = parser.add_subparsers(dest="command", help="Comandos Principales")
@@ -190,6 +255,12 @@ def main():
     subparsers.add_parser("doctor", help="Diagnóstico técnico de la instalación")
     subparsers.add_parser("weekly-scorecard", help="Consolidado de gobernanza semanal")
     subparsers.add_parser("week-review", help="Generar el paquete real de revisión semanal S1 (Fase 29R)")
+
+    close_p = subparsers.add_parser("week-close", help="Cerrar formalmente la semana y asentar decisión")
+    close_p.add_argument("--week", required=True, help="Semana a cerrar (ej. 2026-W12)")
+    close_p.add_argument("--decision", required=True, choices=["stable", "watch", "investigate"], help="Decisión humana final")
+    close_p.add_argument("--note", required=True, help="Nota resumen del operador")
+    close_p.add_argument("--force", action="store_true", help="Sobrescribir un cierre previo")
 
     case_parser = subparsers.add_parser("cases", help="Gestión de expedientes HITL")
     case_subparsers = case_parser.add_subparsers(dest="case_command")
@@ -217,6 +288,10 @@ def main():
         
     if args.command == "week-review":
         run_week_review()
+        return
+
+    if args.command == "week-close":
+        run_week_close(args)
         return
 
     manager = HITLManager(str(OBS_DIR))

@@ -108,7 +108,12 @@ Cada lunes (o al inicio de la semana operativa), el operador debe capturar el pa
 1. **Generar Paquete**: Ejecutar `./bin/bitnin-ctl week-review`. Este comando generará una carpeta en `verticals/bitnin/runtime/observability/history/weekly_reviews/YYYY-WW/` con toda la evidencia real.
 2. **Revisar Evidencias**: Leer `weekly_scorecard.md`, el número real de incidentes y el backlog.
 3. **Completar Nota**: Editar `pilot_readiness_week_note.md` generado en el paquete y marcar el veredicto real (`stable`, `watch`, o `investigate`). Añadir observaciones cualitativas, **pero nunca inventar métricas**.
-4. **IMPORTANTE**: Este ritual archiva el estado actual, pero **no** habilita Pilot automáticamente. Se requieren 4 paquetes exitosos consecutivos.
+4. **Cerrar la Semana**: Asentar la decisión formalmente en el ledger inmutable:
+   ```bash
+   ./bin/bitnin-ctl week-close --week YYYY-WW --decision stable --note "Todo normal, backlog en cero."
+   ```
+   *Esto generará un registro en `weekly_review_state.json` y actualizará `weekly_review_history.md`.*
+5. **IMPORTANTE**: Este ritual archiva el estado actual y asienta el ledger, pero **no** habilita Pilot automáticamente. Se requieren 4 cierres exitosos (decisión `stable`) consecutivos.
 
 ### 3. Promotion Gate (Hacia Pilot)
 La promoción a fase Pilot requiere 4 semanas consecutivas de "Salud Verde" y cumplimiento total de KPIs operativos.
