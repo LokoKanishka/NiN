@@ -68,8 +68,14 @@ Para asegurar una bitácora profesional y auditable, el operador debe ejecutar e
 A partir de la Fase 25, BitNin cuenta con herramientas de infraestructura profesional.
 
 ### 1. Diagnóstico de Salud Técnica (Doctor)
-Si algo no parece funcionar bien, corra el diagnóstico:
+Si algo no parece funcionar bien, corra el diagnóstico. Para asegurar una invocación segura (especialmente remota o automatizada):
+- Los chequeos **deben correrse desde la raíz `NIN/`**.
+- **No usar `bash -lc`** si su `~/.profile` o equivalente carga scripts interactivos (como conda init), pues causará bloqueos.
+- Ejecute directamente:
+
 ```bash
+cd /home/lucy-ubuntu/Escritorio/NIN
+./bin/bitnin-ctl status
 ./bin/bitnin-ctl doctor
 ```
 
