@@ -64,6 +64,22 @@ def main():
         run_id = f"sh_{current_dt.strftime('%Y%m%d')}"
         logger.info(f"\n---> Running tick for day {current_dt.strftime('%Y-%m-%d')} (as_of: {as_of})")
         
+        # PRE-STEP: Refresh narrative data before tick
+        logger.info("PRE-STEP: Refreshing narrative dataset from GDELT...")
+        import subprocess
+        narrative_version = ctx.narrative_path.stem.split("__")[-1]
+        cmd_build = [
+            sys.executable, "-m", "verticals.bitnin.services.bitnin_narrative_builder.builder",
+            "gdelt", "--dataset-version", narrative_version,
+            "--mode", "full", "--query", "bitcoin", "--timespan", "1d", "--maxrecords", "50"
+        ]
+        try:
+            cmd_cwd = str(Path(__file__).resolve().parents[2])
+            subprocess.run(cmd_build, check=True, cwd=cmd_cwd)
+            logger.info("Narrative dataset refreshed successfully.")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to refresh narrative dataset: {e}")
+            
         try:
             res = runner.run_once(
                 symbol="BTCUSDT",
