@@ -18,7 +18,7 @@ Este documento servirá para consolidar la evidencia recolectada durante la vent
 | Drift Events | | | | | < 10% |
 
 ## 3. Bitácora de Incidentes Reales
-[Listado cronológico de incidentes clasificados según taxonomía]
+- **2026-03-23** `[FEED]`: Pérdida de frescura en dataset narrativo por omisión en orquestador. Resuelto. Ventana 29R se mantiene íntegra.
 
 ## 4. Evaluación del Gate a Pilot
 - **Criterio 1 (Burndown)**: PENDING

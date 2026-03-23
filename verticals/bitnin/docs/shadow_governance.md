@@ -46,5 +46,8 @@ Para que BitNin sea considerado para la fase **Pilot** (ejecución simulada con 
 3. Validar estado de la señal compuesta contra KPIs analíticos.
 4. Emitir veredicto semanal: `STABLE`, `WATCH` o `INVESTIGATE`.
 
+## 5. Historial de Incidentes
+- **2026-03-23**: Incidente `FEED` resuelto (Narrative Pipeline Recovery). Ver acta para más detalles.
+
 ---
 *Nota: La ejecución de este marco comenzó formalmente el 2026-03-17. Ver: [Acta de Inicio: Ventana Real de Gobernanza](file:///home/lucy-ubuntu/Escritorio/NIN/verticals/bitnin/docs/real_governance_window_start.md).*
