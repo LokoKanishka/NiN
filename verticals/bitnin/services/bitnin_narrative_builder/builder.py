@@ -76,13 +76,30 @@ class NarrativeDatasetBuilder:
         normalized_path = self._normalized_path("gdelt_doc_artlist", query_slug, dataset_version)
         existing_events = self._read_jsonl(normalized_path) if mode == "incremental" else []
 
-        raw_result = GDELTDocSource().fetch_articles(
-            query=query,
-            maxrecords=maxrecords,
-            timespan=timespan,
-            start=start,
-            end=end,
-        )
+        ingestion_error = None
+        try:
+            raw_result = GDELTDocSource().fetch_articles(
+                query=query,
+                maxrecords=maxrecords,
+                timespan=timespan,
+                start=start,
+                end=end,
+            )
+        except Exception as e:
+            ingestion_error = str(e)
+            self._write_run_log(
+                {
+                    "action": "build_gdelt",
+                    "mode": mode,
+                    "dataset_version": dataset_version,
+                    "query": query,
+                    "query_slug": query_slug,
+                    "ingestion_error": ingestion_error,
+                    "status": "FAILED"
+                }
+            )
+            raise
+
         raw_path = self._write_raw(raw_result, query_slug=query_slug)
 
         fresh_events = normalize_gdelt_articles(raw_result, dataset_version=dataset_version)

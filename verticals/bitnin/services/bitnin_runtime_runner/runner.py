@@ -88,7 +88,8 @@ class BitNinRuntimeRunner:
                 "composite_states": {"HIGH": 0, "DIVERGENT": 0, "LOW": 0},
                 "causal_typologies": {},
                 "average_narrative_coverage": 0.0,
-                "runs_with_active_memory": 0
+                "runs_with_active_memory": 0,
+                "ingestion_failures": 0
             },
             "detailed_runs": []
         }
@@ -161,6 +162,9 @@ class BitNinRuntimeRunner:
             stats["metrics_summary"]["average_narrative_coverage"] += res.get("narrative_coverage_score", 0.0)
             if res.get("active_memory_count", 0) > 0:
                 stats["metrics_summary"]["runs_with_active_memory"] += 1
+            
+            if res.get("ingestion_status") == "failed":
+                stats["metrics_summary"]["ingestion_failures"] += 1
 
             stats["statuses"][final_status] = stats["statuses"].get(final_status, 0) + 1
             stats["detailed_runs"].append({
@@ -183,7 +187,7 @@ class BitNinRuntimeRunner:
         report_path.write_text(json.dumps(stats, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         return str(report_path)
 
-    def run_once(self, symbol: str = "BTCUSDT", interval: str = "1d", top_k: int = 5, auto_approve: bool = False, run_id: str | None = None, as_of: str | None = None) -> Dict[str, Any]:
+    def run_once(self, symbol: str = "BTCUSDT", interval: str = "1d", top_k: int = 5, auto_approve: bool = False, run_id: str | None = None, as_of: str | None = None, ingestion_status: str = "ok") -> Dict[str, Any]:
         """Runs a single iteration of the pipeline with instrumentation."""
         import time
         start_time = time.time()
@@ -282,4 +286,5 @@ class BitNinRuntimeRunner:
             "composite_signal": analysis_res.get("composite_signal", {}),
             "narrative_coverage_score": analysis_res.get("narrative_coverage_score", 0.0),
             "active_memory_count": len(analysis_res.get("active_memory", [])),
+            "ingestion_status": ingestion_status
         }

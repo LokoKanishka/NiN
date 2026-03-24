@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import time
+import sys
 import urllib.request
 import urllib.parse
 from dataclasses import dataclass
@@ -11,6 +12,9 @@ from typing import Any
 
 GDELT_DOC_API_URL = "https://api.gdeltproject.org/api/v2/doc/doc"
 GDELT_MIN_INTERVAL_SECONDS = 5.0
+
+from pathlib import Path
+BITNIN_ROOT = Path(__file__).resolve().parents[2] # verticals/bitnin/
 
 
 def utc_now_iso() -> str:
@@ -41,10 +45,12 @@ class RawNarrativeFetchResult:
 
 class GDELTDocSource:
     _last_request_at: float = 0.0
+    _sync_file = BITNIN_ROOT / "runtime" / ".gdelt_last_request"
 
-    def __init__(self, timeout: int = 30, retries: int = 3):
+    def __init__(self, timeout: int = 30, retries: int = 5):
         self.timeout = timeout
         self.retries = retries
+        self._sync_file.parent.mkdir(parents=True, exist_ok=True)
 
     def fetch_articles(
         self,
@@ -73,6 +79,7 @@ class GDELTDocSource:
             params["timespan"] = timespan
 
         last_error = None
+        import random
         for attempt in range(self.retries):
             self._respect_rate_limit()
             query_string = urllib.parse.urlencode(params)
@@ -81,19 +88,24 @@ class GDELTDocSource:
             try:
                 req = urllib.request.Request(url)
                 with urllib.request.urlopen(req, timeout=self.timeout) as response:
-                    self.__class__._last_request_at = time.monotonic()
+                    self._update_last_request()
                     payload = self._parse_payload(response)
             except urllib.error.HTTPError as e:
-                self.__class__._last_request_at = time.monotonic()
+                self._update_last_request()
                 if e.code == 429:
-                    last_error = RuntimeError(e.read().decode('utf-8').strip())
-                    time.sleep(GDELT_MIN_INTERVAL_SECONDS * (attempt + 1))
+                    error_msg = e.read().decode('utf-8').strip()
+                    last_error = RuntimeError(f"GDELT 429: {error_msg}")
+                    # Exponential backoff: 5, 10, 20, 40, 80... with jitter
+                    delay = (GDELT_MIN_INTERVAL_SECONDS * (2 ** attempt)) + (random.random() * 2)
+                    print(f"DEBUG: GDELT Rate Limit hit. Retrying in {delay:.2f}s (Attempt {attempt+1}/{self.retries})", file=sys.stderr)
+                    time.sleep(delay)
                     continue
                 raise
-            except urllib.error.URLError as e:
-                # This handles network errors, timeout errors, etc.
-                last_error = RuntimeError(f"Network or URL error: {e}")
-                time.sleep(GDELT_MIN_INTERVAL_SECONDS * (attempt + 1)) # Wait before retrying
+            except (urllib.error.URLError, TimeoutError) as e:
+                last_error = RuntimeError(f"Network error: {e}")
+                delay = (GDELT_MIN_INTERVAL_SECONDS * (attempt + 1)) + (random.random() * 2)
+                print(f"DEBUG: GDELT Network issue. Retrying in {delay:.2f}s (Attempt {attempt+1}/{self.retries})", file=sys.stderr)
+                time.sleep(delay)
                 continue
 
             if "articles" not in payload:
@@ -108,13 +120,35 @@ class GDELTDocSource:
                 payload=payload,
             )
 
-        raise RuntimeError(f"GDELT rate limit or fetch error: {last_error}")
+        raise RuntimeError(f"GDELT persistent failure after {self.retries} attempts. Last error: {last_error}")
 
     def _respect_rate_limit(self) -> None:
-        elapsed = time.monotonic() - self.__class__._last_request_at
+        """Process-safe rate limiting using a shared timestamp file."""
+        now = time.time()
+        last_req = 0.0
+        
+        if self._sync_file.exists():
+            try:
+                last_req = float(self._sync_file.read_text().strip())
+            except (ValueError, OSError):
+                pass
+        
+        # Also check class attribute for same-process threads if any
+        last_req = max(last_req, self.__class__._last_request_at)
+        
+        elapsed = now - last_req
         wait_seconds = GDELT_MIN_INTERVAL_SECONDS - elapsed
         if wait_seconds > 0:
             time.sleep(wait_seconds)
+
+    def _update_last_request(self) -> None:
+        """Update both memory and file-based timestamps."""
+        now = time.time()
+        self.__class__._last_request_at = now
+        try:
+            self._sync_file.write_text(str(now))
+        except OSError:
+            pass
 
     def _parse_payload(self, response: Any) -> dict[str, Any]:
         content_type = response.headers.get("Content-Type", "")

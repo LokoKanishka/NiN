@@ -76,6 +76,11 @@ class ScorecardGenerator:
 
         # 1. Narrative collapse
         avg_narrative = metrics.get("average_narrative_coverage", 0.0)
+        ingestion_fails = metrics.get("ingestion_failures", 0)
+        
+        if ingestion_fails > 0:
+            alerts.append(f"🟠 **INGESTION**: {ingestion_fails} runs affected by GDELT fetch failures.")
+        
         if avg_narrative < 0.2:
             alerts.append(f"🔴 **DEGRADATION**: Average narrative coverage critically low ({avg_narrative:.2f}).")
 
@@ -173,6 +178,7 @@ class ScorecardGenerator:
         
         md += f"- **Average Narrative Coverage:** `{avg_narr:.2f}`\n"
         md += f"- **Runs with Active Memory:** `{runs_mem}` (`{mem_pct:.1f}%`)\n"
+        md += f"- **GDELT Ingestion Failures:** `{metrics.get('ingestion_failures', 0)}`\n"
         
         if history:
             md += "\n## 5. Temporal Trends (Last Batches)\n"

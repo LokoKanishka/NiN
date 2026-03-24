@@ -73,12 +73,15 @@ def main():
             "gdelt", "--dataset-version", narrative_version,
             "--mode", "full", "--query", "bitcoin", "--timespan", "1d", "--maxrecords", "50"
         ]
+        ingestion_st = "ok"
         try:
             cmd_cwd = str(Path(__file__).resolve().parents[2])
             subprocess.run(cmd_build, check=True, cwd=cmd_cwd)
             logger.info("Narrative dataset refreshed successfully.")
         except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to refresh narrative dataset: {e}")
+            logger.warning(" [33m⚠️ WARNING: Narrative ingestion failed. Continuing with DEGRADED narrative coverage. [0m")
+            logger.error(f"   Reason: GDELT Ingestion Error (see builder logs for details). Error: {e}")
+            ingestion_st = "failed"
             
         try:
             res = runner.run_once(
@@ -87,7 +90,8 @@ def main():
                 top_k=5,
                 auto_approve=False,
                 run_id=run_id,
-                as_of=as_of
+                as_of=as_of,
+                ingestion_status=ingestion_st
             )
             results.append(res)
             logger.info(f"     Status: {res['analyst_status']} | Action: {res['analyst_action']} | CompState: {res['composite_signal'].get('state', 'UNKNOWN')}")
