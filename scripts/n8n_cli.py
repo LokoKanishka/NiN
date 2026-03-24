@@ -26,7 +26,7 @@ import urllib.error
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(SCRIPT_DIR)
 ENV_FILE = os.path.join(REPO_DIR, ".env")
-CONTAINER = "n8n-lucy"
+CONTAINER = "N8N-NiN-uso-exclusivo-del-proyecto-nin"
 TIMEOUT = 15  # seconds per request
 
 
