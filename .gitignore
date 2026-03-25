@@ -16,7 +16,7 @@ download_model.py
 .DS_Store
 __pycache__/
 *.pyc
-.env
+.venv/
 # NiN Runtime & State
 runtime/
 *.db

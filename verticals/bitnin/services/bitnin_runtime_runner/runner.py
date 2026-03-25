@@ -58,7 +58,8 @@ class BitNinRuntimeRunner:
         self.health = HealthChecker(
             n8n_url="http://localhost:5688",
             ollama_url="http://localhost:11434",
-            qdrant_url="http://localhost:6333"
+            qdrant_url="http://localhost:6335",
+            searxng_url="http://localhost:8080"
         )
 
     def generate_batch_report(self, batch_id: str, results: list[Dict[str, Any]]) -> str:
@@ -82,7 +83,8 @@ class BitNinRuntimeRunner:
             "health_summary": {
                 "n8n": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0},
                 "ollama": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0},
-                "qdrant": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0}
+                "qdrant": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0},
+                "searxng": {"UP": 0, "DOWN": 0, "UNREACHABLE_BUT_NON_BLOCKING": 0}
             },
             "metrics_summary": {
                 "composite_states": {"HIGH": 0, "DIVERGENT": 0, "LOW": 0},
@@ -211,8 +213,8 @@ class BitNinRuntimeRunner:
         logger.info(f"Starting BitNin Operational Cycle: {replay_id}")
 
         # 1. Health Check
-        # analyst needs ollama and qdrant
-        required_deps = ["ollama", "qdrant"]
+        # analyst needs ollama, qdrant and searxng
+        required_deps = ["ollama", "qdrant", "searxng"]
         health_status = self.health.run_all(required=required_deps)
         log_point("health_check", health_status)
         

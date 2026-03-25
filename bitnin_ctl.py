@@ -11,11 +11,13 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent.resolve()
 sys.path.append(str(ROOT_DIR))
 
+from verticals.bitnin.services.bitnin_observability.health import HealthChecker
 try:
     from verticals.bitnin.services.bitnin_hitl.hitl_manager import HITLManager
 except ImportError:
-    print("[CRITICAL] Could not import HITLManager.")
-    sys.exit(1)
+    # Fallback for when running from root with PYTHONPATH not set 
+    sys.path.append(str(ROOT_DIR / "verticals/bitnin/services"))
+    from bitnin_hitl.hitl_manager import HITLManager
 
 # Configuration
 OBS_DIR = ROOT_DIR / "verticals/bitnin/runtime/observability"
@@ -42,19 +44,22 @@ def get_scheduler_status():
         return {"error": str(e)}
 
 def color_status(status):
-    if status == "HEALTHY": return f"\033[92m{status}\033[0m"
+    if status in ["HEALTHY", "UP"]: return f"\033[92m{status}\033[0m"
     if status == "DEGRADED": return f"\033[93m{status}\033[0m"
-    if status == "STALE": return f"\033[91m{status}\033[0m"
+    if status in ["STALE", "UNHEALTHY", "DOWN"]: return f"\033[91m{status}\033[0m"
     return status
 
 def run_doctor():
     print("\n=== 🧑‍⚕️ BITNIN DOCTOR (Diagnostic Report) ===")
+    
+    print("\n--- [ LAYER 1: Local Infrastructure ] ---")
     def check(label, condition, fix=None):
         status = "✅ OK" if condition else "❌ FAIL"
         color = "\033[92m" if condition else "\033[91m"
         print(f"[{color}{status}\033[0m] {label}")
         if not condition and fix:
             print(f"      💡 Fix: {fix}")
+            
     check("Project Root Access", ROOT_DIR.exists())
     check("Runtime Directory Structure", OBS_DIR.exists(), "run ./scripts/bootstrap.sh")
     check("HITL State File present", STATE_FILE.exists())
@@ -63,6 +68,24 @@ def run_doctor():
     sched = get_scheduler_status()
     if "error" not in sched:
         check("BitNin Timer Active", sched["is_timer_active"])
+    
+    print("\n--- [ LAYER 2: Service Stack Health ] ---")
+    checker = HealthChecker(
+        n8n_url="http://localhost:5688",
+        ollama_url="http://localhost:11434",
+        qdrant_url="http://localhost:6335",
+        searxng_url="http://localhost:8080"
+    )
+    # n8n is optional for some local CLI runs, others are required
+    results = checker.run_all(required=["ollama", "qdrant", "searxng"])
+    for r in results["checks"]:
+        status = r["status"]
+        color = "\033[92m" if status == "UP" else "\033[91m"
+        label = r["service"].upper()
+        req_mark = "*" if r["service"] in results["required"] else ""
+        print(f"[{color}{status:<4}\033[0m] {label:<8} {req_mark} ({r['url']})")
+    
+    print("\n* (*) Required for Full Analyst shadow cycle.")
     print("==========================================\n")
 
 def run_weekly_scorecard():
@@ -299,16 +322,44 @@ def main():
 
     if args.command == "status":
         print("\n=== 🎯 BITNIN STATUS 360° ===")
+        
+        # 1. Pipeline Persistence Status
+        p_status = "UNKNOWN"
         if HEALTH_FILE.exists():
-            health = json.loads(HEALTH_FILE.read_text())
-            print(f"System Health: {color_status(health.get('status'))}")
+            health_json = json.loads(HEALTH_FILE.read_text())
+            p_status = health_json.get('status', 'UNKNOWN')
+        print(f"Pipeline:      {color_status(p_status)}")
+        
+        # 2. Live Services Status
+        checker = HealthChecker(
+            n8n_url="http://localhost:5688",
+            ollama_url="http://localhost:11434",
+            qdrant_url="http://localhost:6335",
+            searxng_url="http://localhost:8080"
+        )
+        live_health = checker.run_all(required=["ollama", "qdrant", "searxng"])
+        s_status = live_health["overall"].replace("UP", "HEALTHY").replace("DOWN", "UNHEALTHY")
+        print(f"Services:      {color_status(s_status)}")
+        
+        # 3. Scheduler & Backlog
         sched = get_scheduler_status()
         if "error" not in sched:
             icon = "🟢" if sched["is_timer_active"] else "🔴"
             print(f"Scheduler:     {icon} {'Active' if sched['is_timer_active'] else 'Inactive'}")
+        
         cases = state.get("cases", [])
         pending = [c for c in cases if c["status"] == "PENDING"]
         print(f"HITL Backlog:  \033[96m{len(pending)} Pendientes\033[0m")
+        
+        # Final Verdict
+        if p_status == "HEALTHY" and s_status == "HEALTHY":
+            verdict = "HEALTHY"
+        elif "STALE" in p_status or s_status == "UNHEALTHY":
+            verdict = "UNHEALTHY"
+        else:
+            verdict = "DEGRADED"
+            
+        print(f"--- Verdict:   {color_status(verdict)} ---")
         print("==============================\n")
 
     elif args.command == "briefing":

@@ -105,8 +105,14 @@ def main():
     logger.info("\n=============================================")
     logger.info(f"Pipeline finished. Total runs: {len(results)}")
     
-    # Generate Batch Report
+    # Output Scorecard
     if results:
+        # Check if all runs were aborted due to health
+        aborted = [r for r in results if r.get("analyst_action") == "abort"]
+        if len(aborted) == len(results) and len(results) > 0:
+            logger.error("FATAL: All pipeline ticks aborted due to service health failures.")
+            sys.exit(1)
+
         # Save to batches/
         batch_report_path = runner.generate_batch_report(batch_id=batch_id, results=results)
         # Move it to batches folder for better organization

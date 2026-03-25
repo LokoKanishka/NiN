@@ -9,10 +9,11 @@ from typing import Any
 class HealthChecker:
     """Checks health of BitNin dependencies (n8n, Ollama, Qdrant)."""
 
-    def __init__(self, n8n_url: str, ollama_url: str, qdrant_url: str):
+    def __init__(self, n8n_url: str, ollama_url: str, qdrant_url: str, searxng_url: str):
         self.n8n_url = n8n_url
         self.ollama_url = ollama_url
         self.qdrant_url = qdrant_url
+        self.searxng_url = searxng_url
 
     def check_service(self, name: str, url: str, endpoint: str = "") -> dict[str, Any]:
         target_url = f"{url.rstrip('/')}/{endpoint.lstrip('/')}"
@@ -22,18 +23,17 @@ class HealthChecker:
                 status = response.getcode()
                 return {"service": name, "status": "UP", "code": status, "url": target_url}
         except Exception as e:
-            # If root responds but endpoint doesn't, it might be DEGRADED or just wrong endpoint
-            # But here we just want to know if reachable
             return {"service": name, "status": "DOWN", "error": str(e), "url": target_url}
 
     def run_all(self, required: list[str] | None = None) -> dict[str, Any]:
         if required is None:
-            required = ["ollama", "qdrant"] # Default required for BitNin
+            required = ["ollama", "qdrant", "searxng"] # Default required for BitNin
             
         results = [
             self.check_service("n8n", self.n8n_url, endpoint=""),
             self.check_service("ollama", self.ollama_url, endpoint="/api/tags"),
             self.check_service("qdrant", self.qdrant_url, endpoint="/readyz"),
+            self.check_service("searxng", self.searxng_url, endpoint=""),
         ]
         
         # Determine overall state based on requirements
@@ -61,11 +61,11 @@ class HealthChecker:
 
 
 if __name__ == "__main__":
-    # Internal defaults based on SSOT (Unified to 6333)
-    # Internal defaults based on SSOT (Unified to 6333)
+    # Internal defaults based on SSOT (NiN specific: Qdrant 6335, SearXNG 8080)
     checker = HealthChecker(
         n8n_url="http://localhost:5688",
         ollama_url="http://localhost:11434",
-        qdrant_url="http://localhost:6333",
+        qdrant_url="http://localhost:6335",
+        searxng_url="http://localhost:8080",
     )
-    print(json.dumps(checker.run_all(required=["ollama"]), indent=2))
+    print(json.dumps(checker.run_all(required=["ollama", "qdrant", "searxng"]), indent=2))
