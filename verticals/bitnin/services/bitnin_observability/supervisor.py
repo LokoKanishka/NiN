@@ -164,8 +164,22 @@ class BitNinSupervisor:
             
             # Resume logic
             if state.get("last_processed_date"):
-                last_dt = datetime.strptime(state["last_processed_date"], "%Y-%m-%d")
+                last_dt = datetime.strptime(state["last_processed_date"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
                 start_dt = last_dt + timedelta(days=1)
+                
+                # [GUARDRAIL] Prevent future resume cursor
+                now_dt = datetime.now(timezone.utc)
+                if start_dt.date() > now_dt.date():
+                    logger.warning(f"[GUARDRAIL] Future cursor detected: {start_dt.strftime('%Y-%m-%d')}. Real time: {now_dt.strftime('%Y-%m-%d')}.")
+                    # Sanitize: reset to current real time
+                    start_dt = now_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+                    logger.info(f"[GUARDRAIL] Cursor sanitized to real time: {start_dt.strftime('%Y-%m-%d')}")
+                    # Clear stale future alerts that were causing persistent DEGRADED status
+                    old_alerts = state.get("active_alerts", [])
+                    state["active_alerts"] = [a for a in old_alerts if "failed at 2026-04" not in a]
+                    if len(state["active_alerts"]) < len(old_alerts):
+                        logger.info("[GUARDRAIL] Stale future alerts cleared from state.")
+                
                 logger.info(f"Resuming from last processed date: {state['last_processed_date']}. Next: {start_dt.strftime('%Y-%m-%d')}")
             elif start_date_str:
                 start_dt = datetime.strptime(start_date_str, "%Y-%m-%d")
