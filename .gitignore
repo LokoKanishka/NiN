@@ -34,6 +34,7 @@ __pycache__/
 
 # Legacy / Experimental
 legacy/
+node_modules/**/node_modules/
 verticals/*
 !verticals/bitnin/
 !verticals/bitnin/**

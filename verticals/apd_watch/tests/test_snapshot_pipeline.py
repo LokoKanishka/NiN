@@ -1,19 +1,12 @@
-import importlib.util
 import json
-import sys
 import unittest
 from pathlib import Path
 
-MODULE_PATH = Path("verticals/apd_watch/tools/snapshot_pipeline.py")
-SPEC = importlib.util.spec_from_file_location("apd_snapshot_pipeline", MODULE_PATH)
-MODULE = importlib.util.module_from_spec(SPEC)
-assert SPEC and SPEC.loader
-sys.modules[SPEC.name] = MODULE
-SPEC.loader.exec_module(MODULE)
-
-compute_fingerprint = MODULE.compute_fingerprint
-compute_stable_id = MODULE.compute_stable_id
-run_pipeline = MODULE.run_pipeline
+from verticals.apd_watch.tools.snapshot_pipeline import (
+    compute_fingerprint,
+    compute_stable_id,
+    run_pipeline,
+)
 
 
 class SnapshotPipelineTests(unittest.TestCase):
