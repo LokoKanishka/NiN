@@ -37,6 +37,8 @@ legacy/
 verticals/*
 !verticals/bitnin/
 !verticals/bitnin/**
+!verticals/apd_watch/
+!verticals/apd_watch/**
 verticals/bitnin/**/__pycache__/
 verticals/bitnin/**/*.pyc
 verticals/bitnin/runtime/**
