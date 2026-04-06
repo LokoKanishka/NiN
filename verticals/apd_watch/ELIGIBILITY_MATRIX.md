@@ -32,3 +32,9 @@ Cada `eligibility_rule` debe contemplar:
 - La matriz debe mantenerse en formato versionable y legible (JSON/YAML/tabla estructurada).
 - Cambios de reglas no deben exigir cambios de código en el motor de matching.
 - Toda versión debe registrar `effective_date` y autor de cambio.
+
+## Base machine-readable inicial
+
+- Ruta oficial inicial: `verticals/apd_watch/data/eligibility_rules.seed.json`.
+- Cada objeto de esa semilla debe ser compatible con `verticals/apd_watch/schemas/eligibility_rule.schema.json`.
+- La semilla es solo de arranque (2–3 reglas de ejemplo) y no define todavía cobertura completa.

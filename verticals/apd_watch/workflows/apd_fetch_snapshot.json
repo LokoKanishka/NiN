@@ -1,0 +1,24 @@
+{
+  "name": "NIN | APD Fetch Snapshot (Placeholder)",
+  "slug": "apd_fetch_snapshot",
+  "status": "planned_placeholder",
+  "active": false,
+  "read_only": true,
+  "description": "Placeholder documental para el futuro workflow de captura read-only de snapshots APD.",
+  "inputs": [
+    "source",
+    "source_snapshot_date",
+    "input_fixture_path"
+  ],
+  "outputs": [
+    "verticals/apd_watch/runtime/snapshots/apd_raw_YYYYMMDD.json",
+    "verticals/apd_watch/runtime/snapshots/apd_raw_manifest_YYYYMMDD.json",
+    "verticals/apd_watch/runtime/normalized/apd_normalized_YYYYMMDD.json",
+    "verticals/apd_watch/runtime/normalized/apd_normalized_manifest_YYYYMMDD.json"
+  ],
+  "notes": [
+    "No scraping productivo en este tramo.",
+    "No login/APD write actions.",
+    "No Telegram y no matching en este placeholder."
+  ]
+}

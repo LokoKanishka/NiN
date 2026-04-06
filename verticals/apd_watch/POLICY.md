@@ -18,7 +18,7 @@ Estado: obligatorio
 
 ## 3) Política de datos y persistencia
 
-1. Persistencia inicial mínima y auditable en `runtime/apd_watch/`.
+1. Persistencia inicial mínima y auditable en `verticals/apd_watch/runtime/`.
 2. Snapshots diarios obligatorios (bruto y normalizado).
 3. Todo artefacto debe incluir fecha de snapshot y metadatos de fuente.
 4. Se recomienda timestamp UTC RFC3339 para comparabilidad cross-day.

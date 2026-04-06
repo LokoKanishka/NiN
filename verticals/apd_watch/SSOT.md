@@ -13,6 +13,12 @@ APD Watch es la vertical de NiN para:
 - generación de diff diario y reporte legible,
 - emisión de alertas resumidas por canal oficial.
 
+Estado de implementación actual (Tramo 2):
+
+- contrato de captura raw/normalized implementado en modo fixture-first,
+- snapshots y manifests reproducibles en runtime local de la vertical,
+- sin matching, sin Telegram y sin automatización de postulación.
+
 ## 2. Límites no negociables
 
 APD Watch **sí** hace:
@@ -20,7 +26,7 @@ APD Watch **sí** hace:
 - lectura de fuente APD,
 - snapshot bruto y snapshot normalizado,
 - matching y clasificación (`seguro`, `probable`, `ambigua`, `no_match`),
-- persistencia de artefactos en `runtime/`.
+- persistencia de artefactos en `verticals/apd_watch/runtime/`.
 
 APD Watch **no** hace:
 
@@ -60,7 +66,7 @@ Consecuencias:
    - Salida por scripts/servicios permitida; long polling paralelo prohibido para el mismo bot.
 
 3. **Persistencia en `runtime/`**
-   - El estado operativo y artefactos deben vivir en `runtime/`.
+   - Para APD Watch la convención queda congelada en `verticals/apd_watch/runtime/`.
    - Patrón recomendado: snapshots + derivados + logs con convención estable.
 
 4. **Uso de Ollama**
@@ -93,10 +99,33 @@ Consecuencias:
 
 Estructura prevista:
 
-- `runtime/apd_watch/snapshots/`
-- `runtime/apd_watch/normalized/`
-- `runtime/apd_watch/matches/`
-- `runtime/apd_watch/reports/`
-- `runtime/apd_watch/logs/`
+- `verticals/apd_watch/runtime/snapshots/`
+- `verticals/apd_watch/runtime/normalized/`
+- `verticals/apd_watch/runtime/matches/`
+- `verticals/apd_watch/runtime/reports/`
+- `verticals/apd_watch/runtime/logs/`
 
 No se introducen dependencias extra en esta fase fundacional.
+
+## 6. Scaffold mínimo creado
+
+Además de `schemas/`, la vertical deja creados:
+
+- `verticals/apd_watch/workflows/` (vacío, con `.gitkeep`)
+- `verticals/apd_watch/data/eligibility_rules.seed.json` (semilla inicial machine-readable)
+- `verticals/apd_watch/runtime/{snapshots,normalized,matches,reports,logs}/` (vacío, con `.gitkeep`)
+
+## 7. Tramo 2 (read-only operable)
+
+Componentes creados:
+
+- `verticals/apd_watch/tools/snapshot_pipeline.py`
+- `verticals/apd_watch/tests/fixtures/apd_offers_sample.json`
+- `verticals/apd_watch/tests/test_snapshot_pipeline.py`
+- `verticals/apd_watch/workflows/apd_fetch_snapshot.json` (placeholder no productivo)
+
+Alcance de Tramo 2:
+
+- transforma input de muestra/manual en `offer_raw[]` y `offer_normalized[]`,
+- valida campos requeridos de ambos contratos,
+- genera snapshot + manifest raw y normalized.
