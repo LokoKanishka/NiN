@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "apd_watch/offer_raw.schema.json",
+  "title": "APD Offer Raw",
+  "type": "object",
+  "required": [
+    "source",
+    "source_snapshot_date",
+    "captured_at_utc",
+    "source_url",
+    "raw_payload"
+  ],
+  "properties": {
+    "source": { "type": "string", "minLength": 1 },
+    "source_snapshot_date": { "type": "string", "format": "date" },
+    "captured_at_utc": { "type": "string", "format": "date-time" },
+    "source_url": { "type": ["string", "null"] },
+    "raw_payload": { "type": "object" },
+    "raw_hash": { "type": "string" }
+  },
+  "additionalProperties": true
+}

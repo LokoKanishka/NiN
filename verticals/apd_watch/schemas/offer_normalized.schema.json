@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "apd_watch/offer_normalized.schema.json",
+  "title": "APD Offer Normalized",
+  "type": "object",
+  "required": [
+    "stable_id",
+    "source",
+    "source_snapshot_date",
+    "captured_at_utc",
+    "normalized_at_utc",
+    "cargo_materia",
+    "district",
+    "status",
+    "fingerprint",
+    "source_url"
+  ],
+  "properties": {
+    "stable_id": { "type": "string", "minLength": 1 },
+    "code": { "type": ["string", "null"] },
+    "cargo_materia": { "type": "string", "minLength": 1 },
+    "district": { "type": "string", "minLength": 1 },
+    "level_modality": { "type": ["string", "null"] },
+    "school": { "type": ["string", "null"] },
+    "status": { "type": "string", "minLength": 1 },
+    "closing_at": { "type": ["string", "null"], "format": "date-time" },
+    "source": { "type": "string", "minLength": 1 },
+    "source_snapshot_date": { "type": "string", "format": "date" },
+    "captured_at_utc": { "type": "string", "format": "date-time" },
+    "normalized_at_utc": { "type": "string", "format": "date-time" },
+    "fingerprint": { "type": "string", "minLength": 1 },
+    "source_url": { "type": ["string", "null"] }
+  },
+  "additionalProperties": true
+}

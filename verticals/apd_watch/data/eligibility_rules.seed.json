@@ -1,0 +1,41 @@
+[
+  {
+    "rule_id": "apd-rule-001",
+    "official_name": "Matemática - Nivel Secundario",
+    "aliases": ["Matematica Secundaria", "Prof. Matemática"],
+    "code": "MAT-SEC",
+    "level_modality": "Secundaria",
+    "match_type": "exact",
+    "priority": 1,
+    "confidence_band": "segura",
+    "notes": "Regla de ejemplo para coincidencia determinista por código/nombre.",
+    "enabled": true,
+    "effective_date": "2026-04-06"
+  },
+  {
+    "rule_id": "apd-rule-002",
+    "official_name": "Prácticas del Lenguaje - Primaria",
+    "aliases": ["Lengua Primaria", "Prácticas del lenguaje"],
+    "code": null,
+    "level_modality": "Primaria",
+    "match_type": "normalized",
+    "priority": 2,
+    "confidence_band": "probable",
+    "notes": "Regla de ejemplo con variantes ortográficas y alias.",
+    "enabled": true,
+    "effective_date": "2026-04-06"
+  },
+  {
+    "rule_id": "apd-rule-003",
+    "official_name": "Educación Artística",
+    "aliases": ["Artística", "Educacion Artistica"],
+    "code": null,
+    "level_modality": null,
+    "match_type": "manual_review",
+    "priority": 3,
+    "confidence_band": "ambigua",
+    "notes": "Regla de ejemplo para casos ambiguos que requieren revisión.",
+    "enabled": true,
+    "effective_date": "2026-04-06"
+  }
+]
