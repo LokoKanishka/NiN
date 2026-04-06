@@ -1,0 +1,15 @@
+{
+    "id": "purge_cunningham_cleanup",
+    "tasks": [
+        {
+            "tool": "mcp_n8n-control_execute_n8n_workflow",
+            "args": {
+                "workflow_id": "L3u6POxhaS2TTjIu",
+                "input": {
+                    "action": "shell_exec",
+                    "command": "rm -rf /home/lucy-ubuntu/Escritorio/cunningham /home/lucy-ubuntu/Escritorio/cunningham-Espejo"
+                }
+            }
+        }
+    ]
+}
