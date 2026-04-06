@@ -22,19 +22,28 @@ BASE_DIR = os.path.dirname(SCRIPT_DIR)
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # --- CONSTANTES OPERATIVAS ---
-EXCEL_PATH = os.path.join(BASE_DIR, "verticals/gmail_cv/data/lista_produccion_colegios.xlsx")
-CV_PATH = os.path.join(BASE_DIR, "verticals/gmail_cv/data/CV.PROF.FILOSOFIA.pdf")
-HISTORY_PATH = os.path.join(BASE_DIR, "runtime/cv_sent_history.json")
+EXCEL_PATH = os.path.join(BASE_DIR, "data/9 15.xlsx")
+CV_PATH = os.path.join(BASE_DIR, "data/CV DIEGO PARA CABA.pdf.pdf")
+HISTORY_PATH = "/tmp/cv_sent_history_v3.json"
 LOCK_FILE = "/tmp/send_cvs.lock"
 
 # --- SEGURIDAD Y CREDENCIALES ---
 DRY_RUN = False  # Cambiar a True para simular sin enviar mails
-SMTP_USER = os.getenv("SMTP_USER_DIEGO", "profedefilodiego@gmail.com")
-SMTP_PASS = os.getenv("SMTP_PASS_DIEGO") # Tomado de .env
 
-CUENTAS_SMTP = [
-    {"user": SMTP_USER, "pass": SMTP_PASS},
-]
+CUENTAS_SMTP = []
+for i in range(1, 10):
+    user = os.getenv(f"SMTP_USER_{i}")
+    pwd = os.getenv(f"SMTP_PASS_{i}")
+    if user and pwd:
+        # Remover espacios en la pass para evitar errores SMTP
+        CUENTAS_SMTP.append({"user": user, "pass": pwd.replace(" ", "")})
+
+# Fallback al formato original por si falta configuración
+if not CUENTAS_SMTP:
+    SMTP_USER = os.getenv("SMTP_USER_DIEGO", "profedefilodiego@gmail.com")
+    SMTP_PASS = os.getenv("SMTP_PASS_DIEGO")
+    if SMTP_USER and SMTP_PASS:
+        CUENTAS_SMTP.append({"user": SMTP_USER, "pass": SMTP_PASS.replace(" ", "")})
 
 # Credenciales Telegram NiN (desde .env)
 TG_TOKEN = os.getenv("TG_TOKEN")
@@ -121,7 +130,7 @@ def notify_telegram(message):
 
 def w_log(msg):
     full_msg = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}"
-    print(full_msg)
+    print(full_msg, flush=True)
 
 def armar_textos(colegio):
     # Texto Plano
@@ -170,8 +179,8 @@ def enviar_correo(origen_user, origen_pass, destino, colegio):
     # Adjuntar PDF
     try:
         with open(CV_PATH, "rb") as f:
-            part3 = MIMEApplication(f.read(), Name="CV.PROF.FILOSOFIA.pdf")
-            part3['Content-Disposition'] = 'attachment; filename="CV.PROF.FILOSOFIA.pdf"'
+            part3 = MIMEApplication(f.read(), Name="CV_DIEGO_PARA_CABA.pdf")
+            part3['Content-Disposition'] = 'attachment; filename="CV_DIEGO_PARA_CABA.pdf"'
             msg.attach(part3)
             w_log(f"📎 CV adjuntado correctamente: {CV_PATH}")
     except Exception as e:
@@ -205,8 +214,8 @@ def principal():
         w_log("🚀 Iniciando Script de Envío de CVs (NiN Stabilized)...")
         if DRY_RUN: w_log("🧪 MODO DRY-RUN ACTIVADO: No se enviarán correos reales.")
 
-        if not SMTP_PASS and not DRY_RUN:
-            w_log("❌ ERROR: No se encontró SMTP_PASS_DIEGO en el ambiente (.env). Abortando.")
+        if not CUENTAS_SMTP and not DRY_RUN:
+            w_log("❌ ERROR: No se encontraron cuentas SMTP en el ambiente (.env). Abortando.")
             sys.exit(1)
 
         # 1. Programación o Inmediato
@@ -274,28 +283,40 @@ def principal():
                 stats["skipped"] += 1
                 continue
 
-            # --- ENVÍO ---
-            cuenta = cuentas_activas[stats["sent"] % len(cuentas_activas)]
-            
+            # --- ENVÍO CON ROTACIÓN DINÁMICA ---
             success_at_least_one = False
             for destino in valid_emails:
-                w_log(f"✉️  [{i+1}/{total}] Enviando a {nombre} ({destino})...")
-                
-                if DRY_RUN:
-                    resultado = "OK"
-                    time.sleep(0.1)
-                else:
-                    resultado = enviar_correo(cuenta['user'], cuenta['pass'], destino, nombre)
-                
-                if resultado == "OK":
-                    success_at_least_one = True
-                    w_log(f"✅ Éxito.")
-                    if not DRY_RUN: save_to_history(nombre, destino, "OK")
-                else:
-                    w_log(f"❌ Fallo: {resultado}")
-                    if "Daily user sending limit exceeded" in str(resultado):
-                        cuentas_activas.remove(cuenta)
-                        break
+                enviado_ok = False
+                while cuentas_activas and not enviado_ok:
+                    cuenta = cuentas_activas[stats["sent"] % len(cuentas_activas)]
+                    w_log(f"✉️  [{i+1}/{total}] Enviando a {nombre} ({destino}) usando {cuenta['user']}...")
+                    
+                    if DRY_RUN:
+                        resultado = "OK"
+                        time.sleep(0.1)
+                    else:
+                        resultado = enviar_correo(cuenta['user'], cuenta['pass'], destino, nombre)
+                    
+                    if resultado == "OK":
+                        success_at_least_one = True
+                        enviado_ok = True
+                        w_log(f"✅ Éxito.")
+                        if not DRY_RUN: save_to_history(nombre, destino, "OK")
+                    else:
+                        w_log(f"❌ Fallo ({cuenta['user']}): {resultado}")
+                        # Si el fallo es de cuenta (limite, auth bloqueado, etc.), sacamos la cuenta del pool de rotación
+                        if any(k in str(resultado).lower() for k in ["auth", "limit", "quota", "535", "534", "554", "blocked"]):
+                            cuenta_fallida = cuenta
+                            cuentas_activas.remove(cuenta_fallida)
+                            if cuentas_activas:
+                                w_log(f"🔄 Cuenta quemada. Reintentando el envío a {destino} con la siguiente...")
+                            else:
+                                w_log("❌ Todas las cuentas han fallado o agotado límite. Abortando bloque.")
+                                break
+                        else:
+                            # Posible error de red o de dirección de destinatario mala
+                            w_log(f"⚠️ Error desconocido/destino, se ignora: {destino}")
+                            break
 
             if success_at_least_one:
                 stats["sent"] += 1
@@ -303,7 +324,7 @@ def principal():
                 notify_telegram(f"✅ Enviado: {nombre}")
                 # Pausa Anti-Spam
                 if i < total - 1:
-                    delay = random.randint(50, 110)
+                    delay = random.randint(30, 40)
                     w_log(f"⏳ Pausa de {delay}s...")
                     time.sleep(delay)
             else:

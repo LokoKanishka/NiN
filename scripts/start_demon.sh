@@ -20,7 +20,7 @@ echo "🚀 [Anti-Hang] Lanzando $SCRIPT_NAME en aislamiento total..."
 export PYTHONUNBUFFERED=1
 
 # El escudo maestro: nohup + stderr a stdout + cierre de stdin + disown
-nohup /usr/bin/python3 "$PROJECT_DIR/scripts/$SCRIPT_NAME" > "$LOG_FILE" 2>&1 < /dev/null &
+nohup "$PROJECT_DIR/.venv/bin/python3" "$PROJECT_DIR/scripts/$SCRIPT_NAME" > "$LOG_FILE" 2>&1 < /dev/null &
 disown
 
 echo "✅ OK: $SCRIPT_NAME lanzado. Terminal liberada."

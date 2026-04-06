@@ -1,0 +1,160 @@
+=== LSBLK ===
+NAME        FSTYPE FSVER LABEL UUID FSAVAIL FSUSE% MOUNTPOINTS
+loop0                                     0   100% /snap/bare/5
+loop1                                     0   100% /snap/core20/2686
+loop2                                     0   100% /snap/core20/2717
+loop3                                     0   100% /snap/core22/2292
+loop4                                     0   100% /snap/core22/2411
+loop5                                     0   100% /snap/core24/1349
+loop6                                     0   100% /snap/core24/1499
+loop7                                     0   100% /snap/curl/2384
+loop8                                     0   100% /snap/curl/2393
+loop9                                     0   100% /snap/firefox/7901
+loop10                                    0   100% /snap/firefox/7967
+loop11                                    0   100% /snap/firmware-updater/210
+loop12                                    0   100% /snap/firmware-updater/216
+loop13                                    0   100% /snap/gnome-3-38-2004/143
+loop14                                    0   100% /snap/gnome-42-2204/226
+loop15                                    0   100% /snap/gnome-42-2204/247
+loop16                                    0   100% /snap/gnome-46-2404/153
+loop17                                    0   100% /snap/gtk-common-themes/1535
+loop18                                    0   100% /snap/kf5-core22/3
+loop19                                    0   100% /snap/mesa-2404/1165
+loop20                                    0   100% /snap/snap-store/1270
+loop21                                    0   100% /snap/snapd/25935
+loop22                                    0   100% /snap/snapd/26382
+loop23                                    0   100% /snap/snapd-desktop-integration/315
+loop24                                    0   100% /snap/snapd-desktop-integration/343
+loop25                                    0   100% /snap/spotify/89
+loop26                                    0   100% /snap/spotify/92
+loop27                                             
+sda                                                
+nvme0n1                                            
+├─nvme0n1p1                              1G     1% /boot/efi
+└─nvme0n1p2                            1,5T    12% /
+
+=== DF ===
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+tmpfs             13G   3,0M   13G   1% /run
+/dev/nvme0n1p2   1,9T   232G  1,6T  13% /
+tmpfs             63G   150M   63G   1% /dev/shm
+tmpfs            5,0M    20K  5,0M   1% /run/lock
+efivarfs         128K    69K   55K  56% /sys/firmware/efi/efivars
+/dev/nvme0n1p1   1,1G   6,2M  1,1G   1% /boot/efi
+tmpfs             13G   224K   13G   1% /run/user/1000
+
+=== MOUNT ===
+sysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime)
+proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)
+udev on /dev type devtmpfs (rw,nosuid,relatime,size=65431488k,nr_inodes=16357872,mode=755,inode64)
+devpts on /dev/pts type devpts (rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000)
+tmpfs on /run type tmpfs (rw,nosuid,nodev,noexec,relatime,size=13102504k,mode=755,inode64)
+/dev/nvme0n1p2 on / type ext4 (rw,relatime)
+securityfs on /sys/kernel/security type securityfs (rw,nosuid,nodev,noexec,relatime)
+tmpfs on /dev/shm type tmpfs (rw,nosuid,nodev,inode64)
+tmpfs on /run/lock type tmpfs (rw,nosuid,nodev,noexec,relatime,size=5120k,inode64)
+cgroup2 on /sys/fs/cgroup type cgroup2 (rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot)
+none on /sys/fs/pstore type pstore (rw,nosuid,nodev,noexec,relatime)
+efivarfs on /sys/firmware/efi/efivars type efivarfs (rw,nosuid,nodev,noexec,relatime)
+bpf on /sys/fs/bpf type bpf (rw,nosuid,nodev,noexec,relatime,mode=700)
+systemd-1 on /proc/sys/fs/binfmt_misc type autofs (rw,relatime,fd=32,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=35049)
+hugetlbfs on /dev/hugepages type hugetlbfs (rw,nosuid,nodev,relatime,pagesize=2M)
+mqueue on /dev/mqueue type mqueue (rw,nosuid,nodev,noexec,relatime)
+tracefs on /sys/kernel/tracing type tracefs (rw,nosuid,nodev,noexec,relatime)
+debugfs on /sys/kernel/debug type debugfs (rw,nosuid,nodev,noexec,relatime)
+fusectl on /sys/fs/fuse/connections type fusectl (rw,nosuid,nodev,noexec,relatime)
+configfs on /sys/kernel/config type configfs (rw,nosuid,nodev,noexec,relatime)
+/var/lib/snapd/snaps/bare_5.snap on /snap/bare/5 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/core20_2686.snap on /snap/core20/2686 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/core20_2717.snap on /snap/core20/2717 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/core22_2292.snap on /snap/core22/2292 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/core22_2411.snap on /snap/core22/2411 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/core24_1349.snap on /snap/core24/1349 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/core24_1499.snap on /snap/core24/1499 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/curl_2384.snap on /snap/curl/2384 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/curl_2393.snap on /snap/curl/2393 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/firefox_7901.snap on /snap/firefox/7901 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/firefox_7967.snap on /snap/firefox/7967 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/firmware-updater_210.snap on /snap/firmware-updater/210 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/firmware-updater_216.snap on /snap/firmware-updater/216 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/gnome-3-38-2004_143.snap on /snap/gnome-3-38-2004/143 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/gnome-42-2204_226.snap on /snap/gnome-42-2204/226 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/gnome-42-2204_247.snap on /snap/gnome-42-2204/247 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/gnome-46-2404_153.snap on /snap/gnome-46-2404/153 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/gtk-common-themes_1535.snap on /snap/gtk-common-themes/1535 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/kf5-core22_3.snap on /snap/kf5-core22/3 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/mesa-2404_1165.snap on /snap/mesa-2404/1165 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/snap-store_1270.snap on /snap/snap-store/1270 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/snapd_25935.snap on /snap/snapd/25935 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/snapd_26382.snap on /snap/snapd/26382 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/snapd-desktop-integration_315.snap on /snap/snapd-desktop-integration/315 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/snapd-desktop-integration_343.snap on /snap/snapd-desktop-integration/343 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/spotify_92.snap on /snap/spotify/92 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/var/lib/snapd/snaps/spotify_89.snap on /snap/spotify/89 type squashfs (ro,nodev,relatime,errors=continue,threads=single,x-gdu.hide,x-gvfs-hide)
+/dev/nvme0n1p1 on /boot/efi type vfat (rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro)
+binfmt_misc on /proc/sys/fs/binfmt_misc type binfmt_misc (rw,nosuid,nodev,noexec,relatime)
+tmpfs on /run/user/1000 type tmpfs (rw,nosuid,nodev,relatime,size=13102500k,nr_inodes=3275625,mode=700,uid=1000,gid=1000,inode64)
+portal on /run/user/1000/doc type fuse.portal (rw,nosuid,nodev,relatime,user_id=1000,group_id=1000)
+tmpfs on /run/snapd/ns type tmpfs (rw,nosuid,nodev,noexec,relatime,size=13102504k,mode=755,inode64)
+nsfs on /run/snapd/ns/snapd-desktop-integration.mnt type nsfs (rw)
+overlay on /var/lib/docker/overlay2/496df151b18e56c5cbf83da269d046bab1b1c122b9d34fe68525f5c6b5ca8b4b/merged type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/UF2HDIT6URNZEJECCOYT6AW2PT:/var/lib/docker/overlay2/l/XNDOOJYNPXKJHKJVR25N46I4LI:/var/lib/docker/overlay2/l/I6X2PLSZH7CFNDFDYMKF57I3FA:/var/lib/docker/overlay2/l/43TJNKBQGRATFRL34JW5INSJSD:/var/lib/docker/overlay2/l/IFYHFDA4AUMQWKOXFWIXMC6OFW:/var/lib/docker/overlay2/l/TXUT72RJT2HCSIRAZGU4GUMN7R:/var/lib/docker/overlay2/l/YNI4MM4YMWHHAOJ5SOIU3UZYSO:/var/lib/docker/overlay2/l/IQ77EN6NHOHJOHZCZJESE3R5X4:/var/lib/docker/overlay2/l/G3KSB2A44OMKROILCJ5FEUF6ER:/var/lib/docker/overlay2/l/K4KS5Q7TGOO5LA5LY5MNEC43BC:/var/lib/docker/overlay2/l/6LXD47Q3VESJAPKJB3RAHG7TXL:/var/lib/docker/overlay2/l/U6HGXGV4WOZLGXU5ZLMUAWUBHW:/var/lib/docker/overlay2/l/NPOWFVDC3BUNXX7UHAVD7TP26Q:/var/lib/docker/overlay2/l/LQEDZFWYSVWSOD36ZFWG2AJTHO:/var/lib/docker/overlay2/l/XUSZXJMJPEERRR7ZUBF27NN7B6:/var/lib/docker/overlay2/l/QN4HC7QNNNUPSV4X4AU5MH2R4D:/var/lib/docker/overlay2/l/SWCQADYA4RKUQDBFCDEROQ5QHB:/var/lib/docker/overlay2/l/QS3MK7DOUFB7YINKRA4FJQ62DQ:/var/lib/docker/overlay2/l/MU2YKU3FM7TTXFESTD4O5AZ4ID,upperdir=/var/lib/docker/overlay2/496df151b18e56c5cbf83da269d046bab1b1c122b9d34fe68525f5c6b5ca8b4b/diff,workdir=/var/lib/docker/overlay2/496df151b18e56c5cbf83da269d046bab1b1c122b9d34fe68525f5c6b5ca8b4b/work,nouserxattr)
+nsfs on /run/docker/netns/33ee550cb020 type nsfs (rw)
+gvfsd-fuse on /run/user/1000/gvfs type fuse.gvfsd-fuse (rw,nosuid,nodev,relatime,user_id=1000,group_id=1000)
+overlay on /var/lib/docker/overlay2/acbaf9748bba2205d374abd3d0064d6ba0d399f5e7c749f74dc7f16999683547/merged type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/GFXPGG4T37FKD2LIMIIVLGWKQK:/var/lib/docker/overlay2/l/HGAEA74W3P53F625Q6UOKG5MUV:/var/lib/docker/overlay2/l/SEGJRAGCRZ4UIKF4K55FY45UDD:/var/lib/docker/overlay2/l/7CZBWXVR5OIRPLVNVLRRFWVFGF:/var/lib/docker/overlay2/l/6MF5ED3A2FKAZ4UQNGBZTBULI3:/var/lib/docker/overlay2/l/VBP2CDYQFKFDQVSIOOEXAANEWL:/var/lib/docker/overlay2/l/PWYO7ARIDAHTPFTFBN7XJZTCZL:/var/lib/docker/overlay2/l/OMGQYXNHZ2K26YG7QQ35AXGNH3:/var/lib/docker/overlay2/l/7RQ7X3QGGX5GZ56BCHHLZAWYQD:/var/lib/docker/overlay2/l/DB7VX7XWA52NAS6CCKEVFTPOGT:/var/lib/docker/overlay2/l/SPYSEDZ4UHWGZJVAWFHN7K3QOO:/var/lib/docker/overlay2/l/7SSAVBMJ7EBYPOJLFWSHUZCRLD:/var/lib/docker/overlay2/l/EYM4IN3K6ZZSRA2US4DZSX3M5W,upperdir=/var/lib/docker/overlay2/acbaf9748bba2205d374abd3d0064d6ba0d399f5e7c749f74dc7f16999683547/diff,workdir=/var/lib/docker/overlay2/acbaf9748bba2205d374abd3d0064d6ba0d399f5e7c749f74dc7f16999683547/work,nouserxattr)
+nsfs on /run/docker/netns/19d1c40cf8fb type nsfs (rw)
+nsfs on /run/snapd/ns/firefox.mnt type nsfs (rw)
+overlay on /var/lib/docker/overlay2/25b1401e2a948d39f821428e7904cb607b1ff43b8f43c8d00fabeefa242d4409/merged type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/HZGPHT3AXSK55IDKE2MMIAVBPK:/var/lib/docker/overlay2/l/JRZRLQ7PXURN2I6JG3TLDLL2MI:/var/lib/docker/overlay2/l/PIFSHF72R4U75OTA5ZQPIF3Z4L:/var/lib/docker/overlay2/l/FHPB7O6X4BZZF7ZIVEWY7VFELV:/var/lib/docker/overlay2/l/PGYH42YZ7VGS2Q7ZGPZQZRNEDB:/var/lib/docker/overlay2/l/Y6CHWROT3EZY237XSGIZTTCLZ4:/var/lib/docker/overlay2/l/LI55PXX6J5EWVCVAWEB5TIABQG:/var/lib/docker/overlay2/l/XYOATU37GXB6QA2CCCTLKG6HAA:/var/lib/docker/overlay2/l/M3KOIY4IKT6KES5SYC24BAVR6A:/var/lib/docker/overlay2/l/VZISIXXAG32CPW7IUNMABSDDGV:/var/lib/docker/overlay2/l/WHABBEQ2DDUBLM7SQ5YOXHGSXZ:/var/lib/docker/overlay2/l/VREXXRSIYZVKSTOYQQAE2AXLF6:/var/lib/docker/overlay2/l/W2AKSD55HJ2H5PFQZDPD3LHFHX:/var/lib/docker/overlay2/l/UDY2NHDCI2KA6AHJZD5N4AD5RT:/var/lib/docker/overlay2/l/MBSBPQONDXMFTJ65TQ5AKVB2XF:/var/lib/docker/overlay2/l/HG2E6GI6ATAGSYOLV2EZ7FFGVP:/var/lib/docker/overlay2/l/5C2KH43TSO3GST4GFWNHX7ZIW2:/var/lib/docker/overlay2/l/AEJN3NWRPZP3B7XJ5GHRYQ6J5L:/var/lib/docker/overlay2/l/3GYE3GH5KAADZTBX2UCIANX3T6:/var/lib/docker/overlay2/l/FOVQ5DO6OOWKKS3BSUWKLWNY5J:/var/lib/docker/overlay2/l/DC262XSGQGDQBBVKRDXSEK7REP:/var/lib/docker/overlay2/l/H6HNWDGVMNYTKO4OLYCIYM3FCF:/var/lib/docker/overlay2/l/3V4XHBTO7UOL7Y4Z4NUTOXJULU:/var/lib/docker/overlay2/l/IC3PJK75C6X5HYKFG54Z2YFEIB:/var/lib/docker/overlay2/l/LK4CYEX2HCUO632LAKKA3ZM2AC:/var/lib/docker/overlay2/l/HHVZFCKVNYYHPNKI5PO6P75W7U:/var/lib/docker/overlay2/l/UKXVNZONJHN4MYLJF7546OL34T:/var/lib/docker/overlay2/l/QSAWCKVXVLOT6UBU5HV4OFP6NJ:/var/lib/docker/overlay2/l/6MM4YTP6OPOWKHWEAJSJSL2PIV,upperdir=/var/lib/docker/overlay2/25b1401e2a948d39f821428e7904cb607b1ff43b8f43c8d00fabeefa242d4409/diff,workdir=/var/lib/docker/overlay2/25b1401e2a948d39f821428e7904cb607b1ff43b8f43c8d00fabeefa242d4409/work,nouserxattr)
+nsfs on /run/docker/netns/f72a6dcb1c72 type nsfs (rw)
+nsfs on /run/snapd/ns/firmware-updater.mnt type nsfs (rw)
+
+=== FSTAB ===
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+# / was on /dev/sdb2 during curtin installation
+/dev/disk/by-uuid/fc7ea308-093e-4408-90c7-4aed32580245 / ext4 defaults 0 1
+# /boot/efi was on /dev/sdb1 during curtin installation
+/dev/disk/by-uuid/C8AD-5CC2 /boot/efi vfat defaults 0 1
+/swap.img	none	swap	sw	0	0
+
+=== FINDMNT ===
+SOURCE           FSTYPE     SIZE   USED AVAIL USE% TARGET
+udev             devtmpfs  62,4G      0 62,4G   0% /dev
+tmpfs            tmpfs     12,5G     3M 12,5G   0% /run
+/dev/nvme0n1p2   ext4       1,8T 231,5G  1,5T  12% /
+tmpfs            tmpfs     62,5G 150,2M 62,3G   0% /dev/shm
+tmpfs            tmpfs        5M    20K    5M   0% /run/lock
+/dev/loop0       squashfs   128K   128K     0 100% /snap/bare/5
+/dev/loop1       squashfs  63,9M  63,9M     0 100% /snap/core20/2686
+/dev/loop2       squashfs  63,9M  63,9M     0 100% /snap/core20/2717
+/dev/loop3       squashfs    74M    74M     0 100% /snap/core22/2292
+/dev/loop4       squashfs    74M    74M     0 100% /snap/core22/2411
+/dev/loop5       squashfs  66,9M  66,9M     0 100% /snap/core24/1349
+/dev/loop6       squashfs  66,9M  66,9M     0 100% /snap/core24/1499
+/dev/loop7       squashfs   4,9M   4,9M     0 100% /snap/curl/2384
+/dev/loop8       squashfs   5,3M   5,3M     0 100% /snap/curl/2393
+/dev/loop9       squashfs 254,6M 254,6M     0 100% /snap/firefox/7901
+/dev/loop10      squashfs   255M   255M     0 100% /snap/firefox/7967
+/dev/loop11      squashfs  18,5M  18,5M     0 100% /snap/firmware-updater/210
+/dev/loop12      squashfs  16,5M  16,5M     0 100% /snap/firmware-updater/216
+/dev/loop13      squashfs 349,8M 349,8M     0 100% /snap/gnome-3-38-2004/143
+/dev/loop14      squashfs 516,3M 516,3M     0 100% /snap/gnome-42-2204/226
+/dev/loop15      squashfs 531,4M 531,4M     0 100% /snap/gnome-42-2204/247
+/dev/loop16      squashfs 606,1M 606,1M     0 100% /snap/gnome-46-2404/153
+/dev/loop17      squashfs  91,8M  91,8M     0 100% /snap/gtk-common-themes/1535
+/dev/loop18      squashfs   1,5G   1,5G     0 100% /snap/kf5-core22/3
+/dev/loop19      squashfs   395M   395M     0 100% /snap/mesa-2404/1165
+/dev/loop20      squashfs  10,9M  10,9M     0 100% /snap/snap-store/1270
+/dev/loop21      squashfs  48,1M  48,1M     0 100% /snap/snapd/25935
+/dev/loop22      squashfs  48,4M  48,4M     0 100% /snap/snapd/26382
+/dev/loop23      squashfs   640K   640K     0 100% /snap/snapd-desktop-integration/315
+/dev/loop24      squashfs   640K   640K     0 100% /snap/snapd-desktop-integration/343
+/dev/loop26      squashfs 161,3M 161,3M     0 100% /snap/spotify/92
+/dev/loop25      squashfs 196,6M 196,6M     0 100% /snap/spotify/89
+/dev/nvme0n1p1   vfat         1G   6,1M    1G   1% /boot/efi
+tmpfs            tmpfs     12,5G   224K 12,5G   0% /run/user/1000
+tmpfs[/snapd/ns] tmpfs     12,5G     3M 12,5G   0% /run/snapd/ns

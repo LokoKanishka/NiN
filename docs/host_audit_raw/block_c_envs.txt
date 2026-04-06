@@ -1,0 +1,10 @@
+=== WHICH PYTHON ===
+/home/lucy-ubuntu/Miniforge3/bin/python3
+Python 3.13.12
+
+=== VENV PATH ===
+lrwxrwxrwx 1 lucy-ubuntu lucy-ubuntu 10 mar 15 20:34 /home/lucy-ubuntu/Escritorio/NIN/.venv/bin/python -> python3.12
+
+=== HEAD BIN SCRIPTS ===
+#!/bin/bash
+# --- BitNin Console Wrapper ---
