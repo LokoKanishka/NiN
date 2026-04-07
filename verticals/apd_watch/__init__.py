@@ -1,1 +1,0 @@
-"""APD Watch vertical package."""

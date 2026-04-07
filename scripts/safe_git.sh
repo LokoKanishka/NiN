@@ -13,8 +13,9 @@ COMMIT_MSG=${1:-"Respaldo automático del agente (Anti-Hang Protocol)"}
 
 echo "🛡️ [SafeGit] Iniciando secuencia de guardado seguro..."
 
-# 2. Agregar cambios
-git add .
+# 2. Agregar cambios (Solo los ya rastreados para evitar fugas de secretos accidentales)
+# El usuario o el agente deben hacer 'git add' de archivos nuevos antes de llamar a este script.
+git add -u
 
 # 3. Commit con timeout de 10s (evita hooks locales largos)
 timeout 10s git commit -m "$COMMIT_MSG"

@@ -1,115 +1,24 @@
-# Models
-models/
-*.gguf
-
-# Python scripts (Setup helpers)
-find_models.py
-find_gpt_oss.py
-list_openai_models.py
-find_gpt_oss_v2.py
-find_gpt_oss_gguf.py
-list_repo_files.py
-download_model.py
-
-# Environment / OS
-.env
-.DS_Store
-__pycache__/
-*.pyc
-.venv/
-# NiN Runtime & State
-runtime/
-*.db
-*.sqlite
-*.sqlite3
+# NiN Security Gitignore
+# Excluir archivos que pueden contener secretos (Tokens, OAuth, Credenciales)
+diagnostics/
+backups/
+demon/
+*.bak
+*.txt
+*.vscdb
 *.log
-*.pid
-*.gz
+*.json.bak
+*.xlsx
+*.pdf
 
-# Environment / OS
+# Directorios de sistema
 .env
-.DS_Store
+.venv/
 __pycache__/
-*.pyc
+node_modules/
+.DS_Store
 
-# Legacy / Experimental
-legacy/
-node_modules/**/node_modules/
-verticals/*
-!verticals/bitnin/
-!verticals/bitnin/**
-!verticals/apd_watch/
-!verticals/apd_watch/**
-verticals/bitnin/**/__pycache__/
-verticals/bitnin/**/*.pyc
-verticals/bitnin/runtime/**
-!verticals/bitnin/runtime/
-!verticals/bitnin/runtime/datasets/
-!verticals/bitnin/runtime/datasets/market/
-!verticals/bitnin/runtime/datasets/market/raw/
-!verticals/bitnin/runtime/datasets/market/raw/.gitkeep
-!verticals/bitnin/runtime/datasets/market/normalized/
-!verticals/bitnin/runtime/datasets/market/normalized/.gitkeep
-!verticals/bitnin/runtime/datasets/market/snapshots/
-!verticals/bitnin/runtime/datasets/market/snapshots/.gitkeep
-!verticals/bitnin/runtime/datasets/narrative/
-!verticals/bitnin/runtime/datasets/narrative/raw/
-!verticals/bitnin/runtime/datasets/narrative/raw/.gitkeep
-!verticals/bitnin/runtime/datasets/narrative/normalized/
-!verticals/bitnin/runtime/datasets/narrative/normalized/.gitkeep
-!verticals/bitnin/runtime/datasets/narrative/snapshots/
-!verticals/bitnin/runtime/datasets/narrative/snapshots/.gitkeep
-!verticals/bitnin/runtime/datasets/episodes/
-!verticals/bitnin/runtime/datasets/episodes/raw/
-!verticals/bitnin/runtime/datasets/episodes/raw/.gitkeep
-!verticals/bitnin/runtime/datasets/episodes/normalized/
-!verticals/bitnin/runtime/datasets/episodes/normalized/.gitkeep
-!verticals/bitnin/runtime/datasets/episodes/snapshots/
-!verticals/bitnin/runtime/datasets/episodes/snapshots/.gitkeep
-!verticals/bitnin/runtime/memory/
-!verticals/bitnin/runtime/memory/qdrant/
-!verticals/bitnin/runtime/memory/qdrant/exports/
-!verticals/bitnin/runtime/memory/qdrant/exports/.gitkeep
-!verticals/bitnin/runtime/memory/qdrant/queries/
-!verticals/bitnin/runtime/memory/qdrant/queries/.gitkeep
-!verticals/bitnin/runtime/memory/qdrant/logs/
-!verticals/bitnin/runtime/memory/qdrant/logs/.gitkeep
-!verticals/bitnin/runtime/analyses/
-!verticals/bitnin/runtime/analyses/raw/
-!verticals/bitnin/runtime/analyses/raw/.gitkeep
-!verticals/bitnin/runtime/analyses/normalized/
-!verticals/bitnin/runtime/analyses/normalized/.gitkeep
-!verticals/bitnin/runtime/analyses/snapshots/
-!verticals/bitnin/runtime/analyses/snapshots/.gitkeep
-!verticals/bitnin/runtime/backtests/
-!verticals/bitnin/runtime/backtests/runs/
-!verticals/bitnin/runtime/backtests/runs/.gitkeep
-!verticals/bitnin/runtime/backtests/reports/
-!verticals/bitnin/runtime/backtests/reports/.gitkeep
-!verticals/bitnin/runtime/backtests/replays/
-!verticals/bitnin/runtime/backtests/replays/.gitkeep
-!verticals/bitnin/runtime/backtests/snapshots/
-!verticals/bitnin/runtime/backtests/snapshots/.gitkeep
-!verticals/bitnin/runtime/shadow/
-!verticals/bitnin/runtime/shadow/intents/
-!verticals/bitnin/runtime/shadow/intents/.gitkeep
-!verticals/bitnin/runtime/shadow/reports/
-!verticals/bitnin/runtime/shadow/reports/.gitkeep
-!verticals/bitnin/runtime/shadow/reviews/
-!verticals/bitnin/runtime/shadow/reviews/.gitkeep
-!verticals/bitnin/runtime/shadow/snapshots/
-!verticals/bitnin/runtime/shadow/snapshots/.gitkeep
-!verticals/bitnin/runtime/approvals/
-!verticals/bitnin/runtime/approvals/requests/
-!verticals/bitnin/runtime/approvals/requests/.gitkeep
-!verticals/bitnin/runtime/approvals/decisions/
-!verticals/bitnin/runtime/approvals/decisions/.gitkeep
-!verticals/bitnin/runtime/approvals/snapshots/
-!verticals/bitnin/runtime/approvals/snapshots/.gitkeep
-!verticals/bitnin/runtime/logs/
-!verticals/bitnin/runtime/logs/.gitkeep
-Memorias/
-verticals/bitnin/runtime/observability/history/operational_state.json
-verticals/bitnin/runtime/observability/history/*.lock
-verticals/bitnin/runtime/observability/batches/*.json
-verticals/bitnin/runtime/observability/history/health_snapshot.md
+# Temporales de operación
+tmp/
+/tmp/
+*.lock

@@ -1,2 +1,0 @@
-"""BitNin shadow package."""
-

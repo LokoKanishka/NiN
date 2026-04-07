@@ -1,6 +1,0 @@
-{
-    "n8n.host": "",
-    "n8n.apiKey": "",
-    "n8n.syncFolder": "workflows",
-    "n8n.syncMode": "auto"
-}
